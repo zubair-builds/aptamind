@@ -236,3 +236,16 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   limitation; signals are events observed, not canonical truth).
 - Not done: aggregate and canonical-change signals of vocabulary v1 (hiring acceleration, role
   family expansion, new location, remote policy, funding, sponsorship, team/leadership).
+
+## OPS-5 job URL import (implemented 2026-10-30)
+
+- `type=jobs` reuses the board import (`market.ats_boards.import`, new input `refreshBoards`) and
+  adds a `refresh` node (`market.refresh_imported_boards`, parallel to `finalize`; `outputNode`
+  stays `finalize`) that starts one refresh per board resolved to a company. Contract:
+  `contracts/market-imports.md`.
+- Found while testing: the board-file contact guard refused real Greenhouse job links (a 10-digit
+  posting id reads as a phone number) and Lever/Ashby UUID links with long digit runs. In board and
+  job URL files only, the posting id on an ATS host is now set aside after the phone-shaped segment
+  checks; ids starting 0 or 7 are still refused (fail closed).
+- Admin ask: `/imports/new/jobs` (URL column mapping; same flow as `ats_boards`).
+- Not yet verified on the owner's real job link file (Source DoD 1/7).

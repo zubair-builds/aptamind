@@ -1109,7 +1109,21 @@ export function decodeStable(s: string): string {
  * address used as the "domain", a contact URI, or an email / phone number anywhere in its path,
  * query or fragment (decoded until stable).
  */
-export function urlHasContactValue(value: string): boolean {
+/** Hosts of ATS job links whose posting id is set aside by `urlHasContactValue` (OPS-5). */
+const ATS_JOB_HOSTS = new Set([
+  'boards.greenhouse.io',
+  'job-boards.greenhouse.io',
+  'job-boards.eu.greenhouse.io',
+  'jobs.ashbyhq.com',
+  'jobs.lever.co',
+  'jobs.eu.lever.co',
+]);
+
+/**
+ * `opts.atsJobIds` (OPS-5, job URL and board files only): the posting id of a job link on an ATS
+ * host is set aside. Company-file URL cells keep the stricter rule (DECISION_LOG 621f14c).
+ */
+export function urlHasContactValue(value: string, opts: { atsJobIds?: boolean } = {}): boolean {
   // Any `@`-like character anywhere in a URL or domain cell (`https://acme.com\@gmail.com`), after
   // HTML entities and percent-escapes are decoded until stable (`jane&commat;acme.com`,
   // `jane%26commat%3Bacme.com`); and every other contact value in the decoded cell except the
@@ -1149,11 +1163,19 @@ export function urlHasContactValue(value: string): boolean {
   // the slug was scanned above — is a trailing LinkedIn-shaped id: a company id of at most 9 digits
   // ending `/company/<id>`, or a job id of exactly 10 digits ending `/jobs/view/<slug>-<id>` that
   // does not start with 7 (`7` + 9 digits is a UK mobile without its leading 0).
-  const digitPath = isLinkedIn(u.hostname.toLowerCase())
+  const lowerHost = u.hostname.toLowerCase().replace(/\.$/, '');
+  const digitPath = isLinkedIn(lowerHost)
     ? normalizedPath(decoded)
         .replace(/^(\/company\/)[1-9]\d{0,8}(?=\/|$)/i, '$1_')
         .replace(/^(\/jobs\/view\/(?:[\p{L}\p{N}-]*-)?)(?!7)[1-9]\d{9}(?=\/|$)/iu, '$1_')
-    : decoded;
+    : opts.atsJobIds && ATS_JOB_HOSTS.has(lowerHost)
+      ? // OPS-5: an ATS job link's own posting id (after the slug and the phone-shaped segment
+        // checks above): Greenhouse `/<board>/jobs/<id>` (digits not starting 0 or 7), Ashby and
+        // Lever `/<board>/<uuid>`.
+        normalizedPath(decoded)
+          .replace(/^(\/[^/]+\/jobs\/)(?![07])[1-9]\d{5,15}(?=\/|$)/, '$1_')
+          .replace(/^(\/[^/]+\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/i, '$1_')
+      : decoded;
   if (longestDigitRun(digitPath) >= 9) return true;
   // A person's page or card (`/team/jane-smith`, `/people/…`, `….vcf`).
   const segments = normalizedPath(decoded).toLowerCase().split('/').filter(Boolean);

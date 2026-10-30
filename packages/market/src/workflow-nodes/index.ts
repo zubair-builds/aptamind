@@ -36,6 +36,7 @@ import {
   processAtsBoardRow,
   processAtsBoardRowV2,
   queueCareersDiscovery,
+  refreshImportedBoards,
 } from './imports';
 import {
   determineEmploymentIntelligence,
@@ -107,6 +108,7 @@ export const marketCapabilities: AnyCapability[] = [
   verifyJob,
   freshnessSweep,
   retentionSweep,
+  refreshImportedBoards,
   writeLifecycleSignals,
   selectOutdatedJobInterpretations,
   reportReinterpretBackfill,

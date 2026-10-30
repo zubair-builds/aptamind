@@ -285,7 +285,8 @@ function mapBoardRow(
   let warning: BoardRowWarning | null = null;
   const url = cell(row, c.url);
   if (url) {
-    if (urlHasContactValue(url)) return fail('contact_value', 'the URL holds a contact value', c.url);
+    if (urlHasContactValue(url, { atsJobIds: true }))
+      return fail('contact_value', 'the URL holds a contact value', c.url);
     const r = boardRefFromUrl(url);
     if ('ref' in r) fromUrl = r.ref;
     else if (r.error === 'invalid')
@@ -409,7 +410,8 @@ function mapBoardRowV1(
   let apiBase: string | null = null;
   const url = cell(row, c.url);
   if (url) {
-    if (urlHasContactValue(url)) return fail('contact_value', 'the URL holds a contact value', c.url);
+    if (urlHasContactValue(url, { atsJobIds: true }))
+      return fail('contact_value', 'the URL holds a contact value', c.url);
     const ref = detectAtsFromUrl(url);
     if (!ref) return fail('invalid_url', 'the URL is not a Greenhouse, Ashby or Lever board URL', c.url);
     if (ref.provider !== ats || ref.boardToken.toLowerCase() !== token.toLowerCase())

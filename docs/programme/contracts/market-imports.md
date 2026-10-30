@@ -16,7 +16,7 @@ Import → Run → Snapshot/Observations → Companies/Jobs/Sources/Reviews.
 | `companies`  | `company_directory` (M8.1)      | `market.company_directory.import` | available                   |
 | `ats_boards` | `ats_board_directory` (M8.2)    | `market.ats_boards.import`        | available                   |
 | `snapshot`   | any source that accepts uploads | the source's own workflow         | available (wraps M6 upload) |
-| `jobs`       | reserved (OPS-5)                | reserved                          | refused for now (see below) |
+| `jobs`       | `ats_board_directory` (OPS-5)   | `market.ats_boards.import`        | available (job URL file)    |
 
 ## Flow (Admin)
 
@@ -73,7 +73,18 @@ Body: the file bytes (`text/csv` for `companies` and `ats_boards`; the source's 
 - The source must exist (`404 not_found`) and be enabled (`409 invalid_state`). Its provider
   must match the type: `400 validation_failed` with problem
   `{ code: 'wrong_source_type', expected, actual }`.
-- `type=jobs` is `400 validation_failed` with problem `{ code: 'not_supported' }` until OPS-5.
+- `type=jobs` (OPS-5) needs an `ats_board_directory` source whose column map includes `url`
+  (else `400 validation_failed`, problem `missing_url_column`; another provider is
+  `wrong_source_type`). The file is a board file of job links: rows run exactly as `ats_boards`
+  (provider detection from the URL, company resolution, board registration), then every board a
+  row resolved to a company gets one listing refresh at once (idempotency key
+  `job_urls:<runId>:<sourceId>`), so the posted jobs become canonical jobs without waiting for
+  the 6-hourly schedule. The report is the board import report. A plain `ats_boards` import
+  never refreshes.
+- In board and job URL files only, the posting id of a job link on an ATS host
+  (Greenhouse `/<board>/jobs/<digits>` not starting 0 or 7; Ashby and Lever `/<board>/<uuid>`) is
+  set aside by the contact guard after the phone-shaped segment checks. Company-file URL cells
+  keep the stricter rule (a 10-digit Greenhouse job id there is still `contact_value`).
   The shared error codes have no `not_supported` code, so it is a problem code instead.
 - The query is strict: an unknown parameter is `400 validation_failed`.
 - If the run cannot start after the snapshot is stored, the record keeps `error` and

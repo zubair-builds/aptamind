@@ -244,7 +244,12 @@ export const atsBoardsImport: WorkflowSpec = {
   inputSchema: {
     type: 'object',
     required: ['sourceId', 'snapshotId'],
-    properties: { sourceId: { type: 'string' }, snapshotId: { type: 'string' } },
+    properties: {
+      sourceId: { type: 'string' },
+      snapshotId: { type: 'string' },
+      /** OPS-5: set by a `jobs` (job URL) import: refresh the resolved boards after the rows. */
+      refreshBoards: { type: 'boolean' },
+    },
   },
   nodes: [
     manualTrigger,
@@ -311,13 +316,24 @@ export const atsBoardsImport: WorkflowSpec = {
         fanout: ref('nodes.rows.output'),
       },
     },
+    {
+      id: 'refresh',
+      title: 'Job URL import: refresh resolved boards → canonical jobs',
+      capability: { type: 'market.refresh_imported_boards', version: 1 },
+      input: {
+        enabled: ref('run.input.refreshBoards', false),
+        fanout: ref('nodes.rows.output'),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'download' },
     { from: 'download', to: 'map' },
     { from: 'map', to: 'rows' },
     { from: 'rows', to: 'finalize' },
+    { from: 'rows', to: 'refresh' },
   ],
+  outputNode: 'finalize',
   labels: { domain: 'market', stream: 'jobs' },
 };
 

@@ -132,7 +132,8 @@ describe('POST /api/imports', () => {
     expect(JSON.stringify(wrong.body)).toContain('wrong_source_type');
     const jobs = await upload(`type=jobs&sourceId=${companySourceId}`, CSV);
     expectValidationError(jobs);
-    expect(JSON.stringify(jobs.body)).toContain('not_supported');
+    // OPS-5: job URL imports run through a board file source; a company source is the wrong type.
+    expect(JSON.stringify(jobs.body)).toContain('wrong_source_type');
     expect((await upload(`type=companies&sourceId=src_missing`, CSV)).status).toBe(404);
     expectValidationError(await upload(`type=companies`, CSV));
     expectValidationError(await upload(`type=companies&sourceId=${companySourceId}&extra=1`, CSV));

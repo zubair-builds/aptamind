@@ -115,10 +115,12 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
     OPS-4:
       branch: prog/market-ops-next
       status: 'lifecycle part implemented 2026-10-30 (PR pending review): market.signals.lifecycle hourly writer, vocabulary v1 job_discovered/changed/closed/reopened/reposted with job-evidence ids and snapshot ids, deterministic dedupe. Remaining vocabulary (HIRING_ACCELERATION, ROLE_FAMILY_EXPANSION, NEW_LOCATION_HIRING, REMOTE_POLICY_CHANGE, FUNDING_EVENT, SPONSORSHIP_CHANGE, TEAM_OR_LEADERSHIP_CHANGE) needs canonical-change writers: planned.'
-    OPS-5: { branch: market/ops-5-job-urls, status: planned, after: MKT-OPS-1 }
+    OPS-5:
+      branch: prog/market-ops-next
+      status: 'implemented 2026-10-30 (PR pending review): POST /api/imports type=jobs on an ats_board_directory source with a url column; board rows as M8.2/OPS-1b, then one listing refresh per resolved board (market.refresh_imported_boards) -> canonical jobs. Fixed: ATS job links with 10-digit Greenhouse ids or UUIDs were refused as contact_value in board files (set aside on ATS hosts only). Admin /imports/new/jobs UI not built (Admin stream ask).'
   sources: # wave -> status (done only per the source Definition of Done in streams/market-ops.md)
     1-company-lists: 'operational (live company import 2026-10-02; careers discovery found all 3 boards)'
-    2-job-lists: 'operational (owner board file: 1031 boards created, 13 not live, 2 unreachable)'
+    2-job-lists: 'operational for board files; job URL import (OPS-5) implemented, not yet verified on real owner job links'
     3-greenhouse: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     4-ashby: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     5-lever: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
