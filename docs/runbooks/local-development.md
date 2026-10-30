@@ -134,15 +134,15 @@ hosts shows up as `NOT REACHABLE`, which is an environment limitation, not a tes
 
 All variables are validated at startup (`packages/config`). Notable ones:
 
-| Variable                                    | Purpose                                                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `NET_ALLOW_PRIVATE_NETWORK`                 | Allow fetching private/loopback addresses (tests/fixture servers only; refused in production)                 |
-| `BROWSER_EXECUTABLE_PATH`                   | Chromium binary for `core.browser_fetch`/`core.browser_crawl` (browser capabilities fail visibly without it)  |
-| `CHROMIUM_BIN`, `CHROMIUM_RUN_AS`           | Only with `scripts/chromium-unprivileged.sh` (root dev containers): the real binary and the unprivileged user |
-| `API_ALLOW_UNSAFE_PUBLIC_BIND`              | Production override of the bind guard; must equal the acknowledgement phrase (see §5)                         |
-| `AI_PROVIDER`, `AI_MODEL`, `AI_API_KEY_ENV` | AI gateway (`none` by default; `anthropic` uses the key from the env var named by `AI_API_KEY_ENV`)           |
-| `WORKER_QUEUES`                             | Dedicate a worker to capability classes, e.g. `browser` or `ai`                                               |
-| `WORKER_LEASE_MS`                           | Node/chunk lease; crashed workers' work is taken over after it expires                                        |
+| Variable                                    | Purpose                                                                                                        |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `NET_ALLOW_PRIVATE_NETWORK`                 | Allow fetching private/loopback addresses (tests/fixture servers only; refused in production)                  |
+| `BROWSER_EXECUTABLE_PATH`                   | Chromium binary for `core.browser_fetch`/`core.browser_crawl` (browser capabilities fail visibly without it)   |
+| `CHROMIUM_BIN`, `CHROMIUM_RUN_AS`           | Only with `scripts/chromium-unprivileged.sh` (root dev containers): the real binary and the unprivileged user  |
+| `API_ALLOW_UNSAFE_PUBLIC_BIND`              | Production override of the bind guard; must equal the acknowledgement phrase (see §5)                          |
+| `AI_PROVIDER`, `AI_MODEL`, `AI_API_KEY_ENV` | AI gateway (`none` by default; `anthropic` or `gemini` use the key from the env var named by `AI_API_KEY_ENV`) |
+| `WORKER_QUEUES`                             | Dedicate a worker to capability classes, e.g. `browser` or `ai`                                                |
+| `WORKER_LEASE_MS`                           | Node/chunk lease; crashed workers' work is taken over after it expires                                         |
 
 ## 5. Exposure warning
 

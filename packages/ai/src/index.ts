@@ -1,12 +1,14 @@
 import { AnthropicProvider } from './anthropic-provider';
+import { GeminiProvider } from './gemini-provider';
 import { type AiCallObserver, type AiGateway, DefaultAiGateway } from './gateway';
 
 export * from './gateway';
 export * from './anthropic-provider';
+export * from './gemini-provider';
 export * from './fixture-provider';
 
 export interface AiGatewayConfig {
-  provider: 'none' | 'anthropic' | 'fixture';
+  provider: 'none' | 'anthropic' | 'gemini' | 'fixture';
   model: string;
   apiKeyEnv: string;
   timeoutMs: number;
@@ -27,6 +29,14 @@ export function createAiGateway(
     if (!apiKey) return new DefaultAiGateway(null, observer);
     return new DefaultAiGateway(
       new AnthropicProvider({ apiKey, model: cfg.model, timeoutMs: cfg.timeoutMs }),
+      observer,
+    );
+  }
+  if (cfg.provider === 'gemini') {
+    const apiKey = env[cfg.apiKeyEnv];
+    if (!apiKey) return new DefaultAiGateway(null, observer);
+    return new DefaultAiGateway(
+      new GeminiProvider({ apiKey, model: cfg.model, timeoutMs: cfg.timeoutMs }),
       observer,
     );
   }
