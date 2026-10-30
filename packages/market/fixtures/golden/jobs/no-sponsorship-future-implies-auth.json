@@ -1,0 +1,18 @@
+{
+  "id": "no-sponsorship-future-implies-auth",
+  "description": "M11.1: 'must not require sponsorship now or in the future' is both a role-level no and an existing-authorization requirement. Before: explicit_no but authorization.required null. The sentence names no country, so none is invented. bc50be7: \"now or in the future\" is a future marker, so the role statement stays unclear; the authorization requirement is unaffected.",
+  "input": {
+    "title": "Financial Analyst",
+    "locationTexts": ["New York, NY"],
+    "descriptionText": "Support quarterly planning.\n\nCandidates must not require sponsorship now or in the future.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "authorization.value.required": true,
+    "authorization.value.countries": [],
+    "authorization.value.regions": [],
+    "authorization.confidence": "high",
+    "authorization.basis": "description.explicit"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "identities": [
+    {
+      "name": "aptamind-local",
+      "credentials": [{ "accessKey": "aptamind", "secretKey": "aptamind-dev-secret" }],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    }
+  ]
+}

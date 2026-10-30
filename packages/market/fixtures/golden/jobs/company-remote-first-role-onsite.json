@@ -1,0 +1,14 @@
+{
+  "id": "company-remote-first-role-onsite",
+  "description": "'Although the company is remote-first, this role is onsite.' \u2014 the role statement wins over company-level wording.",
+  "input": {
+    "title": "Lab Technician",
+    "locationTexts": ["Cambridge, United Kingdom"],
+    "descriptionText": "Although the company is remote-first, this role is onsite."
+  },
+  "expect": {
+    "workModel.value": "onsite",
+    "workModel.confidence": "high",
+    "workModel.basis": "description.explicit"
+  }
+}

@@ -1,0 +1,149 @@
+/*
+ * Aptamind admin design tokens. Source of truth: docs/design/admin-design-system.md §1.
+ *
+ * Cascade layers are declared here, first, so every later stylesheet (global or CSS Module)
+ * slots into a known order: reset < tokens < base < components < utilities.
+ *
+ * Colours are semantic tokens written as light-dark(light, dark) pairs. The theme is chosen by
+ * `color-scheme` on <html>: `light dark` follows the OS (default), `data-theme="light|dark"`
+ * pins it. Component CSS references these tokens only — never raw hex values.
+ *
+ * Values are the contract's (UX1); `--bg-hover`, `--scrim` and the tone dots are derived.
+ */
+@layer reset, tokens, base, components, utilities;
+
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    /* ---------------------------------------------------------------- surfaces & text */
+    --bg-app: light-dark(#fbfbfa, #111110);
+    --bg-surface: light-dark(#ffffff, #181817);
+    --bg-subtle: light-dark(#f5f5f3, #1f1f1d);
+    --bg-hover: color-mix(in srgb, var(--text) 6%, transparent);
+    --bg-selected: light-dark(#eef1fd, #1d2440);
+    --border-subtle: light-dark(#ececea, #262624);
+    --border: light-dark(#e0e0dc, #2f2f2c);
+    --border-strong: light-dark(#c9c9c4, #3d3d3a);
+    --border-control: light-dark(#8a8a84, #72726c);
+    --text: light-dark(#1b1b19, #ececea);
+    --text-secondary: light-dark(#5f5f5a, #a8a8a2);
+    --text-tertiary: light-dark(#6e6e68, #8b8b85);
+    --accent: light-dark(#3b5bdb, #7c9aff);
+    --accent-fg: light-dark(#ffffff, #0d1330);
+    --focus-ring: light-dark(#3b5bdb, #9db2ff);
+    --scrim: light-dark(rgb(0 0 0 / 0.24), rgb(0 0 0 / 0.56));
+
+    /* ---------------------------------------------------------------- status tones */
+    --tone-neutral-bg: light-dark(#f0f0ee, #262624);
+    --tone-neutral-fg: light-dark(#5f5f5a, #b5b5ae);
+    --tone-neutral-dot: light-dark(#9a9a92, #77776f);
+    --tone-info-bg: light-dark(#e8f0fc, #16243b);
+    --tone-info-fg: light-dark(#1f5fbf, #8ab4ff);
+    --tone-info-dot: light-dark(#2f6fd6, #6ea2ff);
+    --tone-success-bg: light-dark(#e9f6ec, #15291b);
+    --tone-success-fg: light-dark(#1a7f37, #6fd08c);
+    --tone-success-dot: light-dark(#1f9d45, #4fbf6f);
+    --tone-warning-bg: light-dark(#fff4d6, #332812);
+    --tone-warning-fg: light-dark(#8a5a00, #f2c35b);
+    --tone-warning-dot: light-dark(#d99100, #e0ac3a);
+    --tone-danger-bg: light-dark(#fdecea, #3a1a18);
+    --tone-danger-fg: light-dark(#b42318, #ff8f87);
+    --tone-danger-dot: light-dark(#d23b2f, #ff6b61);
+    --tone-accent-bg: light-dark(#f1ebfc, #271d3d);
+    --tone-accent-fg: light-dark(#6e3fc9, #c1a4ff);
+    --tone-accent-dot: light-dark(#7c4dcc, #a684ff);
+
+    /* Distribution bars (legacy dashboard charts). */
+    --chart-bar: light-dark(#5c7cfa, #7c9aff);
+
+    /* ---------------------------------------------------------------- type */
+    --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+    --text-xs: 11px;
+    --text-xs-lh: 16px;
+    --text-sm: 12px;
+    --text-sm-lh: 16px;
+    --text-md: 13px;
+    --text-md-lh: 20px;
+    --text-lg: 14px;
+    --text-lg-lh: 20px;
+    --text-xl: 16px;
+    --text-xl-lh: 24px;
+    --text-2xl: 20px;
+    --text-2xl-lh: 28px;
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+
+    /* ---------------------------------------------------------------- spacing (px-named, 4 px grid) */
+    --space-0: 0;
+    --space-2: 2px;
+    --space-4: 4px;
+    --space-6: 6px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-20: 20px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-40: 40px;
+    --space-48: 48px;
+
+    /* ---------------------------------------------------------------- radius & elevation */
+    --radius-sm: 4px;
+    --radius: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+    --shadow-popover: 0 4px 12px light-dark(rgb(0 0 0 / 0.08), rgb(0 0 0 / 0.4));
+    --shadow-overlay: 0 12px 32px light-dark(rgb(0 0 0 / 0.14), rgb(0 0 0 / 0.55));
+
+    /* ---------------------------------------------------------------- density & sizing */
+    --row-compact: 32px;
+    --row-comfortable: 40px;
+    --control-sm: 28px;
+    --control: 32px;
+    --hit-min: 24px;
+    --sidebar-width: 232px;
+    --sidebar-collapsed-width: 52px;
+    --drawer-width: min(280px, 85vw);
+    --topbar-height: 44px;
+    --panel-width: 440px;
+    --dialog-width: min(520px, calc(100vw - 32px));
+    --popover-min-width: 180px;
+    --popover-max-width: min(360px, calc(100vw - 16px));
+    --tooltip-max-width: 280px;
+    --toast-max-width: min(420px, calc(100vw - 32px));
+    --property-label-width: 160px;
+    --content-max-width: 960px;
+
+    /* ---------------------------------------------------------------- motion */
+    --dur-fast: 120ms;
+    --dur: 180ms;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* ---------------------------------------------------------------- stacking */
+    --z-sidebar: 10;
+    --z-sticky: 20;
+    --z-panel: 30;
+    --z-popover: 40;
+    --z-dialog: 50;
+    --z-toast: 60;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --dur-fast: 0ms;
+      --dur: 0ms;
+    }
+  }
+}

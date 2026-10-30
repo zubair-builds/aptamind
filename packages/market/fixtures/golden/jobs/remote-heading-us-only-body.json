@@ -1,0 +1,30 @@
+{
+  "id": "remote-heading-us-only-body",
+  "description": "Location label says \"Remote\" but the body restricts candidates to the United States.",
+  "input": {
+    "title": "Senior Backend Engineer",
+    "locationTexts": ["Remote"],
+    "provider": {
+      "workplaceType": "remote",
+      "employmentTypeText": "Full-time"
+    },
+    "descriptionText": "About Lumen Health\nLumen Health builds scheduling software used by more than 4,000 clinics. Our engineering team is small, senior and fully distributed.\n\nThe role\nYou'll design and build the services that power appointment booking, own them end to end, and work closely with product managers and designers.\n\nLocation\nThis is a fully remote position, but candidates must be based in the United States. We are unable to hire outside the US at this time.\n\nRequirements\n- 5+ years of experience building backend services in Go or Python\n- Strong PostgreSQL experience\n- Experience with AWS\n\nNice to have\n- Kubernetes experience"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.confidence": "high",
+    "workModel.basis": "description.explicit",
+    "remoteScope.value.type": "country",
+    "remoteScope.value.countries": ["US"],
+    "remoteScope.confidence": "high",
+    "flags[code=remote_label_restricted].severity": "warning",
+    "officeAttendance.value.required": false,
+    "employmentType.value": "full_time",
+    "title.value.seniority": "senior",
+    "title.value.roleFamily": "software_engineering",
+    "title.value.specialization": "backend",
+    "remoteScope.evidence.length": {
+      "$gte": 1
+    }
+  }
+}

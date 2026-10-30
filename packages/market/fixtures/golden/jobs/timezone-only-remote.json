@@ -1,0 +1,21 @@
+{
+  "id": "timezone-only-remote",
+  "description": "Remote with a UTC offset window and no country restriction.",
+  "input": {
+    "title": "Staff Platform Engineer",
+    "locationTexts": ["Remote"],
+    "descriptionText": "Northwind is a developer-tools company with a distributed team of 60.\n\nThe role\nThis is a fully remote role. You will lead the design of our multi-region platform, mentor engineers and take part in the on-call rotation.\n\nWhere you can work\nYou can work from anywhere as long as you are within UTC-3 to UTC+3, so that you have good overlap with the rest of the team.\n\nWhat we're looking for\n- Deep experience with Kubernetes and Terraform\n- Experience operating distributed systems in production"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "remoteScope.value.type": "timezone",
+    "remoteScope.value.timezone.minUtcOffset": -3,
+    "remoteScope.value.timezone.maxUtcOffset": 3,
+    "remoteScope.value.countries": [],
+    "remoteScope.confidence": "high",
+    "title.value.seniority": "staff",
+    "title.value.roleFamily": "devops_sre",
+    "responsibilities.operationalResponsibility.present": true,
+    "responsibilities.leadership.present": true
+  }
+}

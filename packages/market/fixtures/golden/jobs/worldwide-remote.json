@@ -1,0 +1,17 @@
+{
+  "id": "worldwide-remote",
+  "description": "Explicit work-from-anywhere statement.",
+  "input": {
+    "title": "Developer Advocate",
+    "locationTexts": ["Remote"],
+    "descriptionText": "Hopscotch is fully distributed: work from anywhere in the world. We have teammates in 31 countries and no headquarters.\n\nWhat you'll do\n- Write tutorials and sample apps\n- Speak at conferences and run community events\n\nWhat you'll need\n- Experience building with JavaScript or TypeScript\n- Excellent written English"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "remoteScope.value.type": "worldwide",
+    "remoteScope.confidence": "high",
+    "remoteScope.value.countries": [],
+    "remoteScope.value.regions": [],
+    "requirements[normalizedConcept=javascript].importance": "important"
+  }
+}

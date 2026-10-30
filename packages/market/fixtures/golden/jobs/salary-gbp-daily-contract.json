@@ -1,0 +1,29 @@
+{
+  "id": "salary-gbp-daily-contract",
+  "description": "UK day-rate contract (outside IR35).",
+  "input": {
+    "title": "Senior Data Engineer - Contract",
+    "locationTexts": ["London, UK"],
+    "provider": {
+      "employmentTypeText": "Contract"
+    },
+    "descriptionText": "6-month initial contract, outside IR35.\n\nDay rate: £350 - £450 per day depending on experience.\n\nHybrid: 2 days a week in our Farringdon office."
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "GBP",
+    "compensation.value.min": 350,
+    "compensation.value.max": 450,
+    "compensation.value.period": "day",
+    "compensation.value.basis": "contract_rate",
+    "compensation.value.annualized": {
+      "min": 91000,
+      "max": 117000,
+      "assumptions": ["260 working days per year (5 days/week × 52 weeks)"]
+    },
+    "employmentType.value": "contract",
+    "workModel.value": "hybrid",
+    "officeAttendance.value.daysPerWeek": 2,
+    "title.value.normalized": "Senior Data Engineer"
+  }
+}

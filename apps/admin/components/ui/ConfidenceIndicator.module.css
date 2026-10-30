@@ -1,0 +1,54 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .meter {
+    display: inline-flex;
+    flex: none;
+    align-items: flex-end;
+    gap: var(--space-2);
+    height: var(--space-12);
+    vertical-align: middle;
+  }
+
+  .bar {
+    width: var(--space-4);
+    border: 1px solid var(--border-control);
+    border-radius: 1px;
+  }
+
+  .bar:nth-child(1) {
+    height: var(--space-6);
+  }
+
+  .bar:nth-child(2) {
+    height: var(--space-8);
+  }
+
+  .bar:nth-child(3) {
+    height: var(--space-12);
+  }
+
+  .bar[data-on] {
+    border-color: transparent;
+    background: var(--text-secondary);
+  }
+
+  .meter[data-level='low'] .bar[data-on] {
+    background: var(--tone-warning-dot);
+  }
+
+  .meter[data-level='unknown'] .bar {
+    border-style: dashed;
+  }
+
+  .labelled {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .word {
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+  }
+}

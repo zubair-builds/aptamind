@@ -1,0 +1,3109 @@
+{
+  "description": "Confirmation precedence (prof-rec-1): confirmed truth outranks every automated source (PL-1); evidence against it is a challenge, never a replacement (PL-2); rejected values are never reopened by re-extraction (R-14); revival conditions (a)-(d) and the declared-date rule after a subject supersession. Event sequences on one item. Synthetic values only.",
+  "cases": [
+    {
+      "id": "confirmed-beats-newer-stated",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "requests": []
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "form1",
+            "asOf": "2023-01-01",
+            "mode": "stated"
+          },
+          "expect": {
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed",
+              "status": "known",
+              "assertion": "LON"
+            },
+            "states": {
+              "LON": "CONFIRMED",
+              "BER": "CONFLICTED"
+            },
+            "conflicts": ["challenges_confirmed:BER,LON@place"],
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"],
+            "events": ["BER:PROPOSED>CONFLICTED:challenges_confirmed"],
+            "confidence": {
+              "level": "high",
+              "reasons": ["confirmed", "challenged"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed-historical-challenged-by-newer-cv",
+      "claimType": "experience.role",
+      "values": {
+        "C": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021,
+            "month": 6
+          }
+        },
+        "X": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2022,
+            "month": 3
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "C",
+            "source": "cv1",
+            "asOf": "2021-07-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "C",
+            "at": "2021-08-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "X",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "C",
+          "basis": "confirmed",
+          "status": "known"
+        },
+        "states": {
+          "C": "CONFIRMED",
+          "X": "CONFLICTED"
+        },
+        "attributes": {
+          "end": "known",
+          "start": "known"
+        },
+        "conflicts": ["challenges_confirmed:C,X@end"],
+        "requests": ["reconfirm/challenges_confirmed:C,X"]
+      }
+    },
+    {
+      "id": "confirmed-refinement-is-suggestion-only",
+      "claimType": "experience.role",
+      "values": {
+        "C": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "R": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019,
+            "month": 3
+          },
+          "end": {
+            "year": 2021,
+            "month": 6
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "C",
+            "source": "cv1",
+            "asOf": "2021-07-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "C",
+            "at": "2021-08-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "R",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "C",
+          "basis": "confirmed"
+        },
+        "states": {
+          "C": "CONFIRMED",
+          "R": "PROPOSED"
+        },
+        "refinements": ["R"],
+        "conflicts": [],
+        "requests": []
+      }
+    },
+    {
+      "id": "extract-confirm-newer-cv-reprocess-reject-restate",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/unconfirmed_material:LON"],
+            "versions": 1
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "requests": [],
+            "versions": 2
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "CONFLICTED"
+            },
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"],
+            "versions": 3
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv2",
+            "extractor": 2
+          },
+          "expect": {
+            "noChange": true
+          }
+        },
+        {
+          "reject": {
+            "value": "BER",
+            "at": "2023-02-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "REJECTED",
+              "LON": "CONFIRMED"
+            },
+            "conflicts": [],
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "requests": [],
+            "versions": 4
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv2",
+            "extractor": 3
+          },
+          "expect": {
+            "noChange": true,
+            "states": {
+              "BER": "REJECTED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "form1",
+            "asOf": "2023-06-01",
+            "mode": "stated"
+          },
+          "expect": {
+            "states": {
+              "BER": "REJECTED",
+              "LON": "CONFIRMED"
+            },
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "requests": ["confirm_new/rejected_restated:BER"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "older-cv-after-confirmation-is-history-not-a-challenge",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2024-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2024-05-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2021-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "CONFIRMED"
+            },
+            "conflicts": [],
+            "requests": [],
+            "events": ["LON:PROPOSED>SUPERSEDED:older_than_confirmed"],
+            "canonical": {
+              "value": "BER",
+              "basis": "confirmed"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-a-historical-never-revives",
+      "claimType": "experience.role",
+      "values": {
+        "A": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2022
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2021-02-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "A",
+            "at": "2021-03-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "B",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "states": {
+              "A": "SUPERSEDED",
+              "B": "CONFIRMED"
+            }
+          }
+        },
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv3",
+            "asOf": "2023-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "A": "SUPERSEDED",
+              "B": "CONFIRMED"
+            },
+            "requests": ["confirm_new/outdated_restated:A"]
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "B",
+          "basis": "confirmed"
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "revival-a-merge-superseded-never-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "seed": {
+            "value": "LON",
+            "state": "SUPERSEDED",
+            "supersession": {
+              "cause": "merge",
+              "supersededAtAsOf": "2022-01-01"
+            }
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2024-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "noChange": true
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "unknown",
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "revival-b-mark-outdated-then-older-cv-reprocessed",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv1",
+            "extractor": 2
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "noChange": true,
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-b-support-dated-as-winner-never-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv4",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "PROPOSED"
+            },
+            "canonical": {
+              "value": "BER",
+              "status": "known"
+            },
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-c-revived-under-confirmed-rival-conflicts",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "CONFLICTED",
+              "BER": "CONFIRMED"
+            },
+            "events": ["LON:SUPERSEDED>PROPOSED:revived", "LON:PROPOSED>CONFLICTED:challenges_confirmed"],
+            "revivalPrior": {
+              "LON": "newer_state"
+            },
+            "canonical": {
+              "value": "BER",
+              "basis": "confirmed",
+              "assertion": "BER"
+            },
+            "conflicts": ["challenges_confirmed:BER,LON@place"],
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"],
+            "versions": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-c-previously-confirmed-value-revives-unconfirmed",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "CONFIRMED"
+            }
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2024-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "LON": "CONFLICTED",
+              "BER": "CONFIRMED"
+            },
+            "revivalPrior": {
+              "LON": "subject"
+            },
+            "canonical": {
+              "value": "BER",
+              "basis": "confirmed"
+            },
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-d-a-b-a-is-three-versions-with-recorded-revival",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "versions": 1
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "versions": 2
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          },
+          "expect": {
+            "versions": 3,
+            "revivalPrior": {
+              "LON": "newer_state"
+            },
+            "events": ["LON:SUPERSEDED>PROPOSED:revived"],
+            "canonical": {
+              "value": "LON"
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true,
+            "versions": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "undated-cv-after-mark-outdated-does-not-revive",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2023-05-01",
+            "declared": false
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/outdated_restated:LON", "confirm_new/current_unknown:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "dated-cv-after-mark-outdated-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2023-05-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "LON": "PROPOSED"
+            },
+            "canonical": {
+              "status": "known",
+              "value": "LON",
+              "basis": "extracted"
+            },
+            "revivalPrior": {
+              "LON": "subject"
+            },
+            "events": ["LON:SUPERSEDED>PROPOSED:revived"],
+            "requests": ["confirm_new/unconfirmed_material:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "reconfirm-closed-when-challenger-withdrawn",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"]
+          }
+        },
+        {
+          "quarantine": "cv2",
+          "expect": {
+            "states": {
+              "BER": "WITHDRAWN",
+              "LON": "CONFIRMED"
+            },
+            "requests": [],
+            "conflicts": [],
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "winner-quarantined-older-value-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "canonical": {
+              "value": "BER"
+            }
+          }
+        },
+        {
+          "quarantine": "cv2",
+          "expect": {
+            "states": {
+              "BER": "WITHDRAWN",
+              "LON": "PROPOSED"
+            },
+            "events": ["BER:PROPOSED>WITHDRAWN:no_current_support", "LON:SUPERSEDED>PROPOSED:revived"],
+            "revivalPrior": {
+              "LON": "newer_state"
+            },
+            "canonical": {
+              "value": "LON",
+              "status": "known",
+              "basis": "extracted",
+              "assertion": "LON"
+            },
+            "requests": ["confirm_new/unconfirmed_material:LON"],
+            "versions": 3
+          }
+        },
+        {
+          "unquarantine": "cv2",
+          "expect": {
+            "states": {
+              "BER": "PROPOSED",
+              "LON": "SUPERSEDED"
+            },
+            "canonical": {
+              "value": "BER"
+            },
+            "events": ["BER:WITHDRAWN>PROPOSED:support_returned", "LON:PROPOSED>SUPERSEDED:newer_state"],
+            "versions": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "subject-superseded-value-with-winner-quarantined-does-not-revive",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "CONFIRMED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "quarantine": "cv2",
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "CONFIRMED"
+            },
+            "canonical": {
+              "value": "BER",
+              "basis": "confirmed",
+              "status": "known"
+            },
+            "requests": ["reconfirm/superseder_withdrawn:BER,LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "newer-support-quarantined-restores-previous-winner",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2019-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2021-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv3",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "PROPOSED",
+              "BER": "SUPERSEDED"
+            },
+            "canonical": {
+              "value": "LON"
+            }
+          }
+        },
+        {
+          "quarantine": "cv3",
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "PROPOSED"
+            },
+            "canonical": {
+              "value": "BER",
+              "status": "known"
+            },
+            "events": ["BER:SUPERSEDED>PROPOSED:revived", "LON:PROPOSED>SUPERSEDED:newer_state"],
+            "revivalPrior": {
+              "BER": "newer_state"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed-value-evidence-quarantined-reevaluates-older-values",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv4",
+            "asOf": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "quarantine": "cv3",
+          "expect": {
+            "states": {
+              "LON": "CONFLICTED",
+              "BER": "CONFIRMED"
+            },
+            "canonical": {
+              "value": "BER",
+              "basis": "confirmed"
+            },
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed-rival-revoked-older-values-revive",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "events": ["LON:PROPOSED>SUPERSEDED:older_than_confirmed"]
+          }
+        },
+        {
+          "reject": {
+            "value": "BER",
+            "at": "2023-09-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "REJECTED",
+              "LON": "PROPOSED"
+            },
+            "canonical": {
+              "value": "LON",
+              "basis": "extracted",
+              "status": "known"
+            },
+            "revivalPrior": {
+              "LON": "confirmed_rival"
+            },
+            "requests": ["confirm_new/unconfirmed_material:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed-rival-marked-outdated-older-values-stay-superseded",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "BER",
+            "validTo": "2024-01-01",
+            "at": "2024-01-05"
+          },
+          "expect": {
+            "states": {
+              "BER": "SUPERSEDED",
+              "LON": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/current_unknown:BER"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirm-change-rejected-older-value-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["confirm_change/newer_state:BER,LON"]
+          }
+        },
+        {
+          "reject": {
+            "value": "BER",
+            "at": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "REJECTED",
+              "LON": "PROPOSED"
+            },
+            "canonical": {
+              "value": "LON",
+              "status": "known"
+            },
+            "requests": ["confirm_new/unconfirmed_material:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed-rival-chronology-shrinks-supersession-is-updated",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-09-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv4",
+            "asOf": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED"
+            }
+          }
+        },
+        {
+          "quarantine": "cv3",
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "CONFIRMED"
+            },
+            "requests": [],
+            "events": ["LON:SUPERSEDED>SUPERSEDED:supersession_reevaluated"]
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "rejected-value-not-undone-by-compatible-more-precise-value",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED",
+              "LONR": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "events": ["LONR:PROPOSED>SUPERSEDED:subject_decision"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rejected-value-compatible-restatement-asks",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED",
+              "LONR": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/rejected_restated:LONR", "confirm_new/held_by_decision:LONR"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rejected-value-compatible-declared-newer-evidence-counts",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2023-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED",
+              "LONR": "PROPOSED"
+            },
+            "canonical": {
+              "status": "known",
+              "value": "LONR"
+            },
+            "requests": ["confirm_new/unconfirmed_material:LONR"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "outdated-value-not-undone-by-compatible-refinement",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2023-05-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "LONR": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": [
+              "confirm_new/outdated_restated:LONR",
+              "confirm_new/current_unknown:LON",
+              "confirm_new/held_by_decision:LONR"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "unrejected-value-restores-compatible-value",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "CONFIRMED",
+              "LONR": "PROPOSED"
+            },
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            },
+            "revivalPrior": {
+              "LONR": "subject_decision"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "historical-value-compatible-with-rejected-is-held",
+      "claimType": "experience.role",
+      "values": {
+        "R": {
+          "organization": {
+            "name": "Acme",
+            "key": "acme"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "X": {
+          "organization": {
+            "name": "Acme",
+            "key": "acme"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019,
+            "month": 3
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "R",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "R",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "X",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "states": {
+              "R": "REJECTED",
+              "X": "CONFLICTED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "conflicts": ["contradicts_decision:R,X"],
+            "requests": ["confirm_new/held_by_decision:X"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "historical-subject-superseded-value-restated-asks",
+      "claimType": "experience.role",
+      "values": {
+        "A": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2022
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2021-02-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "A",
+            "at": "2021-03-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "B",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv3",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "states": {
+              "A": "SUPERSEDED",
+              "B": "CONFIRMED"
+            },
+            "requests": ["confirm_new/outdated_restated:A"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-unconfirmed-material-by-reject",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/unconfirmed_material:LON"],
+            "roles": {
+              "confirm_new/unconfirmed_material:LON": {
+                "LON": "candidate"
+              }
+            }
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-rejected-restated-still-rejected",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "form1",
+            "asOf": "2023-01-01",
+            "mode": "stated"
+          },
+          "expect": {
+            "requests": ["confirm_new/rejected_restated:LON"],
+            "roles": {
+              "confirm_new/rejected_restated:LON": {
+                "LON": "rejected"
+              }
+            }
+          }
+        },
+        {
+          "still_rejected": {
+            "value": "LON",
+            "at": "2023-02-01"
+          },
+          "expect": {
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "form2",
+            "asOf": "2024-01-01",
+            "mode": "stated"
+          },
+          "expect": {
+            "requests": ["confirm_new/rejected_restated:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-outdated-restated-still-outdated",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2023-05-01"
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "requests": ["confirm_new/outdated_restated:LON", "confirm_new/current_unknown:LON"]
+          }
+        },
+        {
+          "still_outdated": {
+            "value": "LON",
+            "validTo": "2023-06-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/current_unknown:LON"],
+            "states": {
+              "LON": "SUPERSEDED"
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-outdated-restated-reject-old-value",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2023-05-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED"
+            },
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-current-unknown-restore-older-value",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2023-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "CONFIRMED"
+            },
+            "requests": [],
+            "canonical": {
+              "value": "LON",
+              "basis": "confirmed"
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-reconfirm-keep-without-rejecting",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"],
+            "roles": {
+              "reconfirm/challenges_confirmed:BER,LON": {
+                "LON": "confirmed",
+                "BER": "challenger"
+              }
+            }
+          }
+        },
+        {
+          "reaffirm": {
+            "value": "LON",
+            "at": "2023-03-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "SUPERSEDED",
+              "LON": "CONFIRMED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "CONFLICTED"
+            },
+            "requests": ["reconfirm/challenges_confirmed:BER,LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-reconfirm-keep-rejecting-challenger",
+      "claimType": "experience.role",
+      "values": {
+        "C": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "X": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Scientist",
+          "titleKey": "data-scientist",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "C",
+            "source": "cv1",
+            "asOf": "2021-07-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "C",
+            "at": "2021-08-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "X",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["reconfirm/challenges_confirmed:C,X"]
+          }
+        },
+        {
+          "reaffirm": {
+            "value": "C",
+            "at": "2023-02-01",
+            "rejectRivals": ["X"]
+          },
+          "expect": {
+            "states": {
+              "X": "REJECTED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-superseder-withdrawn-keep",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-06-01"
+          }
+        },
+        {
+          "quarantine": "cv2",
+          "expect": {
+            "requests": ["reconfirm/superseder_withdrawn:BER,LON"],
+            "roles": {
+              "reconfirm/superseder_withdrawn:BER,LON": {
+                "BER": "confirmed",
+                "LON": "candidate"
+              }
+            }
+          }
+        },
+        {
+          "reaffirm": {
+            "value": "BER",
+            "at": "2023-09-01"
+          },
+          "expect": {
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-confirm-change-by-confirming",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["confirm_change/newer_state:BER,LON"],
+            "roles": {
+              "confirm_change/newer_state:BER,LON": {
+                "BER": "to",
+                "LON": "from"
+              }
+            }
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2023-02-01"
+          },
+          "expect": {
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-resolve-conflict-by-confirming-one",
+      "claimType": "experience.role",
+      "values": {
+        "A": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Software Engineer",
+          "titleKey": "software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Senior Software Engineer",
+          "titleKey": "senior-software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "B",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "requests": ["resolve_conflict/same_basis_conflict:A,B"],
+            "roles": {
+              "resolve_conflict/same_basis_conflict:A,B": {
+                "A": "rival",
+                "B": "rival"
+              }
+            }
+          }
+        },
+        {
+          "confirm": {
+            "value": "B",
+            "at": "2023-02-01",
+            "rejectRivals": ["A"]
+          },
+          "expect": {
+            "states": {
+              "A": "REJECTED",
+              "B": "CONFIRMED"
+            },
+            "requests": []
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "revival-is-order-independent-within-a-run",
+      "claimType": "location.current",
+      "values": {
+        "Z9": {
+          "region": "Bavaria",
+          "country": "DE"
+        },
+        "A1": {
+          "city": "Munich",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "Z9",
+            "source": "cv1",
+            "asOf": "2020-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "Z9",
+            "at": "2020-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "Z9",
+            "validTo": "2021-01-01",
+            "at": "2021-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "A1",
+            "source": "form1",
+            "asOf": "2020-06-01",
+            "mode": "stated",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "A1": "SUPERSEDED"
+            }
+          }
+        },
+        {
+          "observe": {
+            "value": "Z9",
+            "source": "cv2",
+            "asOf": "2022-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "Z9": "PROPOSED",
+              "A1": "PROPOSED"
+            },
+            "events": ["Z9:SUPERSEDED>PROPOSED:revived", "A1:SUPERSEDED>PROPOSED:revived"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "historical-held-value-declared-cv-does-not-escape",
+      "claimType": "experience.role",
+      "values": {
+        "R": {
+          "organization": {
+            "name": "Acme",
+            "key": "acme"
+          },
+          "title": "Senior Engineer",
+          "titleKey": "senior-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "R2": {
+          "organization": {
+            "name": "Acme",
+            "key": "acme"
+          },
+          "title": "Senior Engineer",
+          "titleKey": "senior-engineer",
+          "start": {
+            "year": 2019,
+            "month": 3
+          },
+          "end": {
+            "year": 2021,
+            "month": 6
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "R",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "R",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "R2",
+            "source": "cv2",
+            "asOf": "2023-01-01",
+            "declared": true
+          },
+          "expect": {
+            "states": {
+              "R": "REJECTED",
+              "R2": "CONFLICTED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "conflicts": ["contradicts_decision:R,R2"],
+            "requests": ["confirm_new/rejected_restated:R2", "confirm_new/held_by_decision:R2"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "rejecting-precise-skill-keeps-plain-skill",
+      "claimType": "skill",
+      "values": {
+        "PYX": {
+          "label": "Python",
+          "concept": "python",
+          "kind": "skill",
+          "proficiency": "expert",
+          "context": "listed"
+        },
+        "PY": {
+          "label": "Python",
+          "concept": "python",
+          "kind": "skill",
+          "context": "listed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "PYX",
+            "source": "form1",
+            "asOf": "2022-01-01",
+            "mode": "stated"
+          }
+        },
+        {
+          "reject": {
+            "value": "PYX",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "PY",
+            "source": "cv1",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "states": {
+              "PYX": "REJECTED",
+              "PY": "PROPOSED"
+            },
+            "canonical": {
+              "status": "known",
+              "value": "PY"
+            },
+            "conflicts": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "rejecting-city-keeps-country",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "GB",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED",
+              "GB": "PROPOSED"
+            },
+            "canonical": {
+              "status": "known",
+              "value": "GB"
+            },
+            "requests": ["confirm_new/unconfirmed_material:GB"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "held-value-leaves-material-item-unknown-asks",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED",
+              "LONR": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/held_by_decision:LONR"],
+            "roles": {
+              "confirm_new/held_by_decision:LONR": {
+                "LONR": "candidate"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "revoked-value-leaves-item-unknown-asks-current",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "REJECTED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "outdated-value-coarser-sibling-still-held",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "mark_outdated": {
+            "value": "LON",
+            "validTo": "2023-01-01",
+            "at": "2023-01-05"
+          }
+        },
+        {
+          "observe": {
+            "value": "GB",
+            "source": "cv2",
+            "asOf": "2023-05-01"
+          },
+          "expect": {
+            "states": {
+              "LON": "SUPERSEDED",
+              "GB": "SUPERSEDED"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-held-by-decision-confirm",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LONR",
+            "source": "cv2",
+            "asOf": "2022-03-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/held_by_decision:LONR"]
+          }
+        },
+        {
+          "confirm": {
+            "value": "LONR",
+            "at": "2022-07-01"
+          },
+          "expect": {
+            "states": {
+              "LONR": "CONFIRMED"
+            },
+            "requests": [],
+            "canonical": {
+              "value": "LONR",
+              "basis": "confirmed"
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "answer-current-unknown-after-revoke-with-new-value",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "LONR": {
+          "city": "London",
+          "region": "England",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "confirm": {
+            "value": "LON",
+            "at": "2022-02-01"
+          }
+        },
+        {
+          "reject": {
+            "value": "LON",
+            "at": "2022-06-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/current_unknown:LON"]
+          }
+        },
+        {
+          "confirm": {
+            "value": "BER",
+            "at": "2022-07-01"
+          },
+          "expect": {
+            "states": {
+              "BER": "CONFIRMED",
+              "LON": "REJECTED"
+            },
+            "requests": [],
+            "canonical": {
+              "value": "BER"
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    }
+  ]
+}

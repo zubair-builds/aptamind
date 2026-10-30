@@ -1,0 +1,19 @@
+{
+  "id": "negative-assistance-05-visa-assistance-will-not-be-provided",
+  "description": "PR #21 review A-M1: \"Visa assistance will not be provided.\" is a clear no. With a GB licence and a London job it must be explicit_no (the role statement overrides the company capability), not company_capable. 9186ad2 (v0.1 final): free text is never a verdict; a mention is kept as evidence and does not change company capability.",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Build our data platform.\n\nVisa assistance will not be provided.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.confidence": "medium",
+    "flags[code=sponsorship_mentioned].severity": "info"
+  }
+}

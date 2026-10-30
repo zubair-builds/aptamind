@@ -1,0 +1,282 @@
+{
+  "jobs": [
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345001",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4004345001,
+      "location": {
+        "name": "Remote"
+      },
+      "metadata": [
+        {
+          "id": 4077001,
+          "name": "Employment Type",
+          "value": "Full-time",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 4012345001,
+      "updated_at": "2026-09-01T10:15:22-04:00",
+      "requisition_id": "ENG-104",
+      "title": "Senior Backend Engineer",
+      "company_name": "Acme",
+      "first_published": "2026-08-20T09:00:00-04:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;About Acme&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Acme builds workflow software for logistics teams in 40+ countries. We are a team of 350 people across New York, London and Berlin.&lt;/p&gt;&lt;/div&gt;&lt;h3&gt;The role&lt;/h3&gt;&lt;p&gt;We&amp;rsquo;re looking for a Senior Backend Engineer to own our shipment-tracking APIs (Go, PostgreSQL, Kafka).&lt;/p&gt;&lt;h3&gt;What you&amp;#39;ll do&lt;/h3&gt;&lt;ul&gt;&lt;li&gt;Design and operate high-throughput event pipelines&lt;/li&gt;&lt;li&gt;Mentor engineers &amp;amp; lead technical design reviews&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;Location&lt;/h3&gt;&lt;p&gt;This is a fully remote role, but &lt;strong&gt;candidates must be located in the United States&lt;/strong&gt; and able to work Eastern or Central time hours. We cannot hire outside the US at this time.&lt;/p&gt;&lt;h3&gt;Compensation&lt;/h3&gt;&lt;p&gt;The base salary range for this role is $150,000&amp;ndash;$190,000 USD per year, plus equity.&lt;/p&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;p&gt;Acme is an equal opportunity employer &amp;amp; values diversity at our company.&lt;/p&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 4011111,
+          "name": "Engineering",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4022222,
+          "name": "Remote - US",
+          "location": "United States",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "pay_input_ranges": [
+        {
+          "min_cents": 15000000,
+          "max_cents": 19000000,
+          "currency_type": "USD",
+          "title": "US base salary",
+          "blurb": "Annual base salary range for US-based candidates.",
+          "description": "&lt;p&gt;Final offer depends on experience and location.&lt;/p&gt;"
+        }
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345002",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4004345002,
+      "location": {
+        "name": "Remote - EMEA"
+      },
+      "metadata": [
+        {
+          "id": 4077001,
+          "name": "Employment Type",
+          "value": "Full-time",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 4012345002,
+      "updated_at": "2026-09-03T08:02:11-04:00",
+      "requisition_id": "ENG-117",
+      "title": "Platform Engineer, EMEA",
+      "company_name": "Acme",
+      "first_published": "2026-08-28T05:30:00-04:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;About Acme&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Acme builds workflow software for logistics teams in 40+ countries. We are a team of 350 people across New York, London and Berlin.&lt;/p&gt;&lt;/div&gt;&lt;h3&gt;The role&lt;/h3&gt;&lt;p&gt;Join our Platform team to run Kubernetes infrastructure across AWS eu-west-1 and eu-central-1.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;5+ years with Kubernetes and Terraform&lt;/li&gt;&lt;li&gt;On-call rotation shared across the EMEA team&lt;/li&gt;&lt;/ul&gt;&lt;h3&gt;Where you can work&lt;/h3&gt;&lt;p&gt;Remote from anywhere in EMEA between UTC-1 and UTC+3. We employ through our entities in the UK and Germany and via an Employer of Record elsewhere in EMEA.&lt;/p&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;p&gt;Acme is an equal opportunity employer &amp;amp; values diversity at our company.&lt;/p&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 4011111,
+          "name": "Engineering",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4022223,
+          "name": "London",
+          "location": "London, United Kingdom",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345003",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4004345003,
+      "location": {
+        "name": "London, United Kingdom"
+      },
+      "metadata": [
+        {
+          "id": 4077002,
+          "name": "Workplace Type",
+          "value": "Hybrid",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 4012345003,
+      "updated_at": "2026-08-15T12:00:00-04:00",
+      "requisition_id": "DES-021",
+      "title": "Product Designer",
+      "company_name": "Acme",
+      "first_published": "2026-08-15T12:00:00-04:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;About Acme&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Acme builds workflow software for logistics teams in 40+ countries. We are a team of 350 people across New York, London and Berlin.&lt;/p&gt;&lt;/div&gt;&lt;h3&gt;The role&lt;/h3&gt;&lt;p&gt;As a Product Designer you will shape the dispatcher experience end-to-end, from research to polished UI in Figma.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;3+ years of product design experience&lt;/li&gt;&lt;li&gt;A portfolio showing complex B2B workflows&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;This role is hybrid, with 3 days a week in our London office.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Please note: we are unable to sponsor visas for this role.&lt;/strong&gt; Applicants must already have the right to work in the UK.&lt;/p&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;p&gt;Acme is an equal opportunity employer &amp;amp; values diversity at our company.&lt;/p&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 4011112,
+          "name": "Design",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4022223,
+          "name": "London",
+          "location": "London, United Kingdom",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345004",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4004345004,
+      "location": {
+        "name": "New York, NY"
+      },
+      "metadata": [
+        {
+          "id": 4077001,
+          "name": "Employment Type",
+          "value": "Full-time",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 4012345004,
+      "updated_at": "2026-09-05T16:40:00-04:00",
+      "requisition_id": null,
+      "title": "Data Analyst",
+      "company_name": "Acme",
+      "first_published": "2026-09-02T09:00:00-04:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;About Acme&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Acme builds workflow software for logistics teams in 40+ countries. We are a team of 350 people across New York, London and Berlin.&lt;/p&gt;&lt;/div&gt;&lt;h3&gt;The role&lt;/h3&gt;&lt;p&gt;Help our commercial team understand pricing and demand using SQL, dbt and Looker.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;2+ years in analytics&lt;/li&gt;&lt;li&gt;Strong SQL&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;This role is based in our New York office 4 days per week.&lt;/p&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;p&gt;Acme is an equal opportunity employer &amp;amp; values diversity at our company.&lt;/p&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 4011113,
+          "name": "Data",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4022224,
+          "name": "New York",
+          "location": "New York, NY, United States",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345005",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4004345005,
+      "location": {
+        "name": "Berlin, Germany"
+      },
+      "metadata": [
+        {
+          "id": 4077001,
+          "name": "Employment Type",
+          "value": "Full-time",
+          "value_type": "single_select"
+        }
+      ],
+      "id": 4012345005,
+      "updated_at": "2026-07-30T09:00:00-04:00",
+      "requisition_id": "CS-009",
+      "title": "Customer Success Manager (DACH)",
+      "company_name": "Acme",
+      "first_published": "2026-07-30T09:00:00-04:00",
+      "language": "en",
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;&lt;strong&gt;About Acme&lt;/strong&gt;&lt;/p&gt;&lt;p&gt;Acme builds workflow software for logistics teams in 40+ countries. We are a team of 350 people across New York, London and Berlin.&lt;/p&gt;&lt;/div&gt;&lt;h3&gt;The role&lt;/h3&gt;&lt;p&gt;Own a portfolio of 40 mid-market customers in the DACH region.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Fluent German and English&lt;/li&gt;&lt;li&gt;Experience with logistics or SaaS customers&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Based in our Berlin office.&lt;/p&gt;&lt;div class=&quot;content-conclusion&quot;&gt;&lt;p&gt;Acme is an equal opportunity employer &amp;amp; values diversity at our company.&lt;/p&gt;&lt;/div&gt;",
+      "departments": [
+        {
+          "id": 4011114,
+          "name": "Customer Success",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4022225,
+          "name": "Berlin",
+          "location": "Berlin, Germany",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ]
+    },
+    {
+      "absolute_url": "https://job-boards.greenhouse.io/acme/jobs/4012345099",
+      "internal_job_id": 4012345,
+      "location": {
+        "name": "London"
+      },
+      "metadata": null,
+      "id": 4012345099,
+      "updated_at": "2026-09-01T00:00:00-04:00",
+      "requisition_id": null,
+      "title": null,
+      "content": "",
+      "departments": [],
+      "offices": []
+    }
+  ],
+  "meta": {
+    "total": 6
+  }
+}

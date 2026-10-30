@@ -1,0 +1,24 @@
+{
+  "id": "structured-no-overrides-licence",
+  "description": "012d041 + 8d96663 (5): a structured line whose key names visa sponsorship is a STATEMENT, never a verdict (flag sponsorship_stated, value no, evidence the line), and it does not suppress company-level evidence: the status follows the company axis (company_capable, at low confidence because the role states no). The licence covers the job's country, so sponsorship_role_overrides_company is set. Only an operator can make it explicit_no.",
+  "input": {
+    "title": "Platform Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Join our platform team.\n\nWhat we offer\n- Hybrid working\n- Visa sponsorship: No\n- 25 days holiday",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.confidence": "low",
+    "sponsorship.basis": "company.sponsorLicence",
+    "flags[code=sponsorship_stated].value": "no",
+    "flags[code=sponsorship_stated].evidence.quote": {
+      "$contains": "Visa sponsorship: No"
+    },
+    "flags[code=sponsorship_role_overrides_company].severity": "info"
+  }
+}

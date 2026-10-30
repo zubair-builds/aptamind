@@ -1,0 +1,16 @@
+{
+  "name": "@aptamind/queue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "bullmq": "~5.81.5",
+    "ioredis": "5.11.1"
+  }
+}

@@ -1,0 +1,61 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .viewport {
+    position: fixed;
+    /* Bottom-right: clear of the sidebar's footer controls (theme switch, status). */
+    right: var(--space-16);
+    bottom: var(--space-16);
+    left: auto;
+    z-index: var(--z-toast);
+    pointer-events: none;
+  }
+
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    max-width: var(--toast-max-width);
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--tone-success-dot);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    color: var(--text);
+    box-shadow: var(--shadow-overlay);
+    pointer-events: auto;
+  }
+
+  .toast[data-tone='info'] {
+    border-left-color: var(--tone-info-dot);
+  }
+
+  .message {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .link {
+    flex: none;
+    font-weight: var(--weight-medium);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .toast {
+      animation: slide-in var(--dur) var(--ease);
+    }
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-8));
+    }
+  }
+}

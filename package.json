@@ -1,0 +1,62 @@
+{
+  "name": "aptamind",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "infra:up": "docker compose up -d --wait",
+    "infra:down": "docker compose down",
+    "infra:local": "bash scripts/local-infra.sh start",
+    "dev:worker": "pnpm --filter @aptamind/worker dev",
+    "dev:admin": "pnpm --filter @aptamind/admin dev",
+    "db:migrate": "pnpm --filter @aptamind/worker migrate",
+    "seed:dev": "pnpm --filter @aptamind/worker seed",
+    "build": "pnpm -r --filter './apps/*' build",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --project unit --project admin",
+    "test:admin": "vitest run --project admin",
+    "test:admin-e2e": "node --import tsx apps/admin/e2e/smoke.ts",
+    "test:integration": "vitest run --project integration",
+    "test:all": "vitest run",
+    "eval:golden": "pnpm --filter @aptamind/market eval:golden && pnpm --filter @aptamind/professional eval:golden",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm check:deps && pnpm check:arch && pnpm test && pnpm eval:golden",
+    "docs:data-model": "tsx scripts/generate-data-model.ts",
+    "docs:capabilities": "tsx scripts/generate-capability-matrix.ts",
+    "check:deps": "tsx scripts/check-app-deps.ts",
+    "check:arch": "tsx scripts/check-architecture.ts",
+    "smoke:live": "tsx scripts/live-smoke.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^22.19.0",
+    "eslint": "^9.39.0",
+    "globals": "^16.5.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2",
+    "@aptamind/market": "workspace:*",
+    "@aptamind/professional": "workspace:*",
+    "@aptamind/storage": "workspace:*",
+    "@aptamind/workflows": "workspace:*",
+    "@aptamind/db": "workspace:*",
+    "@aptamind/workflow-sdk": "workspace:*",
+    "@aptamind/workflow-nodes": "workspace:*",
+    "@aptamind/net": "workspace:*"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msgpackr-extract",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

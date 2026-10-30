@@ -1,0 +1,12 @@
+{
+  "id": "bonus-idiom-preferred-qualifications",
+  "description": "'Preferred qualifications are a bonus.' is not compensation (audit M-2).",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["Amsterdam, Netherlands"],
+    "descriptionText": "Preferred qualifications are a bonus.\n\n- Airflow\n- dbt"
+  },
+  "expect": {
+    "compensation.value.bonusText": null
+  }
+}

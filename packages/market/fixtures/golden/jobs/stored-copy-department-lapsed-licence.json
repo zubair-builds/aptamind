@@ -1,0 +1,41 @@
+{
+  "id": "stored-copy-department-lapsed-licence",
+  "description": "M6.4 regression: a stored Greenhouse copy with a provider department, for a company whose only UK sponsor licence has lapsed, in Germany. `market.interpret_job` built its own input without the department and without lapsed licences, so it reported department `customer_success` (from the title), companyCapability `none` and no flag, while reconciliation stored `Customer Success`, `historical` and `sponsor_capability_other_country`. M11.1: the lapsed licence is now past capability (`previously_licensed`, flag `sponsor_licence_lapsed`), not hiring history.",
+  "stored": {
+    "payload": {
+      "externalId": "4012345005",
+      "title": "Customer Success Manager (DACH)",
+      "department": "Customer Success",
+      "locations": [
+        {
+          "text": "Berlin, Germany"
+        }
+      ],
+      "descriptionText": "Own a portfolio of enterprise customers in Germany, Austria and Switzerland. Fluent German and English required. Based in our Berlin office.",
+      "employmentTypeText": "Full-time",
+      "provider": {
+        "name": "greenhouse",
+        "boardToken": "acme"
+      }
+    },
+    "company": {
+      "licenceCountries": [],
+      "lapsedLicenceCountries": ["GB"],
+      "hqCountry": "GB"
+    }
+  },
+  "expect": {
+    "title.value.department": "Customer Success",
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.companyCapability": "previously_licensed",
+    "sponsorship.value.capabilityCountries": ["GB"],
+    "sponsorship.value.roleStatement": "none",
+    "flags": {
+      "$contains": {
+        "code": "sponsor_licence_lapsed",
+        "message": "The company's sponsor licence (GB) is no longer listed, and it was for another country than the job's (DE); it is not evidence that this role sponsors.",
+        "severity": "info"
+      }
+    }
+  }
+}

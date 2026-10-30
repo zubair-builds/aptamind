@@ -1,0 +1,16 @@
+{
+  "id": "hybrid-multiword-office-days",
+  "description": "Office attendance stated with a multi-word office name (\"our New York office 4 days per week\") is hybrid, not unclear.",
+  "input": {
+    "title": "Data Analyst",
+    "locationTexts": ["New York, NY"],
+    "descriptionText": "About the role\nYou will partner with operations to understand shipment performance.\n\nRequirements\n- 2+ years in analytics\n- Strong SQL\n\nThis role is based in our New York office 4 days per week."
+  },
+  "expect": {
+    "workModel.value": "hybrid",
+    "officeAttendance.value.required": true,
+    "officeAttendance.value.daysPerWeek": 4,
+    "remoteScope.value.type": "not_applicable",
+    "locations.0.country": "US"
+  }
+}

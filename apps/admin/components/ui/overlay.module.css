@@ -1,0 +1,139 @@
+@layer reset, tokens, base, components, utilities;
+
+/* Floating layers: tooltip, popover, menu. Rendered with popover="manual" in the top layer. */
+@layer components {
+  .anchor {
+    display: inline-flex;
+  }
+
+  .layer,
+  .tooltip,
+  .popover,
+  .menu {
+    position: fixed;
+    inset: auto;
+    z-index: var(--z-popover);
+    margin: 0;
+    color: var(--text);
+  }
+
+  .tooltip {
+    /* Sized to its text (capped), not to the space left of where it was first laid out. */
+    width: max-content;
+    max-width: var(--tooltip-max-width);
+    padding: var(--space-4) var(--space-8);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--text);
+    color: var(--bg-surface);
+    font-size: var(--text-sm);
+    line-height: var(--text-sm-lh);
+    box-shadow: var(--shadow-popover);
+    pointer-events: auto;
+  }
+
+  .popover,
+  .menu {
+    min-width: var(--popover-min-width);
+    max-width: var(--popover-max-width);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-popover);
+  }
+
+  .popover {
+    /* Never taller than the viewport (minus margins): long content scrolls inside. */
+    max-height: calc(100dvh - 16px);
+    overflow: auto;
+    padding: var(--space-12);
+  }
+
+  .popover[data-size='wide'] {
+    width: min(640px, calc(100vw - 16px));
+    max-width: min(640px, calc(100vw - 16px));
+  }
+
+  .popover:focus {
+    outline: none;
+  }
+
+  /* A panel with nothing focusable takes focus itself: show it to keyboard users. */
+  .popover:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .menu {
+    padding: var(--space-4);
+  }
+
+  .menuItem {
+    display: flex;
+    align-items: center;
+    gap: var(--space-8);
+    width: 100%;
+    height: var(--control-sm);
+    padding: 0 var(--space-8);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .menuItem:hover,
+  .menuItem:focus-visible {
+    background: var(--bg-hover);
+    text-decoration: none;
+  }
+
+  /* Keyboard focus is a visible ring, not only a background tint. */
+  .menuItem:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: -2px;
+  }
+
+  .menuItem[aria-disabled='true'] {
+    color: var(--text-tertiary);
+    cursor: default;
+  }
+
+  .menuItem[data-danger] {
+    color: var(--tone-danger-fg);
+  }
+
+  .menuLabel {
+    flex: 1;
+  }
+
+  .menuCheck {
+    display: inline-flex;
+    flex: none;
+    width: 14px;
+  }
+
+  .menuSeparator {
+    height: 1px;
+    margin: var(--space-4) 0;
+    background: var(--border-subtle);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tooltip,
+    .popover,
+    .menu {
+      animation: fade-in var(--dur-fast) var(--ease);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(calc(-1 * var(--space-2)));
+    }
+  }
+}

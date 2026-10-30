@@ -1,0 +1,27 @@
+{
+  "name": "@aptamind/testing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aptamind/config": "workspace:*",
+    "@aptamind/contracts": "workspace:*",
+    "@aptamind/db": "workspace:*",
+    "@aptamind/observability": "workspace:*",
+    "@aptamind/queue": "workspace:*",
+    "@aptamind/storage": "workspace:*",
+    "@aptamind/workflows": "workspace:*",
+    "mongodb": "^7.0.0",
+    "@aptamind/workflow-nodes": "workspace:*",
+    "@aptamind/workflow-sdk": "workspace:*",
+    "@aptamind/net": "workspace:*",
+    "zod": "^4.6.5",
+    "@aptamind/ai": "workspace:*"
+  }
+}

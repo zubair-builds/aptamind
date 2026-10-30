@@ -1,0 +1,130 @@
+{
+  "description": "Company entity-resolution golden cases. `existing` are canonical companies; each case resolves one candidate.",
+  "existing": [
+    {
+      "id": "cmp_acme",
+      "name": "Acme Ltd",
+      "domain": "acme.com",
+      "registeredTowns": ["London"],
+      "keys": ["ext:uk_sponsor_register:acme ltd|london"]
+    },
+    { "id": "cmp_acme_analytics", "name": "Acme Analytics Inc" },
+    { "id": "cmp_zenith", "name": "Zenith Robotics Ltd", "registeredTowns": ["Cambridge"] },
+    { "id": "cmp_helix", "name": "Helix Biotech PLC" },
+    { "id": "cmp_smith", "name": "Dr J Smith", "registeredTowns": ["Leeds"] },
+    { "id": "cmp_northwind", "name": "Northwind Freight Ltd" }
+  ],
+  "cases": [
+    {
+      "id": "alias-uppercase-legal-form",
+      "description": "Same company, upper-case name and long legal form",
+      "candidate": { "name": "ACME LIMITED", "town": "London" },
+      "expect": { "kind": "match", "companyId": "cmp_acme" }
+    },
+    {
+      "id": "alias-trading-name",
+      "description": "Trading-as suffix is not part of the legal identity",
+      "candidate": { "name": "Acme Ltd t/a Acme Coffee" },
+      "expect": { "kind": "match", "companyId": "cmp_acme" }
+    },
+    {
+      "id": "alias-via-domain",
+      "description": "Different display name but the same official domain",
+      "candidate": { "name": "Acme Group", "domain": "https://www.acme.com/careers" },
+      "expect": { "kind": "match", "companyId": "cmp_acme", "method": "domain" }
+    },
+    {
+      "id": "alias-via-registry-id",
+      "description": "Registry row identity",
+      "candidate": {
+        "name": "Acme",
+        "externalIds": [{ "namespace": "uk_sponsor_register", "id": "acme ltd|london" }]
+      },
+      "expect": { "kind": "match", "companyId": "cmp_acme", "method": "external_id" }
+    },
+    {
+      "id": "plc-long-form",
+      "description": "Public Limited Company == PLC",
+      "candidate": { "name": "Helix Biotech Public Limited Company" },
+      "expect": { "kind": "match", "companyId": "cmp_helix" }
+    },
+    {
+      "id": "similar-distinct-fuzzy",
+      "description": "One letter different, different town — review, never merge",
+      "candidate": { "name": "Zenith Robotic Ltd", "town": "Coventry" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "similar-distinct-legal-form",
+      "description": "Same base name, different legal form — probable, review",
+      "candidate": { "name": "Acme Analytics Ltd" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "same-name-conflicting-domain",
+      "description": "Same legal name but another official domain",
+      "candidate": { "name": "Acme Ltd", "domain": "acme-foods.co.uk" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "bare-name-other-town",
+      "description": "Non-registered name in another town",
+      "candidate": { "name": "Dr J Smith", "town": "Bristol" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "shared-domain-unrelated-name",
+      "description": "A domain shared with an unrelated company is a data error, not a match",
+      "candidate": { "name": "Gamma Health Limited", "domain": "acme.com" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "brand-to-legal",
+      "description": "Brand name mentioned by a job feed maps to the single legal entity",
+      "candidate": { "name": "Northwind Freight" },
+      "expect": { "kind": "match", "companyId": "cmp_northwind", "confidence": "medium" }
+    },
+    {
+      "id": "new-company",
+      "description": "Nothing similar exists",
+      "candidate": { "name": "Quantum Bakery Ltd" },
+      "expect": { "kind": "create" }
+    },
+    {
+      "id": "directory-domain-vs-register-name",
+      "description": "M8.1: a company directory row names the registered company (\"Acme Limited\" = Acme Ltd) but gives a different domain than the canonical one. Ambiguity goes to review: never merged silently, never an overwrite of the canonical domain.",
+      "candidate": { "name": "Acme Limited", "domain": "acme.co.uk", "country": "GB" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "directory-domain-owned-by-other-company",
+      "description": "M8.1: a directory row whose domain belongs to another company with an unrelated name (a data-entry mix-up) is a review, not a domain match.",
+      "candidate": { "name": "Northwind Freight Ltd", "domain": "https://acme.com" },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "directory-bare-person-name-no-town",
+      "description": "M8.1 (DECISION_LOG \"Company directory imports\"): a directory row with a bare name (no legal form, domain, register id or town) that may be a sole trader's personal name never auto-matches, even on an exact name; it goes to review. The same candidate outside a directory would match cmp_smith.",
+      "candidate": { "name": "Dr J Smith", "country": "GB", "directoryRow": true },
+      "expect": { "kind": "review", "severity": "low" }
+    },
+    {
+      "id": "directory-bare-person-name-no-match",
+      "description": "M8.1: a bare-name directory row with no existing company is a review, never a created company.",
+      "candidate": { "name": "Jane Doe", "country": "GB", "directoryRow": true },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "directory-domain-hit-token-overlap-only",
+      "description": "M8.1 (DECISION_LOG \"Company directory identity is structural\"): a directory row whose domain belongs to Acme Ltd but whose own name key differs (\"Acme Coffee Ltd\" only shares a token) goes to review; outside a directory the token overlap would match.",
+      "candidate": { "name": "Acme Coffee Ltd", "domain": "acme.com", "directoryRow": true },
+      "expect": { "kind": "review" }
+    },
+    {
+      "id": "directory-domain-hit-own-name",
+      "description": "M8.1: the same domain with the company's own name key (\"ACME LIMITED\" = acme ltd) matches.",
+      "candidate": { "name": "ACME LIMITED", "domain": "acme.com", "directoryRow": true },
+      "expect": { "kind": "match", "companyId": "cmp_acme", "method": "domain" }
+    }
+  ]
+}

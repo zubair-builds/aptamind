@@ -1,0 +1,18 @@
+{
+  "id": "anti-assistance-09-our-clients-receive-immigration-support-from-our",
+  "description": "PR #21 review HIGH anti-golden: \"Our clients receive immigration support from our team.\" is not an offer of visa assistance to the candidate; it must never be explicit_yes.",
+  "input": {
+    "title": "Operations Specialist",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Join our operations team.\n\nOur clients receive immigration support from our team.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": {
+      "$not": "explicit_yes"
+    },
+    "sponsorship.value.roleStatement": {
+      "$not": "yes"
+    }
+  }
+}

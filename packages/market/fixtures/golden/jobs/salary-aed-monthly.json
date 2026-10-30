@@ -1,0 +1,25 @@
+{
+  "id": "salary-aed-monthly",
+  "description": "AED monthly salary annualised with a 12-month assumption.",
+  "input": {
+    "title": "Senior DevOps Engineer",
+    "locationTexts": ["Dubai, UAE"],
+    "provider": {
+      "workplaceType": "onsite"
+    },
+    "descriptionText": "Package: AED 25,000 per month, tax free, plus annual flights and medical insurance.\n\nResponsibilities\n- Operate our Kubernetes clusters and CI/CD pipelines\n- Participate in the on-call rotation"
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "AED",
+    "compensation.value.min": 25000,
+    "compensation.value.max": 25000,
+    "compensation.value.period": "month",
+    "compensation.value.annualized": {
+      "min": 300000,
+      "max": 300000,
+      "assumptions": ["12 months per year"]
+    },
+    "locations.0.country": "AE"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "salary-usd-k-range",
+  "description": "USD k-range with en dash; US location resolves the dollar sign.",
+  "input": {
+    "title": "Senior Data Scientist",
+    "locationTexts": ["New York, NY"],
+    "descriptionText": "The base salary range for this role is $120k–$150k, depending on experience, plus equity.\n\nWhat you'll do\n- Build causal-inference models for our marketplace"
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "USD",
+    "compensation.value.min": 120000,
+    "compensation.value.max": 150000,
+    "compensation.value.period": "year",
+    "compensation.value.basis": "base_salary",
+    "locations.0.region": "New York",
+    "locations.0.country": "US",
+    "title.value.roleFamily": "data_science_ml"
+  }
+}

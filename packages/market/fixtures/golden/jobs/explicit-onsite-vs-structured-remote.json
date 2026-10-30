@@ -1,0 +1,17 @@
+{
+  "id": "explicit-onsite-vs-structured-remote",
+  "description": "An explicit role statement contradicting two agreeing structured signals (provider + location labels) is kept but with reduced confidence and a review-level flag.",
+  "input": {
+    "title": "Solutions Engineer",
+    "locationTexts": ["Remote - US"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "This role is office-based in our Chicago office."
+  },
+  "expect": {
+    "workModel.value": "onsite",
+    "workModel.confidence": "medium",
+    "flags[code=work_model_structured_conflict].severity": "high"
+  }
+}

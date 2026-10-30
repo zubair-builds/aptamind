@@ -1,0 +1,62 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .dialog {
+    width: var(--dialog-width);
+    max-height: calc(100dvh - 2 * var(--space-32));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--bg-surface);
+    color: var(--text);
+    box-shadow: var(--shadow-overlay);
+  }
+
+  .dialog::backdrop {
+    background: var(--scrim);
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    padding: var(--space-16) var(--space-20) var(--space-20);
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-12);
+  }
+
+  .title {
+    margin: 0;
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semibold);
+  }
+
+  .description {
+    margin: 0;
+    color: var(--text-secondary);
+  }
+
+  .footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-8);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .dialog[open] {
+      animation: rise var(--dur) var(--ease);
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(var(--space-8));
+    }
+  }
+}

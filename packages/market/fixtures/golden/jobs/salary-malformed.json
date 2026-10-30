@@ -1,0 +1,21 @@
+{
+  "id": "salary-malformed",
+  "description": "Inverted range is malformed, never parsed; no zero values.",
+  "input": {
+    "title": "Account Executive",
+    "locationTexts": ["Bristol, UK"],
+    "descriptionText": "Salary: £50,000 - £40 OTE\n\nYou will manage a pipeline of mid-market customers."
+  },
+  "expect": {
+    "compensation.value.status": "malformed",
+    "compensation.value.min": null,
+    "compensation.value.max": null,
+    "compensation.value.warnings": {
+      "$contains": "Salary range is inverted (£50,000 > £40)."
+    },
+    "compensation.value.originalText": "Salary: £50,000 - £40 OTE",
+    "compensation.confidence": "low",
+    "flags[code=compensation_malformed].severity": "warning",
+    "title.value.roleFamily": "sales"
+  }
+}

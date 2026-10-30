@@ -1,0 +1,20 @@
+{
+  "id": "auth-region-not-from-remote-emea-clause",
+  "description": "PR #21 review A-M2: '…; this is a remote role within the EMEA region' describes the remote scope, not the authorization. Before: authorization.regions [EMEA] and a spurious tension flag against the DE licence.",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "Build our payments platform.\n\nYou must be eligible to work in the UK; this is a remote role within the EMEA region.",
+    "company": {
+      "sponsorLicenceCountries": ["DE"]
+    }
+  },
+  "expect": {
+    "authorization.value.required": true,
+    "authorization.value.countries": ["GB"],
+    "authorization.value.regions": [],
+    "flags[code=right_to_work_required_with_sponsor_capability]": {
+      "$exists": false
+    }
+  }
+}

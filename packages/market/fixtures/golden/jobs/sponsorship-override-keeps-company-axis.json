@@ -1,0 +1,39 @@
+{
+  "id": "sponsorship-override-keeps-company-axis",
+  "description": "PR #10 follow-up B-L2: an operator sponsorship override freezes only the role axes (status, roleStatement). The company axis (companyCapability, capabilityCountries) is recomputed from current evidence, so an override recorded while the company had no licence does not hide the licence it holds now.",
+  "stored": {
+    "payload": {
+      "externalId": "b-l2-1",
+      "title": "Data Engineer",
+      "locations": [
+        {
+          "text": "London, United Kingdom"
+        }
+      ],
+      "descriptionText": "Build data pipelines for our analytics platform. Python and SQL required.",
+      "provider": {
+        "name": "greenhouse",
+        "boardToken": "acme"
+      }
+    },
+    "company": {
+      "licenceCountries": ["GB"],
+      "hqCountry": "GB"
+    }
+  },
+  "overrides": {
+    "sponsorship": {
+      "status": "explicit_no",
+      "roleStatement": "no",
+      "companyCapability": "none",
+      "capabilityCountries": []
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "canonical.sponsorship.status": "explicit_no",
+    "canonical.sponsorship.roleStatement": "no",
+    "canonical.sponsorship.companyCapability": "licensed",
+    "canonical.sponsorship.capabilityCountries": ["GB"]
+  }
+}

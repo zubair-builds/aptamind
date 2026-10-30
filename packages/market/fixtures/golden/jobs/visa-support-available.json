@@ -1,0 +1,18 @@
+{
+  "id": "visa-support-available",
+  "description": "M11.1: 'Visa support is available' / 'visa assistance is available' is recognised as an explicit offer. bc50be7: assistance is not sponsorship — never explicit_yes; the span is kept as evidence.",
+  "input": {
+    "title": "Site Reliability Engineer",
+    "locationTexts": ["Amsterdam, Netherlands"],
+    "descriptionText": "Keep our platform reliable.\n\nVisa assistance is available for this role.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.basis": "description.mention",
+    "sponsorship.evidence.0.quote": {
+      "$contains": "isa assistance"
+    }
+  }
+}

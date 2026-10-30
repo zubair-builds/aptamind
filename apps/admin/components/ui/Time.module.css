@@ -1,0 +1,11 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .empty {
+    color: var(--text-tertiary);
+  }
+
+  .secondary {
+    color: var(--text-secondary);
+  }
+}

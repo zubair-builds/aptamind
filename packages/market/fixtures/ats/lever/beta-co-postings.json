@@ -1,0 +1,156 @@
+[
+  {
+    "additionalPlain": "Beta is proud to be an equal opportunity workplace.",
+    "additional": "<div>Beta is proud to be an equal opportunity workplace.</div>",
+    "categories": {
+      "commitment": "Full-time",
+      "department": "Engineering",
+      "location": "Remote",
+      "team": "Payments",
+      "allLocations": ["Remote"]
+    },
+    "createdAt": 1756130400000,
+    "descriptionPlain": "About Beta\nBeta runs payroll for 12,000 small businesses.\n\nThis position is remote, but you must reside in the United States (excluding Hawaii and Alaska). We are unable to hire outside the US.",
+    "description": "<div><b>About Beta</b></div><div>Beta runs payroll for 12,000 small businesses.</div><div><br></div><div>This position is remote, but you must reside in the United States (excluding Hawaii and Alaska). We are unable to hire outside the US.</div>",
+    "id": "6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f601",
+    "lists": [
+      {
+        "text": "What you'll do",
+        "content": "<li>Build our ACH and card payment rails</li><li>Own reliability of money movement services</li>"
+      },
+      {
+        "text": "What we're looking for",
+        "content": "<li>6+ years of backend experience (Ruby or Go)</li><li>Experience with PCI-DSS environments</li>"
+      }
+    ],
+    "text": "Senior Software Engineer, Payments",
+    "country": "US",
+    "workplaceType": "remote",
+    "opening": "",
+    "openingPlain": "",
+    "descriptionBody": "<div><b>About Beta</b></div><div>Beta runs payroll for 12,000 small businesses.</div><div><br></div><div>This position is remote, but you must reside in the United States (excluding Hawaii and Alaska). We are unable to hire outside the US.</div>",
+    "descriptionBodyPlain": "About Beta\nBeta runs payroll for 12,000 small businesses.\n\nThis position is remote, but you must reside in the United States (excluding Hawaii and Alaska). We are unable to hire outside the US.",
+    "hostedUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f601",
+    "applyUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f601/apply",
+    "salaryRange": {
+      "currency": "USD",
+      "interval": "per-year-salary",
+      "min": 165000,
+      "max": 205000
+    },
+    "salaryDescription": "<div>The US base salary range for this full-time position is $165,000 - $205,000 + equity + benefits.</div>",
+    "salaryDescriptionPlain": "The US base salary range for this full-time position is $165,000 - $205,000 + equity + benefits."
+  },
+  {
+    "additionalPlain": "Beta is proud to be an equal opportunity workplace.",
+    "additional": "<div>Beta is proud to be an equal opportunity workplace.</div>",
+    "categories": {
+      "commitment": "Full-time",
+      "department": "Engineering",
+      "location": "Remote - EMEA",
+      "team": "Infrastructure",
+      "allLocations": ["Remote - EMEA", "Amsterdam, Netherlands"]
+    },
+    "createdAt": 1757340000000,
+    "descriptionPlain": "Our infrastructure team is distributed across Europe, the Middle East and Africa.\nYou can work remotely from any EMEA country where we can employ you via our EOR partner; you should overlap with CET working hours.",
+    "description": "<div>Our infrastructure team is distributed across Europe, the Middle East and Africa.</div><div>You can work remotely from any EMEA country where we can employ you via our EOR partner; you should overlap with CET working hours.</div>",
+    "id": "6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f602",
+    "lists": [
+      {
+        "text": "Requirements",
+        "content": "<li>Terraform, Kubernetes, AWS</li><li>Experience running PostgreSQL at scale</li>"
+      }
+    ],
+    "text": "Site Reliability Engineer (EMEA)",
+    "country": "NL",
+    "workplaceType": "remote",
+    "opening": "",
+    "openingPlain": "",
+    "descriptionBody": "<div>Our infrastructure team is distributed across Europe, the Middle East and Africa.</div><div>You can work remotely from any EMEA country where we can employ you via our EOR partner; you should overlap with CET working hours.</div>",
+    "descriptionBodyPlain": "Our infrastructure team is distributed across Europe, the Middle East and Africa.\nYou can work remotely from any EMEA country where we can employ you via our EOR partner; you should overlap with CET working hours.",
+    "hostedUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f602",
+    "applyUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f602/apply"
+  },
+  {
+    "additionalPlain": "Beta is proud to be an equal opportunity workplace.",
+    "additional": "<div>Beta is proud to be an equal opportunity workplace.</div>",
+    "categories": {
+      "commitment": "Full-time",
+      "department": "Product",
+      "location": "London, UK",
+      "team": "Growth",
+      "allLocations": ["London, UK"]
+    },
+    "createdAt": 1757944800000,
+    "descriptionPlain": "Own the self-serve acquisition funnel for our UK launch.\nWe work from our Shoreditch office on Tuesdays and Thursdays.\nVisa sponsorship: we are unable to sponsor visas for this role, so you must already have the right to work in the UK.",
+    "description": "<div>Own the self-serve acquisition funnel for our UK launch.</div><div>We work from our Shoreditch office on Tuesdays and Thursdays.</div><div><b>Visa sponsorship:</b> we are unable to sponsor visas for this role, so you must already have the right to work in the UK.</div>",
+    "id": "6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f603",
+    "lists": [
+      {
+        "text": "You have",
+        "content": "<li>4+ years in product management</li><li>Experience with experimentation platforms</li>"
+      }
+    ],
+    "text": "Product Manager, Growth",
+    "country": "GB",
+    "workplaceType": "hybrid",
+    "opening": "",
+    "openingPlain": "",
+    "descriptionBody": "<div>Own the self-serve acquisition funnel for our UK launch.</div><div>We work from our Shoreditch office on Tuesdays and Thursdays.</div><div><b>Visa sponsorship:</b> we are unable to sponsor visas for this role, so you must already have the right to work in the UK.</div>",
+    "descriptionBodyPlain": "Own the self-serve acquisition funnel for our UK launch.\nWe work from our Shoreditch office on Tuesdays and Thursdays.\nVisa sponsorship: we are unable to sponsor visas for this role, so you must already have the right to work in the UK.",
+    "hostedUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f603",
+    "applyUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f603/apply",
+    "salaryRange": {
+      "currency": "GBP",
+      "interval": "per-year-salary",
+      "min": 85000,
+      "max": 105000
+    }
+  },
+  {
+    "additionalPlain": "Beta is proud to be an equal opportunity workplace.",
+    "additional": "<div>Beta is proud to be an equal opportunity workplace.</div>",
+    "categories": {
+      "commitment": "Contract",
+      "department": "Operations",
+      "location": "Toronto, ON",
+      "team": "Customer Support",
+      "allLocations": ["Toronto, ON"]
+    },
+    "createdAt": 1758290400000,
+    "descriptionPlain": "6-month contract supporting our Canadian customers from our Toronto office.",
+    "description": "<div>6-month contract supporting our Canadian customers from our Toronto office.</div>",
+    "id": "6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f604",
+    "lists": [
+      {
+        "text": "Requirements",
+        "content": "<li>Bilingual English/French</li>"
+      }
+    ],
+    "text": "Support Specialist (Contract)",
+    "country": "CA",
+    "workplaceType": "on-site",
+    "opening": "",
+    "openingPlain": "",
+    "descriptionBody": "<div>6-month contract supporting our Canadian customers from our Toronto office.</div>",
+    "descriptionBodyPlain": "6-month contract supporting our Canadian customers from our Toronto office.",
+    "hostedUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f604",
+    "applyUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f604/apply",
+    "salaryRange": {
+      "currency": "CAD",
+      "interval": "per-hour-wage",
+      "min": 28,
+      "max": 34
+    }
+  },
+  {
+    "id": "6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f699",
+    "categories": {
+      "location": "Remote"
+    },
+    "createdAt": 1758290400000,
+    "hostedUrl": "https://jobs.lever.co/beta-co/6f1c2a3b-4d5e-4f60-8a71-b2c3d4e5f699",
+    "lists": [],
+    "workplaceType": "unspecified"
+  }
+]

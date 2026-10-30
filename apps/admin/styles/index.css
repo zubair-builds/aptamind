@@ -1,0 +1,3 @@
+/* Stylesheet entry: layer order + tokens first, then the legacy global rules inside `base`. */
+@import './tokens.css';
+@import '../app/globals.css' layer(base);

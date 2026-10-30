@@ -1,0 +1,18 @@
+{
+  "id": "salary-eur-european-separators",
+  "description": "EUR range with European thousand separators and German period wording.",
+  "input": {
+    "title": "Softwareentwickler Backend (m/w/d)",
+    "locationTexts": ["Berlin, Deutschland"],
+    "descriptionText": "Wir bieten ein Gehalt von €45.000 - €55.000 brutto/Jahr sowie 30 Tage Urlaub.\n\nDeine Aufgaben\n- Entwicklung von Microservices mit Kotlin"
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "EUR",
+    "compensation.value.min": 45000,
+    "compensation.value.max": 55000,
+    "compensation.value.period": "year",
+    "locations.0.city": "Berlin",
+    "locations.0.country": "DE"
+  }
+}

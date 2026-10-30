@@ -1,0 +1,8 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .failed {
+    color: var(--tone-danger-fg);
+    font-size: var(--text-sm);
+  }
+}

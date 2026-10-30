@@ -1,0 +1,34 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .skeleton {
+    display: block;
+    border-radius: var(--radius-sm);
+    background: var(--bg-hover);
+  }
+
+  .rows {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-16);
+    height: var(--row-compact);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .skeleton {
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+  }
+
+  @keyframes pulse {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}

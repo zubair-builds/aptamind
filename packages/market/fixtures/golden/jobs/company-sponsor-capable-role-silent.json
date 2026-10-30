@@ -1,0 +1,26 @@
+{
+  "id": "company-sponsor-capable-role-silent",
+  "description": "Company holds a UK sponsor licence; the job says nothing about sponsorship.",
+  "input": {
+    "title": "Machine Learning Engineer",
+    "locationTexts": ["Manchester, United Kingdom"],
+    "company": {
+      "sponsorLicenceCountries": ["GB"],
+      "historicalSponsorshipCountries": [],
+      "hqCountry": "GB"
+    },
+    "descriptionText": "Brightside Analytics helps retailers forecast demand.\n\nThe role\nYou'll train, evaluate and deploy forecasting models, working closely with our product team.\n\nRequirements\n- Strong Python and PyTorch\n- Experience deploying ML models to production\n- A degree in a quantitative field"
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.value.capabilityCountries": ["GB"],
+    "sponsorship.basis": "company.sponsorLicence",
+    "sponsorship.confidence": {
+      "$in": ["medium", "low"]
+    },
+    "sponsorship.evidence.0.field": "company",
+    "requirements[category=education].normalizedConcept": "degree"
+  }
+}

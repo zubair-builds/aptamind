@@ -1,0 +1,18 @@
+{
+  "id": "anti-assistance-07-join-our-immigration-law-firm-we-offer-immigrati",
+  "description": "PR #21 review HIGH anti-golden: \"Join our immigration law firm. We offer immigration support to businesses and individuals.\" is not an offer of visa assistance to the candidate; it must never be explicit_yes.",
+  "input": {
+    "title": "Operations Specialist",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Join our operations team.\n\nJoin our immigration law firm. We offer immigration support to businesses and individuals.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": {
+      "$not": "explicit_yes"
+    },
+    "sponsorship.value.roleStatement": {
+      "$not": "yes"
+    }
+  }
+}

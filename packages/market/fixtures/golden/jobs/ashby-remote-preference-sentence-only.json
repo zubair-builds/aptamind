@@ -1,0 +1,17 @@
+{
+  "id": "ashby-remote-preference-sentence-only",
+  "description": "LIVE REGRESSION (audit H-2): the exact Ashby sentence without a 'not a fit' heading \u2014 candidate preference plus company-level remote; strong structured remote signals win.",
+  "input": {
+    "title": "Senior Software Engineer, Product",
+    "locationTexts": ["Remote - US", "Remote - Canada"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "You prefer an in-person role over remote (Ashby operates remotely)."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.basis": "provider.workplaceType",
+    "officeAttendance.value.required": false
+  }
+}

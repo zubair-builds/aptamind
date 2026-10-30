@@ -1,0 +1,20 @@
+{
+  "id": "auth-region-not-from-job-location-based-in-europe",
+  "description": "PR #21 review A-M2: 'right to work in the UK and be based in Europe' — the requirement is UK; 'Europe' is where the job is based, not an authorization region. Before: regions [EUROPE], which covered the DE licence and raised a spurious right-to-work tension flag.",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "Build our payments platform.\n\nCandidates must have the right to work in the UK and be based in Europe.",
+    "company": {
+      "sponsorLicenceCountries": ["DE"]
+    }
+  },
+  "expect": {
+    "authorization.value.required": true,
+    "authorization.value.countries": ["GB"],
+    "authorization.value.regions": [],
+    "flags[code=right_to_work_required_with_sponsor_capability]": {
+      "$exists": false
+    }
+  }
+}

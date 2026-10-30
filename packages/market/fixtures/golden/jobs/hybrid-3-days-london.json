@@ -1,0 +1,26 @@
+{
+  "id": "hybrid-3-days-london",
+  "description": "Hybrid role with explicit office attendance of three days a week in London.",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["London, UK"],
+    "provider": {
+      "workplaceType": "hybrid"
+    },
+    "descriptionText": "Fenwick Pay is a regulated payments company based in London.\n\nThis is a hybrid role: you'll be in our London office 3 days a week, with the rest of the week working from home.\n\nWhat you'll do\n- Build and maintain batch and streaming data pipelines with Airflow and Kafka\n- Model data in Snowflake and dbt\n\nWhat you'll need\n- Strong SQL and Python\n- Experience with data modelling\n- You must have the right to work in the UK"
+  },
+  "expect": {
+    "workModel.value": "hybrid",
+    "workModel.confidence": "high",
+    "remoteScope.value.type": "not_applicable",
+    "officeAttendance.value.required": true,
+    "officeAttendance.value.daysPerWeek": 3,
+    "officeAttendance.value.officeLocations": ["London"],
+    "locations.0.city": "London",
+    "locations.0.country": "GB",
+    "authorization.value.required": true,
+    "authorization.value.countries": ["GB"],
+    "sponsorship.value.status": "unclear",
+    "requirements[category=authorization].importance": "critical"
+  }
+}

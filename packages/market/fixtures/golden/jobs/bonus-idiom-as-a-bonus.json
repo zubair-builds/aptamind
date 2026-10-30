@@ -1,0 +1,13 @@
+{
+  "id": "bonus-idiom-as-a-bonus",
+  "description": "'As a bonus, you have experience with\u2026' is not compensation (audit M-2).",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "Requirements\n- 5+ years of Go\n- As a bonus, you have experience with Kubernetes."
+  },
+  "expect": {
+    "compensation.value.status": "unknown",
+    "compensation.value.bonusText": null
+  }
+}

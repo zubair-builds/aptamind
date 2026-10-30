@@ -1,0 +1,18 @@
+{
+  "id": "salary-open-ended-plus",
+  "description": "'\u00a380k+' is an open-ended minimum: min 80k, max unknown \u2014 not a closed 80k\u201380k range (audit M-2).",
+  "input": {
+    "title": "Engineering Manager",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Salary: \u00a380k+ depending on experience.\n\nYou will manage two teams."
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "GBP",
+    "compensation.value.min": 80000,
+    "compensation.value.max": null,
+    "compensation.value.warnings": {
+      "$contains": "Open-ended amount (\"+\"): minimum only."
+    }
+  }
+}

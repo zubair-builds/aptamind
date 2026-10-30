@@ -1,0 +1,21 @@
+{
+  "id": "salary-competitive-unknown",
+  "description": "Vague salary wording stays unknown (never zero).",
+  "input": {
+    "title": "Marketing Manager",
+    "locationTexts": ["Dublin, Ireland"],
+    "descriptionText": "We offer a competitive salary and great benefits, including a £1,000 annual learning budget.\n\nWhat you'll do\n- Plan and run demand-generation campaigns"
+  },
+  "expect": {
+    "compensation.value.status": "unknown",
+    "compensation.value.min": null,
+    "compensation.value.max": null,
+    "compensation.value.currency": null,
+    "compensation.confidence": "unknown",
+    "compensation.value.originalText": {
+      "$contains": "competitive salary"
+    },
+    "compensation.value.warnings": ["No numeric salary stated."],
+    "title.value.roleFamily": "marketing"
+  }
+}

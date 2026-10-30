@@ -1,0 +1,14 @@
+{
+  "id": "salary-dollar-range-explicit-usd-canada",
+  "description": "'$120k - $150k USD' for a Canadian job is USD, not CAD (audit M-2).",
+  "input": {
+    "title": "Senior Engineer",
+    "locationTexts": ["Toronto, ON"],
+    "descriptionText": "The salary range is $120k - $150k USD.\n\nYou will build our API."
+  },
+  "expect": {
+    "compensation.value.currency": "USD",
+    "compensation.value.min": 120000,
+    "compensation.value.max": 150000
+  }
+}

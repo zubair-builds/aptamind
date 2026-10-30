@@ -1,0 +1,39 @@
+{
+  "name": "@aptamind/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/main.ts",
+    "start": "node dist/main.js",
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json",
+    "migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
+    "@aptamind/contracts": "workspace:*",
+    "@aptamind/market": "workspace:*",
+    "@aptamind/observability": "workspace:*",
+    "@aptamind/platform": "workspace:*",
+    "@aptamind/workflows": "workspace:*",
+    "@aws-sdk/client-s3": "^3.1141.0",
+    "@opentelemetry/api": "^1.9.1",
+    "bullmq": "~5.81.5",
+    "cheerio": "^1.1.2",
+    "cron-parser": "^5.4.0",
+    "csv-parse": "^6.1.0",
+    "ioredis": "5.11.1",
+    "ipaddr.js": "^2.5.0",
+    "mongodb": "^7.0.0",
+    "pino": "^10.3.1",
+    "playwright-core": "~1.56.0",
+    "tldts": "^7.0.17",
+    "undici": "^7.16.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  }
+}

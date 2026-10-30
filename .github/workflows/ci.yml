@@ -1,0 +1,90 @@
+name: CI
+
+# Full certification suite, manual-only during development (DECISION_LOG 2026-10-01 O
+# "Full GitHub CI = manual milestone certification"). The supervisor dispatches it once per
+# milestone, release/deployment candidate, Foundation Exception, major shared-runtime/security/
+# concurrency change or owner request: `gh workflow run ci.yml --ref main`. Normal PRs and pushes
+# use the local gate and do not run this workflow.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      MONGODB_URI: mongodb://127.0.0.1:27017/?replicaSet=rs0&directConnection=true
+      REDIS_URL: redis://127.0.0.1:6379
+      S3_ENDPOINT: http://127.0.0.1:9000
+      S3_ACCESS_KEY_ID: aptamind
+      S3_SECRET_ACCESS_KEY: aptamind-dev-secret
+      NET_ALLOW_PRIVATE_NETWORK: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Format, lint, typecheck
+        run: |
+          pnpm format:check
+          pnpm lint
+          pnpm typecheck
+      - name: Dependency and architecture checks
+        run: |
+          pnpm check:deps
+          pnpm check:arch
+      - name: Unit tests
+        run: pnpm test
+      - name: Golden evaluation
+        run: pnpm eval:golden
+
+      - name: Start infrastructure (same docker-compose.yml as local development)
+        run: docker compose up -d --wait
+
+      # Headless Chromium runs sandboxed (never --no-sandbox). The runner user is non-root; Ubuntu
+      # 24.04 restricts unprivileged user namespaces via AppArmor, which Chromium's sandbox needs.
+      - name: Install sandboxed Chromium
+        run: |
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+          pnpm --filter @aptamind/workflow-nodes exec playwright-core install --with-deps chromium
+          echo "BROWSER_EXECUTABLE_PATH=$(pnpm --filter @aptamind/workflow-nodes exec node -e "console.log(require('playwright-core').chromium.executablePath())" | tail -1)" >> "$GITHUB_ENV"
+
+      - name: Runtime and F1 gate integration tests
+        run: pnpm vitest run --project integration packages/testing/src/runtime/runtime
+      - name: Browser security and integration tests (not skippable)
+        run: pnpm vitest run --project integration packages/testing/src/runtime/browser
+      - name: Market and API integration tests (replay safety, B-3 review resolution, ack replay, schema validation)
+        run: pnpm vitest run --project integration packages/market apps
+      - name: Professional integration tests (collections, validators, indexes, migration idempotency)
+        run: pnpm vitest run --project integration packages/professional
+      - name: Foundation composition integration tests (shared host limiter on Redis)
+        run: pnpm vitest run --project integration packages/platform
+      - name: Every integration test file belongs to a step above
+        run: |
+          stray=$(git ls-files '*.int.test.ts' | grep -vE '^(packages/testing/src/runtime/(runtime|browser)|packages/platform/|packages/market/|packages/professional/|apps/)' || true)
+          if [ -n "$stray" ]; then echo "integration tests not run by CI: $stray"; exit 1; fi
+
+      - name: Build
+        run: pnpm build
+      # Boots migrate/worker/api/admin on an isolated throwaway DB/queue prefix/bucket, seeds the
+      # demo fixtures and visits every admin route in the sandboxed Chromium installed above.
+      - name: Admin route smoke (e2e)
+        timeout-minutes: 10
+        env:
+          ADMIN_E2E_LOG_DIR: ${{ runner.temp }}/admin-e2e-logs
+        run: pnpm test:admin-e2e
+      - name: Upload admin e2e logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-e2e-logs
+          path: ${{ runner.temp }}/admin-e2e-logs
+          if-no-files-found: ignore

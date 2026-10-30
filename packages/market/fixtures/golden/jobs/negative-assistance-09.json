@@ -1,0 +1,19 @@
+{
+  "id": "negative-assistance-09-we-are-not-in-a-position-to-help-with-visa-appli",
+  "description": "PR #21 review A-M1: \"We are not in a position to help with visa applications.\" is a clear no. With a GB licence and a London job it must be explicit_no (the role statement overrides the company capability), not company_capable. 9186ad2 (v0.1 final): free text is never a verdict; a mention is kept as evidence and does not change company capability.",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Build our data platform.\n\nWe are not in a position to help with visa applications.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.confidence": "medium",
+    "flags[code=sponsorship_mentioned].severity": "info"
+  }
+}

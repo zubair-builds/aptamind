@@ -1,0 +1,23 @@
+{
+  "id": "explicit-yes-sponsorship",
+  "description": "Role explicitly offers visa sponsorship. 9186ad2 (v0.1 final): free text is never a verdict; a mention is kept as evidence and does not change company capability.",
+  "input": {
+    "title": "Backend Engineer (Java)",
+    "locationTexts": ["Amsterdam, Netherlands"],
+    "provider": {
+      "workplaceType": "onsite"
+    },
+    "descriptionText": "Kestrel is building the next generation of logistics software from our Amsterdam canal-side office.\n\nVisa sponsorship is available for this role, and we offer a relocation package to help you move to the Netherlands.\n\nRequirements\n- 3+ years of experience with Java and Spring Boot\n- Experience with Kafka or RabbitMQ"
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "unknown",
+    "sponsorship.confidence": "unknown",
+    "relocation.value": "explicit_yes",
+    "workModel.value": "onsite",
+    "remoteScope.value.type": "not_applicable",
+    "title.value.normalized": "Backend Engineer (Java)",
+    "sponsorship.basis": "description.mention"
+  }
+}

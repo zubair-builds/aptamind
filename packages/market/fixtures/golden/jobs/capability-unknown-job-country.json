@@ -1,0 +1,30 @@
+{
+  "id": "capability-unknown-job-country",
+  "description": "M11.1 (supervisor-approved, DECISION_LOG 2026-09-29): a plain 'Remote' role with no scope and a UK sponsor licence. The job's countries are unknown, so the licence cannot be said to cover the role: sponsorship stays unclear, with the company capability still recorded. Before: company_capable (low).",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Remote"],
+    "descriptionText": "Build and operate our public APIs in TypeScript.\n\nRequirements\n- 4+ years of backend experience",
+    "company": {
+      "sponsorLicenceCountries": ["GB"],
+      "historicalSponsorshipCountries": [],
+      "hqCountry": "GB"
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.value.capabilityCountries": ["GB"],
+    "sponsorship.confidence": "unknown",
+    "sponsorship.basis": "company.sponsorLicence.job_country_unknown",
+    "sponsorship.evidence.0.field": "company",
+    "flags": {
+      "$contains": {
+        "code": "sponsor_capability_job_country_unknown",
+        "message": "Company holds a sponsor licence (GB) but the job's countries are unknown, so it cannot be applied to this role.",
+        "severity": "info"
+      }
+    }
+  }
+}

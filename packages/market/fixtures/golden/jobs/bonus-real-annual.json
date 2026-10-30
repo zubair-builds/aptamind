@@ -1,0 +1,15 @@
+{
+  "id": "bonus-real-annual",
+  "description": "An annual bonus in a pay sentence is compensation.",
+  "input": {
+    "title": "Sales Manager",
+    "locationTexts": ["Manchester, United Kingdom"],
+    "descriptionText": "Salary: \u00a360,000 per year plus annual bonus.\n\nYou will grow the north-west region."
+  },
+  "expect": {
+    "compensation.value.min": 60000,
+    "compensation.value.bonusText": {
+      "$contains": "annual bonus"
+    }
+  }
+}

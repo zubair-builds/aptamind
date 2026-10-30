@@ -1,0 +1,15 @@
+{
+  "id": "role-not-remote",
+  "description": "'This role is not remote.' \u2014 excludes remote; office-based with reduced confidence (hybrid vs on-site not stated).",
+  "input": {
+    "title": "Support Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "This role is not remote."
+  },
+  "expect": {
+    "workModel.value": "onsite",
+    "workModel.confidence": "medium",
+    "workModel.basis": "description.not_remote",
+    "officeAttendance.value.required": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "description": "Field reconciliation golden cases: official vs third-party conflicts keep evidence.",
+  "cases": [
+    {
+      "id": "official-beats-third-party-location",
+      "candidates": [
+        { "value": "Remote (Worldwide)", "authority": "third_party", "at": "2026-09-21T06:00:00Z" },
+        { "value": "Remote (United States only)", "authority": "official_ats", "at": "2026-09-01T00:00:00Z" }
+      ],
+      "expect": { "value": "Remote (United States only)", "status": "known", "conflicts": 1 }
+    },
+    {
+      "id": "official-beats-third-party-salary-even-if-newer",
+      "candidates": [
+        { "value": "$90k - $110k", "authority": "third_party", "at": "2026-09-25T00:00:00Z" },
+        { "value": "$150,000 - $190,000", "authority": "official_ats", "at": "2026-09-01T00:00:00Z" }
+      ],
+      "expect": { "value": "$150,000 - $190,000", "status": "known", "conflicts": 1 }
+    },
+    {
+      "id": "equal-authority-disagreement-is-conflicting",
+      "policy": { "sameAuthorityDisagreement": "conflict" },
+      "candidates": [
+        { "value": "acme.com", "authority": "official_site", "at": "2026-09-01T00:00:00Z" },
+        { "value": "acme.io", "authority": "official_site", "at": "2026-09-02T00:00:00Z" }
+      ],
+      "expect": { "value": null, "status": "conflicting", "conflicts": 1 }
+    },
+    {
+      "id": "no-evidence-unknown",
+      "candidates": [],
+      "expect": { "value": null, "status": "unknown", "conflicts": 0 }
+    }
+  ]
+}

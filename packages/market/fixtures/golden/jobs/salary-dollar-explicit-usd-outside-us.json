@@ -1,0 +1,15 @@
+{
+  "id": "salary-dollar-explicit-usd-outside-us",
+  "description": "'$150k USD' for a UK job: the explicit USD code wins over the ambiguous '$' (audit M-2).",
+  "input": {
+    "title": "Staff Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Compensation: $150k USD base salary.\n\nYou will lead our platform team."
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "USD",
+    "compensation.value.min": 150000,
+    "compensation.value.max": 150000
+  }
+}

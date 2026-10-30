@@ -1,0 +1,18 @@
+{
+  "id": "blue-card-dk",
+  "description": "012d041 L3: the EU Blue Card applies in the EU except IE and DK. A Blue Card line for a job in Copenhagen, Denmark is a mention only (no stated value).",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Copenhagen, Denmark"],
+    "descriptionText": "Join our backend team.\n\nWhat we offer\n- EU Blue Card sponsorship: Yes\n- 30 days holiday",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "flags[code=sponsorship_stated]": {
+      "$exists": false
+    },
+    "flags[code=sponsorship_mentioned].severity": "info"
+  }
+}

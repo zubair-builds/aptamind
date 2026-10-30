@@ -1,0 +1,31 @@
+{
+  "id": "salary-gbp-annual",
+  "description": "GBP annual range with per annum wording.",
+  "input": {
+    "title": "Product Manager",
+    "locationTexts": ["Edinburgh, Scotland"],
+    "descriptionText": "Salary: £50,000 - £60,000 per annum, plus a discretionary bonus and share options.\n\nAbout the role\nYou will own the roadmap for our lending products and work with engineering and design."
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "GBP",
+    "compensation.value.min": 50000,
+    "compensation.value.max": 60000,
+    "compensation.value.period": "year",
+    "compensation.value.basis": "base_salary",
+    "compensation.value.annualized": {
+      "min": 50000,
+      "max": 60000,
+      "assumptions": []
+    },
+    "compensation.value.originalText": "Salary: £50,000 - £60,000 per annum, plus a discretionary bonus and share options.",
+    "compensation.confidence": "high",
+    "compensation.value.bonusText": {
+      "$contains": "bonus"
+    },
+    "compensation.value.equityText": {
+      "$contains": "share options"
+    },
+    "locations.0.country": "GB"
+  }
+}

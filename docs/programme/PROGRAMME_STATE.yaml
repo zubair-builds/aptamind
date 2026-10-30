@@ -1,0 +1,314 @@
+# Aptamind programme durable state. Machine-readable; update after every milestone and before a
+# session ends. A fresh session resumes from CLAUDE.md + this file.
+schema_version: 1
+updated: 2026-10-01T12:00Z
+handoff:
+  reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
+  resume_rules:
+    - 'Resume from programme.market_ops below and docs/programme/streams/market-ops.md. It supersedes roadmap order where they conflict (DECISION_LOG 2026-10-01 O rows).'
+    - 'FULL GITHUB CI = MANUAL MILESTONE CERTIFICATION; NORMAL DEVELOPMENT = LOCAL-FIRST (DECISION_LOG 2026-10-01 O). Dispatch full CI once per milestone/release candidate, Foundation Exception (FE-2), major shared-runtime change or owner request; no polling.'
+    - 'Review budget 2-3 passes; three-strikes abstraction rule (DECISION_LOG 2026-09-30 O rows).'
+    - 'Professional and broad Admin redesign are paused unless they do not delay Market.'
+
+foundation:
+  tag: foundation-v0.1
+  tag_pushed: false # cloud git proxy refused tag refs (HTTP 403); see owner_actions
+  sha: d9799b6a2ae42a3799b25a1a0f39bb09bd857698
+  status: frozen
+  ci_run: https://github.com/mateeqazam/aptamind/actions/runs/36562072394
+  exceptions:
+    - { id: FE-1, title: db index sync (text indexes, IndexNotFound race), status: merged, pr: 13 }
+    - { id: FE-P6, title: generic artifact routes refuse Professional artifacts, status: merged, pr: 16 }
+    - id: FE-P8
+      title: per-domain (keyed) artifact ids in ArtifactStore — cross-domain content-address oracle
+      status: candidate
+      note: 'artifact ids art_<sha256[:32]> dedupe across domains; uploading candidate bytes to a Market source and probing /api/artifacts/:id (404 restricted vs 200) confirms a Professional form value (PR 24 re-verify M-1). Required before real personal data (owner decision professional-real-personal-data).'
+    - id: FE-P7
+      title: restrict generic run views (outputRef, outputPreview, node-run IO) for private domains
+      status: candidate
+      note: 'until then Professional node IO carries ids/counts/codes only (R-34, canary-enforced); generic mutations of professional.* runs refused at composition (PR 24); generic reads remain and must be restricted before real personal data'
+    - id: FE-T1
+      title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
+      status: candidate
+      note: 'count only own-prefix clients; CI unaffected; locally re-run alone once'
+
+owner_decisions_pending:
+  - id: professional-real-personal-data
+    question: May real personal data be processed before artifact erasure (FE-P2) exists?
+    default_until_answered: synthetic fixtures and owner-consented data only
+    blocking: false
+  - id: professional-ai-processing
+    question: May professional documents be sent to the AI provider?
+    default_until_answered: 'only with recorded subject consent aiProcessing=allowed; contact details masked'
+    blocking: false
+
+owner_actions:
+  - id: push-foundation-tag
+    why: cloud session cannot push tags
+    command: >-
+      git fetch origin && git tag -a foundation-v0.1 d9799b6a2ae42a3799b25a1a0f39bb09bd857698
+      -m "Frozen Foundation v0.1 baseline" && git push origin foundation-v0.1
+    blocking: false
+
+environment:
+  host: 'owner Mac (darwin, 10 CPU, 32 GB; Docker VM 4 GB). Outbound HTTPS to GOV.UK, Greenhouse and Ashby verified 2026-10-01 (pnpm smoke:live); Lever timed out once on a large board.'
+  checkout: /Users/mateeqazam/myProjects/entrep/aptamind (worktrees beside it as ../aptamind-<lane>)
+  stale_checkout: '/Users/mateeqazam/Projects/aptamind-market-review/aptamind is 551 commits behind main; do not use it'
+  max_concurrent_heavy_agents: 3
+  test_flags: 'pnpm test:integration --maxWorkers=1 for wide runs; targeted files otherwise'
+  infra: 'docker compose project "aptamind" (mongo rs0 :27017, redis :6379, SeaweedFS S3 :9000); pnpm infra:up'
+  ports: 'api 127.0.0.1:4000, admin 127.0.0.1:3000, worker health 4101'
+  mvp_database: 'MONGODB_DB=aptamind_mvp QUEUE_PREFIX=aptamind_mvp (MVP data). The default DB "aptamind" holds only seed:dev --demo fixtures; never mix them.'
+  running_stack: 'restarted 2026-10-02 from the main checkout (b58104a) on aptamind_mvp and R2; one API, one worker, one Admin, started by nohup; stop by pid only'
+  shared_processes: 'never pkill/killall; stop only processes by pid that a session started'
+  github: 'full CI is workflow_dispatch only (gh workflow run ci.yml --ref <branch>); never push empty commits to kick CI'
+
+supervisor:
+  branch: supervisor/mkt-ops
+  worktree: /Users/mateeqazam/myProjects/entrep/aptamind
+  programme: MKT-OPS
+
+market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md)
+  milestone: MKT-OPS-1
+  milestone_status: 'done 2026-10-02 (live verification on aptamind_mvp and R2; full CI run 36973623814 green on b58104a)'
+  preflight:
+    P0-A: { title: durable programme update, status: done }
+    P0-B: { title: storage R2 readiness (no code change; documented in market-ops.md), status: done }
+    P0-C: { title: acquisition hardening (FE-2 limiter; OPS-2 efficiency), status: done }
+    P0-D: { title: Admin Imports (OPS-1 API + ADM-1 UI), status: done }
+    P0-E:
+      {
+        title: manual test path with a real company import,
+        status: done,
+        runbook: docs/runbooks/market-ops-manual-test.md,
+      }
+  lanes:
+    FE-2:
+      branch: foundation/fe-2-host-limiter
+      status: 'merged (PR 38, e24e49a; full CI green run 36852354429; Foundation frozen again)'
+      record: foundation-exceptions/FE-2-distributed-host-limiter.md
+    FE-3:
+      branch: foundation/fe-3-storage-endpoint
+      status: 'merged (PR 44)'
+      record: foundation-exceptions/FE-3-explicit-storage-endpoint.md
+      owner_action: 'done 2026-10-02: the owner deleted the stray AWS bucket aptamind-artifacts (20 objects)'
+    OPS-1:
+      branch: market/ops-1-imports
+      status: 'merged (PR 40, 279fce5); adversarial review, UI test, one repair, one joint verification'
+      contract: contracts/market-imports.md
+    ADM-1:
+      branch: admin/adm-1-imports
+      status: 'merged (PR 41, squash 4bcb072)'
+      contract: contracts/market-imports.md
+    OPS-2:
+      branch: market/ops-2-efficiency
+      status: 'merged (PR 47)'
+      scope: 'conditional requests, unchanged-listing short-circuit, schedule spread, backoff, source_anomaly, discovery token case, cleanFileName'
+    OPS-1b:
+      branch: market/ops-1b-board-identity
+      status: 'merged (PR 48, 8e5aaac); ADM-1b (board URLs and report codes in Admin) merged as PR 49'
+      ruling: 'DECISION_LOG 2026-10-01 S "A live ATS board is company identity evidence"'
+      input: 'owner job links give 1046 distinct boards (ashby 669, greenhouse 300, lever 77)'
+    OPS-3: { branch: market/ops-3-retention, status: planned, after: MKT-OPS-1 }
+    OPS-4: { branch: market/ops-4-signals, status: planned, after: MKT-OPS-1 }
+    OPS-5: { branch: market/ops-5-job-urls, status: planned, after: MKT-OPS-1 }
+  sources: # wave -> status (done only per the source Definition of Done in streams/market-ops.md)
+    1-company-lists: 'operational (live company import 2026-10-02; careers discovery found all 3 boards)'
+    2-job-lists: 'operational (owner board file: 1031 boards created, 13 not live, 2 unreachable)'
+    3-greenhouse: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
+    4-ashby: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
+    5-lever: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
+    6-generic-careers: planned
+    7-uk-sponsor-register: planned
+    8-nl-ind: 'planned (real-file gate first)'
+    9-uscis-h1b: 'planned (real-file gate first)'
+    10-dol-lca: planned
+    11-yc: planned
+    12-a16z: planned
+    13-techstars: planned
+    14-remoteok: planned
+    15-weworkremotely: planned
+    16-sec-form-d: planned
+    17-company-news: planned
+
+roadmap: # 2026-09-30 lock; market_ops above takes priority (DECISION_LOG 2026-10-01). Lists below are history plus the backlog market_ops draws from.
+  public_market:
+    done:
+      [
+        M6 (PR 11),
+        M6.2 (PR 30),
+        M7.1-M7.7 (PR 10,
+        22),
+        M11.1 (PR 21),
+        M8.4 NL IND adapter (PR 32),
+        M11.5 US H-1B history adapter (PR 33),
+      ]
+    next:
+      - 'real-file gate for NL IND and USCIS H-1B (integration.gates) before any production import'
+      - 'M8.4b UK route taxonomy'
+      - 'M8.2 known-board import, then M8.3, M8.5-M8.7, M9, M10, M11.2-M11.5 (DOL LCA), M12 per streams/market.md'
+  private_professional:
+    done:
+      [
+        P0 (PR 7),
+        P1.1 (PR 12),
+        FE-P6 (PR 16),
+        P3.1 policy (PR 14),
+        P1.2 snapshots (PR 20),
+        P1.3 ingest (PR 24),
+        P5.1 career targets (PR 26),
+      ]
+    next:
+      - 'P2.4 resolution and assertions, then P3.2, P3.3, P4.x per streams/professional.md'
+      - 'P2.1/P2.2 deterministic document extraction; stop before AI extraction (P2.3) until owner decision professional-ai-processing'
+      - 'FE-P7 and FE-P8 before any real personal data'
+  admin_ux:
+    done:
+      [
+        UX0 (PR 8),
+        UX1 (PR 9),
+        UX2 (PR 17),
+        UX5 facts (PR 18),
+        UX3 record table (PR 23),
+        UX3f review/runs (PR 25),
+      ]
+    next:
+      - 'domain asks (streams.admin_ux.asks_from_domains and follow_ups), then UX4 side-panel preview, UX6-UX10 per streams/admin-ux.md'
+
+streams:
+  market:
+    branch: market/next
+    status: 'idle — M8.1 merged (PR 27); next per roadmap.public_market'
+    follow_ups:
+      - 'Test fixtures: verification-races ashbyBoard job() descriptions collide (race-tp-fresh merges into race-tp at 0.89 similarity); give each board a non-colliding description'
+      - 'M8.4b UK route taxonomy: ignore Government Authorised Exchange, Seasonal Worker, International Agreement (policy bump + reconcile that never delists)'
+      - 'Generic sponsorship history shape before DOL LCA (M11.5 remainder); historyCountries recency window; NL no-KvK collision key; historyCountries in the company list API'
+      - 'Exact-name lookups never find qualified keys (name:x#gb), so later rows for a qualified company re-review (PR 27 note)'
+      - 'Header guard over-refuses headers starting/ending with a person token (Telecoms, Hotel) (PR 27, Low)'
+      - 'Company canonicalContent excludes externalIds/conflictFields; change needs a one-off changed-hash plan (PR 27 Low)'
+      - 'M6.2 Lows L1-L5 and MR2-MR5 not closed by PR 30 (see PR 30 description)'
+      - 'M8.1 residuals (market-sources.md): hosts are outside the handle rule (jane-doe-skype.acme.com is stored); Ft/Dept/Div whole-token prefixes; homoglyph platform words and platforms outside the list; a self-referencing domain placed apart from the platform word'
+      - 'M8.1: a bare domain as a company name containing a platform word (signal-iduna.de in the name column) is refused (fail closed; the Domain column keeps it)'
+    blockers: []
+
+  professional:
+    branch: professional/v0.1
+    status: 'idle — all open work merged (PR 20, 24, 26); next per roadmap.private_professional'
+    blockers: []
+
+  admin_ux:
+    branch: admin/attio-redesign
+    status: 'idle — UX0-UX3f merged; next per roadmap.admin_ux'
+    asks_from_domains:
+      - 'Market (PR 21): previously_licensed label "Previously licensed"; authorization.regions as region codes; posting-stated sponsorship as "Posting states: Yes/No" + quote + unverified marker; operator override alternates as neutral "System reading"'
+      - 'Market (PR 22): use GET /api/meta/enums labels; triage claim body field holder; no assign in v0.1'
+      - 'Market (PR 32/33): relabel SponsorshipValue.tsx "Employer sponsored before" to "Sponsorship history"; licences show country + route + register; company history panel (petitions per FY, initial vs continuing, USCIS attribution); attach-only company_resolution items offer merge/reject/dismiss only; external id labels (register row key, KvK number); parse node shows routes/unlistedRoutes'
+      - 'Market (PR 30): verifications from merged jobs marked "from merged job"; labels for job.lifecycle_rederived / job.reinterpreted and system actors; system dismissal reason on lifecycle_failure items'
+      - 'Market (PR 11): render review type lifecycle_failure via enums label'
+      - 'Market (PR 21): review resolve ask-again outcome as a sentence; send evidenceHash (If-Match) on resolve and reload on 409'
+    follow_ups:
+      - 'e2e: every axe scan follows animationsSettled(); consolidate into one shared scan helper'
+      - 'view-only URLs (/runs?view=failed) fall back to the first tab silently'
+      - 'review State clipped at 390 in cross-status views'
+      - 'nits: disabled First-page span baseline + role; Ignored lead-in wording'
+    blockers: []
+
+integration:
+  main_sha: 0892e8d501af1d55571ce00fadd433f9122259ba
+  ci_status: 'CERTIFIED: full CI green on main b58104a (MKT-OPS-1 candidate), run 36973623814 (workflow_dispatch, 2026-10-02T06:27-06:49Z). Later docs-only commits are covered by the local gate.'
+  certification:
+    { sha: 87c70b526d997be6db1601e7a23c1e3f8ab9656e, run_id: 36827931909, date: 2026-10-01, result: success }
+  merged_prs:
+    [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+    ]
+  open_prs: []
+  merge_status:
+    - '#27 M8.1 merged 2026-09-30 as 354f677 (head 5835b91) on the local gate: check 8950 unit + 1107 golden, integration 781/793 (12 accepted browser), perf worst row 27.8 ms. rv19 Highs fixed by one focused repair (ed7b71a) + targeted verification; identity-namespaces.ts folded into external-ids.ts; migration 2026-09-30-005 last'
+    - '#36 supervisor docs (claude/aptamind-programme-setup-34y4ze): carries this handoff; merged as the last action of the session on a local format:check'
+  gates:
+    - 'Before the first production import of NL IND or USCIS H-1B data: verify parser, route/category mapping and encoding against a real downloaded file on a non-production database; commit a trimmed recorded fixture; log in DECISION_LOG; only then enable the source (DECISION_LOG 14d07ad (9))'
+  supervisor_follow_ups:
+    - 'append-only collection fingerprint history CI check'
+    - 'egress guard for apps/admin integration tests (composition harness)'
+
+branches: # remote branch -> head at handoff; merged topic branches may be deleted by the owner
+  active:
+    claude/aptamind-programme-setup-34y4ze:
+      { sha: 'head of PR 36 at merge (see PR 36)', pr: 36, worktree: /home/user/aptamind }
+  stream_bases:
+    market/next: f05129d
+    professional/v0.1: e2606e3
+    admin/attio-redesign: 0e7b889
+  merged_topic_branches:
+    market/m8-csv-import: { sha: 5835b91, pr: 27, worktree: /home/user/aptamind-market-api }
+    market/fix-verification-race: { sha: e5de4b8, pr: 35, worktree: /home/user/aptamind-mainfix }
+    market/m11-5-h1b: { sha: 541f059, pr: 33, worktree: /home/user/aptamind-market-h1b }
+    market/m8-4-registers: { sha: 176a2d8, pr: 32, worktree: /home/user/aptamind-market-reg }
+    market/m6-2-followups: { sha: 9813a1d, pr: 30, worktree: /home/user/aptamind-market-m62 }
+    market/m11-semantics: { sha: 385ea6e, pr: 21, worktree: /home/user/aptamind-market }
+    market/m6-acquisition: { sha: 54b1578, pr: 11, worktree: /home/user/aptamind-market-m6 }
+    market/api-lane-2: { sha: 8eea0fd, pr: 22 }
+    market/api-lane: { sha: b13fd99, pr: 10 }
+    professional/p5-targets: { sha: 0d42b37, pr: 26, worktree: /home/user/aptamind-professional-policy }
+    professional/p1-ingest:
+      { sha: de542c8, pr: 24, worktree: /home/user/aptamind-professional (local 091fd9f) }
+    professional/p1-snapshots: { sha: db3e3ca, pr: 20, worktree: /home/user/aptamind-p20 (detached) }
+    professional/p3-policy: { sha: f4c8af5, pr: 14 }
+    professional/p1-subjects-sources: { sha: 4ef551d, pr: 12 }
+    professional/fe-p6-artifact-guard: { sha: d8dd0c2, pr: 16 }
+    professional/p0-foundations: { sha: 3eab0e9, pr: 7 }
+    admin/ux3f-review-runs: { sha: ca140d3, pr: 25, worktree: /home/user/aptamind-admin }
+    admin/ux3-record-table: { sha: 4e67e6f, pr: 23 }
+    admin/ux5-facts: { sha: 93625ca, pr: 18 }
+    admin/ux2-primitives: { sha: cf6b628, pr: 17 }
+    admin/ux1-shell: { sha: 7232c6b, pr: 9 }
+    admin/ux0-foundations: { sha: a094f61, pr: 8 }
+    foundation/fe-1-index-sync: { sha: d685d4f, pr: 13 }
+  legacy:
+    [
+      claude/aptamind-programme-setup-34y4ze-market,
+      claude/market-context-prd-review-ouah2y,
+      claude/market-foundation-hardening,
+    ]
+
+open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
+  - 'Owner: push tag foundation-v0.1 (owner_actions.push-foundation-tag)'
+  - 'Owner: answer professional-real-personal-data and professional-ai-processing (defaults hold meanwhile)'
+  - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
+  - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
+  - 'Professional next milestone per roadmap.private_professional.next (P2.4, or P2.1/P2.2)'
+  - 'Admin next per roadmap.admin_ux.next (domain asks first, incl. the Sponsorship history relabel)'
+  - 'Supervisor: FE-P7/FE-P8 before real personal data; FE-T1 flaky shared-infra tests; supervisor_follow_ups; optionally delete merged topic branches and remove their worktrees'

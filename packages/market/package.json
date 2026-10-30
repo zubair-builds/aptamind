@@ -1,0 +1,36 @@
+{
+  "name": "@aptamind/market",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./testing": "./src/testing.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "eval:golden": "tsx src/golden/run.ts"
+  },
+  "dependencies": {
+    "@aptamind/ai": "workspace:*",
+    "@aptamind/contracts": "workspace:*",
+    "@aptamind/db": "workspace:*",
+    "@aptamind/net": "workspace:*",
+    "@aptamind/observability": "workspace:*",
+    "@aptamind/provenance": "workspace:*",
+    "@aptamind/storage": "workspace:*",
+    "@aptamind/taxonomy": "workspace:*",
+    "@aptamind/workflow-nodes": "workspace:*",
+    "@aptamind/workflow-sdk": "workspace:*",
+    "cheerio": "^1.1.2",
+    "csv-parse": "^6.1.0",
+    "mongodb": "^7.0.0",
+    "tldts": "^7.0.17",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@aptamind/testing": "workspace:*",
+    "@aptamind/workflows": "workspace:*"
+  }
+}

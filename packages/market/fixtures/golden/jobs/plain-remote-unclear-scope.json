@@ -1,0 +1,22 @@
+{
+  "id": "plain-remote-unclear-scope",
+  "description": "Plain \"Remote\" with no scope statement must stay unclear (never invent worldwide).",
+  "input": {
+    "title": "Frontend Engineer",
+    "locationTexts": ["Remote"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "We are looking for a Frontend Engineer to join our growing team.\n\nResponsibilities\n- Build new features in React and TypeScript\n- Collaborate with designers on our component library\n\nRequirements\n- 3+ years of experience with React\n- Solid understanding of CSS and accessibility"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.basis": "provider.workplaceType",
+    "remoteScope.value.type": "unclear",
+    "remoteScope.confidence": "unknown",
+    "remoteScope.value.countries": [],
+    "remoteScope.evidence": [],
+    "requirements[normalizedConcept=react].yearsMin": 3,
+    "requirements[normalizedConcept=react].category": "experience"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "salary-usd-hourly",
+  "description": "Explicit USD hourly contract rate annualised with 2080 hours.",
+  "input": {
+    "title": "Contract QA Engineer",
+    "locationTexts": ["Remote - US"],
+    "descriptionText": "This is a 6-month contract role. Rate: USD 45/hr.\n\nYou must be based in the US and available during Eastern business hours.\n\nWhat you'll do\n- Write automated end-to-end tests with Playwright"
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.currency": "USD",
+    "compensation.value.min": 45,
+    "compensation.value.max": 45,
+    "compensation.value.period": "hour",
+    "compensation.value.basis": "contract_rate",
+    "compensation.value.annualized.min": 93600,
+    "compensation.value.annualized.assumptions": ["2080 working hours per year (40 h/week × 52 weeks)"],
+    "employmentType.value": "contract",
+    "workModel.value": "remote",
+    "remoteScope.value.type": "country",
+    "remoteScope.value.countries": ["US"],
+    "title.value.roleFamily": "qa_testing"
+  }
+}

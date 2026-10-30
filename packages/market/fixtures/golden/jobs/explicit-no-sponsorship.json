@@ -1,0 +1,26 @@
+{
+  "id": "explicit-no-sponsorship",
+  "description": "Explicit \"no sponsorship\" wins even though the company holds a sponsor licence. 9186ad2 (v0.1 final): free text is never a verdict; a mention is kept as evidence and does not change company capability. The explicit refusal now needs a structured line: see structured-no-overrides-licence.",
+  "input": {
+    "title": "Senior Software Engineer",
+    "locationTexts": ["London, UK"],
+    "company": {
+      "sponsorLicenceCountries": ["GB"],
+      "historicalSponsorshipCountries": ["GB"],
+      "hqCountry": "GB"
+    },
+    "descriptionText": "Join Tessellate, the infrastructure platform for insurers.\n\nWe work in a hybrid model with two days a week in our Shoreditch office.\n\nPlease note: you must have the right to work in the UK (we cannot offer sponsorship for this role).\n\nWhat you'll need\n- 6+ years of software engineering experience\n- Experience with TypeScript and Node.js"
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.confidence": "low",
+    "authorization.value.required": true,
+    "authorization.value.countries": ["GB"],
+    "workModel.value": "hybrid",
+    "officeAttendance.value.daysPerWeek": 2,
+    "sponsorship.value.roleStatement": "none",
+    "flags[code=sponsorship_mentioned].severity": "info",
+    "flags[code=right_to_work_required_with_sponsor_capability].severity": "info"
+  }
+}

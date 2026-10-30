@@ -1,0 +1,20 @@
+{
+  "id": "anti-assistance-11-3-years-of-experience-with-immigration-support-f",
+  "description": "PR #21 review HIGH anti-golden: \"3+ years of experience with immigration support for global employees.\" is not an offer of visa assistance to the candidate; it must never be explicit_yes. Immigration-services company with a GB licence: stays at company capability.",
+  "input": {
+    "title": "Operations Specialist",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Join our operations team.\n\n3+ years of experience with immigration support for global employees.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": {
+      "$in": ["company_capable", "unclear"]
+    },
+    "sponsorship.value.roleStatement": {
+      "$not": "yes"
+    }
+  }
+}

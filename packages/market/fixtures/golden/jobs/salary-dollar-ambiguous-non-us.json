@@ -1,0 +1,20 @@
+{
+  "id": "salary-dollar-ambiguous-non-us",
+  "description": "A bare \"$\" for a non-US (London) job is ambiguous; currency is not guessed.",
+  "input": {
+    "title": "Solutions Engineer",
+    "locationTexts": ["London, UK"],
+    "descriptionText": "Compensation: $90,000 - $110,000 base plus commission.\n\nYou'll run technical discovery and demos for enterprise prospects."
+  },
+  "expect": {
+    "compensation.value.status": "ambiguous",
+    "compensation.value.currency": null,
+    "compensation.value.min": 90000,
+    "compensation.value.max": 110000,
+    "compensation.confidence": "low",
+    "compensation.value.warnings": {
+      "$contains": "Currency symbol \"$\" is ambiguous (USD/CAD/AUD/NZD/SGD/HKD/MXN) and the job location does not resolve it."
+    },
+    "flags[code=compensation_ambiguous].severity": "info"
+  }
+}

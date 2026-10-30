@@ -1,0 +1,15 @@
+{
+  "id": "remote-us-and-canada",
+  "description": "Remote label with body restricting to two countries → selected_countries.",
+  "input": {
+    "title": "Customer Success Manager",
+    "locationTexts": ["Remote"],
+    "descriptionText": "We're a remote-first company. This position is open to candidates in the US and Canada only.\n\nYou'll onboard new customers and run quarterly business reviews."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "remoteScope.value.type": "selected_countries",
+    "remoteScope.value.countries": ["US", "CA"],
+    "flags[code=remote_label_restricted].severity": "warning"
+  }
+}

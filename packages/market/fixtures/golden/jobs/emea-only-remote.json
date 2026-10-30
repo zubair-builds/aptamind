@@ -1,0 +1,19 @@
+{
+  "id": "emea-only-remote",
+  "description": "Remote role explicitly limited to EMEA.",
+  "input": {
+    "title": "Product Designer (Remote)",
+    "locationTexts": ["Remote"],
+    "descriptionText": "We're Canopy, a climate-data platform helping asset managers measure physical risk.\n\nWhat you'll do\n- Own the end-to-end design of our portfolio analytics experience\n- Partner with product managers and engineers to ship weekly\n- Run user research with customers across Europe and the Middle East\n\nAbout you\n- 4+ years of product design experience in B2B SaaS\n- Excellent Figma skills and experience contributing to a design system\n\nThis role is remote, EMEA only. We hire through an employer of record across EMEA."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "remoteScope.value.type": "region",
+    "remoteScope.value.regions": ["EMEA"],
+    "remoteScope.value.countries": [],
+    "title.value.roleFamily": "design",
+    "title.value.normalized": "Product Designer",
+    "sponsorship.value.status": "unclear",
+    "sponsorship.confidence": "unknown"
+  }
+}

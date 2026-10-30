@@ -1,0 +1,16 @@
+{
+  "id": "salary-plus-bonus-is-not-open-ended",
+  "description": "'\u00a380k + bonus' is base pay plus a bonus, not an open-ended range.",
+  "input": {
+    "title": "Account Director",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Salary: \u00a380k + bonus.\n\nYou will own key accounts."
+  },
+  "expect": {
+    "compensation.value.min": 80000,
+    "compensation.value.max": 80000,
+    "compensation.value.bonusText": {
+      "$contains": "bonus"
+    }
+  }
+}

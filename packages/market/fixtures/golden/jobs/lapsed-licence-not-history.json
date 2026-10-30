@@ -1,0 +1,39 @@
+{
+  "id": "lapsed-licence-not-history",
+  "description": "M11.1: a lapsed UK licence (no longer on the register) is PAST company capability, not hiring history: the company cannot currently sponsor under it. A silent London role stays unclear with companyCapability previously_licensed recorded. Before: historical_evidence (hiring-history tier) from the lapsed licence.",
+  "stored": {
+    "payload": {
+      "externalId": "7",
+      "title": "Product Analyst",
+      "locations": [
+        {
+          "text": "London, United Kingdom"
+        }
+      ],
+      "descriptionText": "Work with product teams to measure what matters.",
+      "provider": {
+        "name": "greenhouse",
+        "boardToken": "acme"
+      }
+    },
+    "company": {
+      "licenceCountries": [],
+      "lapsedLicenceCountries": ["GB"],
+      "hqCountry": "GB"
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "previously_licensed",
+    "sponsorship.value.capabilityCountries": ["GB"],
+    "sponsorship.confidence": "unknown",
+    "flags": {
+      "$contains": {
+        "code": "sponsor_licence_lapsed",
+        "message": "The company's sponsor licence (GB) is no longer listed; it is past capability, not evidence that this role sponsors.",
+        "severity": "info"
+      }
+    }
+  }
+}

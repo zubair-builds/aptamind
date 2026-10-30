@@ -1,0 +1,14 @@
+{
+  "id": "auth-not-from-sponsorship-experience",
+  "description": "PR #21 review A-L2: 'does not require sponsorship experience' is about a skill, not a work-authorization requirement or a sponsorship statement.",
+  "input": {
+    "title": "HR Coordinator",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Support our people team.\n\nThis role does not require sponsorship experience or approval authority.",
+    "company": null
+  },
+  "expect": {
+    "authorization.value.required": null,
+    "sponsorship.value.status": "unclear"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "eu-work-eligibility-region",
+  "description": "M11.1: 'eligible to work in an EU country' is a region-level authorization requirement. Before: required true with countries [] and no region.",
+  "input": {
+    "title": "Consultant",
+    "locationTexts": ["Remote - Europe"],
+    "descriptionText": "Advise clients on data strategy.\n\nYou must be eligible to work in an EU country.",
+    "company": null
+  },
+  "expect": {
+    "authorization.value.required": true,
+    "authorization.value.countries": [],
+    "authorization.value.regions": ["EU"],
+    "authorization.confidence": "high"
+  }
+}

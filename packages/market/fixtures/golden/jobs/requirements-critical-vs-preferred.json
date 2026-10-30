@@ -1,0 +1,26 @@
+{
+  "id": "requirements-critical-vs-preferred",
+  "description": "Must-have / nice-to-have sections map to critical / preferred importance.",
+  "input": {
+    "title": "Senior Full-Stack Engineer",
+    "locationTexts": ["Toronto, ON"],
+    "descriptionText": "About the role\nYou will build features across our Rails and React stack and own them in production.\n\nMust have\n- 5+ years of professional experience with Ruby on Rails\n- Strong PostgreSQL skills\n- Experience with AWS\n\nNice to have\n- Experience with GraphQL\n- Familiarity with Kubernetes (k8s)\n\nWhat we offer\n- Health benefits and a learning budget"
+  },
+  "expect": {
+    "requirements.length": 5,
+    "requirements[normalizedConcept=rails].importance": "critical",
+    "requirements[normalizedConcept=rails].yearsMin": 5,
+    "requirements[normalizedConcept=rails].explicitness": "explicit",
+    "requirements[normalizedConcept=rails].section": "Must have",
+    "requirements[normalizedConcept=postgresql].importance": "critical",
+    "requirements[normalizedConcept=aws].importance": "critical",
+    "requirements[normalizedConcept=graphql].importance": "preferred",
+    "requirements[normalizedConcept=kubernetes].importance": "preferred",
+    "requirements[normalizedConcept=kubernetes].section": "Nice to have",
+    "requirements.0.evidence.field": "description",
+    "locations.0.city": "Toronto",
+    "locations.0.region": "Ontario",
+    "locations.0.country": "CA",
+    "title.value.specialization": "fullstack"
+  }
+}

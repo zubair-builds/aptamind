@@ -1,0 +1,1275 @@
+{
+  "description": "Job lifecycle golden sequences. Each case starts from `start` and applies events in order.",
+  "cases": [
+    {
+      "id": "failed-source-fetch-no-change",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "source_fetch_failed"
+        },
+        {
+          "kind": "source_fetch_failed"
+        },
+        {
+          "kind": "source_fetch_failed"
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE"
+      }
+    },
+    {
+      "id": "removed-from-source-once",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE"
+      }
+    },
+    {
+      "id": "removed-from-source-twice",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveAbsences": 2
+      },
+      "note": "Ruling L1: absence alone never closes. Two consecutive absences without a not_found verification leave the job POSSIBLY_STALE (verification is scheduled)."
+    },
+    {
+      "id": "third-party-absence-ignored",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "third_party"
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "third_party"
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE"
+      }
+    },
+    {
+      "id": "absent-then-back",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "seen",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE"
+      }
+    },
+    {
+      "id": "closed-then-seen-reopened",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": false
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "seen",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "REOPENED"
+      }
+    },
+    {
+      "id": "repost",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": true
+        },
+        {
+          "kind": "repost_detected"
+        }
+      ],
+      "expect": {
+        "state": "REPOSTED",
+        "historyTo": ["VERIFIED_LIVE", "POSSIBLY_STALE", "CLOSED", "REPOSTED"]
+      },
+      "note": "A repost is a new posting of a CLOSED job: the absence and the not_found close it first (re-verify #9 Low 3)."
+    },
+    {
+      "id": "stale-never-closes",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "stale_check",
+          "hoursLater": 100
+        },
+        {
+          "kind": "stale_check",
+          "hoursLater": 1000
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE"
+      }
+    },
+    {
+      "id": "inconclusive-verification",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "verification",
+          "outcome": "inconclusive",
+          "absentFromListing": false
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE"
+      }
+    },
+    {
+      "id": "content-change",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "seen",
+          "authority": "official_ats",
+          "contentChanged": true
+        }
+      ],
+      "expect": {
+        "state": "CHANGED"
+      }
+    },
+    {
+      "id": "third-party-discovered",
+      "start": {
+        "authority": "third_party"
+      },
+      "events": [],
+      "expect": {
+        "state": "DISCOVERED"
+      }
+    },
+    {
+      "id": "malformed-entry-not-absence",
+      "note": "M6.1 regression: a job whose board entry turns malformed (title null) was absent from the parsed listing and closed after two listings. A dropped entry with an id is seen, not absent.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "greenhouse",
+        "externalId": "101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": "Backend Engineer"
+              }
+            ]
+          },
+          "fillers": 9
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 9
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 9
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 9
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "unlisted-entry-not-absence",
+      "note": "M6.1 regression: an Ashby job switched to isListed=false was dropped and closed. Unlisted is a provider state, not absence.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer",
+                "isListed": true
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer",
+                "isListed": false
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer",
+                "isListed": false
+              }
+            ]
+          },
+          "fillers": 2
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "malformed-entry-without-id-not-absence",
+      "note": "M6.1: an entry that no longer parses and has no usable id cannot be matched to any job, so the listing proves nothing about absence.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "lever",
+        "externalId": "p-101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "id": "p-101",
+              "text": "Product Manager"
+            }
+          ],
+          "fillers": 19
+        },
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "text": "Product Manager"
+            }
+          ],
+          "fillers": 19
+        },
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "text": "Product Manager"
+            }
+          ],
+          "fillers": 19
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "malformed-majority-not-absence",
+      "note": "M6.1: more than 10 % of entries malformed (provider shape drift) makes the listing incomplete, so even a genuinely removed job is not marked absent from it.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "greenhouse",
+        "externalId": "101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": "Backend Engineer"
+              },
+              {
+                "id": 102,
+                "title": "A"
+              },
+              {
+                "id": 103,
+                "title": "B"
+              }
+            ]
+          },
+          "fillers": 7
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 102,
+                "title": null
+              },
+              {
+                "id": 103,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 7
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 102,
+                "title": null
+              },
+              {
+                "id": 103,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 7
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "removed-entry-still-absent",
+      "note": "Control for M6.1: a job genuinely removed from a complete listing (other entries malformed ≤ 10 %) is still absent; a not_found verification then closes it (L1).",
+      "start": {
+        "authority": "official_ats",
+        "provider": "greenhouse",
+        "externalId": "101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": "Backend Engineer"
+              },
+              {
+                "id": 102,
+                "title": "A"
+              }
+            ]
+          },
+          "fillers": 9
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 102,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 9
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": true
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 102,
+                "title": null
+              }
+            ]
+          },
+          "fillers": 9
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "listing-shrink-held",
+      "note": "M6.2 regression: a complete board listing that drops from 200 entries to 5 (< 50 % and ≥ 10 fewer) is held as a source anomaly: no absences, however often it repeats, until an operator confirms it.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "greenhouse",
+        "externalId": "101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": "Backend Engineer"
+              }
+            ]
+          },
+          "fillers": 199
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "listing-empty-twice-held",
+      "note": "M6.2 regression: an empty listing after a non-empty board (baseline ≥ 10) was held once, but it reset the item count, so the next empty listing applied absences and the third closed every job.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "lever",
+        "externalId": "p-1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "id": "p-1",
+              "text": "Designer"
+            }
+          ],
+          "fillers": 11
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "listing-shrink-then-normal-proceeds",
+      "note": "M6.2: after a held shrink the next normal listing (back near the baseline) proceeds, so a job genuinely removed then is absent and — verified not found (L1) — closes.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "greenhouse",
+        "externalId": "101"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": 101,
+                "title": "Backend Engineer"
+              }
+            ]
+          },
+          "fillers": 199
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 199
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": true
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 199
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "listing-small-drop-proceeds",
+      "note": "M6.2 control: a drop of fewer than 10 entries is ordinary churn even when it halves a small board (12 → 5), so absences apply; a not_found verification then closes the job (L1).",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 11
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": true
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 5
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "listing-empty-small-board-held-once",
+      "note": "Ruling L2: a small board (3 jobs, baseline < 10) that empties is held for ONE run without a review; the next consecutive empty listing is applied. Absence alone never closes (L1): after two applied empty listings the job is POSSIBLY_STALE.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "lever",
+        "externalId": "p-1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "id": "p-1",
+              "text": "Designer"
+            }
+          ],
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveAbsences": 2
+      }
+    },
+    {
+      "id": "small-board-empty-live-verification-no-close",
+      "note": "Ruling L1 golden: 3-job board, empty listings with a live verification in between — the live verification ends the run of absences, so nothing closes.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "lever",
+        "externalId": "p-1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "id": "p-1",
+              "text": "Designer"
+            }
+          ],
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "verification",
+          "outcome": "live",
+          "absentFromListing": true
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveAbsences": 1
+      }
+    },
+    {
+      "id": "small-board-empty-not-found-verification-closes",
+      "note": "Ruling L1 golden: the same with a not_found verification in between — two consecutive absences corroborated by not_found since the first absence close the job.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "lever",
+        "externalId": "p-1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": [
+            {
+              "id": "p-1",
+              "text": "Designer"
+            }
+          ],
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        },
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": false
+        },
+        {
+          "kind": "listing",
+          "raw": []
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "absence-live-absence-no-close",
+      "note": "Ruling L1: a live verification resets the run of absences.",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "verification",
+          "outcome": "live",
+          "absentFromListing": true
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveAbsences": 1
+      }
+    },
+    {
+      "id": "absence-not-found-before-first-absence-does-not-corroborate",
+      "note": "Ruling L1: a not_found must come after the first absence of the run to corroborate it.",
+      "start": {
+        "authority": "official_ats"
+      },
+      "events": [
+        {
+          "kind": "verification",
+          "outcome": "not_found",
+          "absentFromListing": false
+        },
+        {
+          "kind": "seen",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        },
+        {
+          "kind": "absent_from_listing",
+          "authority": "official_ats"
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveAbsences": 2
+      }
+    },
+    {
+      "id": "ashby-truncated-board-verification-inconclusive",
+      "note": "Ruling L1 (A N-M3): a board-derived (Ashby) verification that reads a truncated board (3 of 100 entries, without the job) is inconclusive, not not_found.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 99
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 3
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0
+      }
+    },
+    {
+      "id": "ashby-full-board-verification-not-independent",
+      "note": "DECISION_LOG b7f1a76: a board-derived not_found is the same evidence as a listing read, never independent verification. The full board (99 of 100) without the job, with no absence run, is inconclusive.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 99
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 99
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveNotFound": 0
+      }
+    },
+    {
+      "id": "ashby-small-board-empties-then-verification-closes",
+      "note": "DECISION_LOG b7f1a76: a board-derived read only corroborates a job-level absence run of 2. A small Ashby board (3) that empties: held one run (L2), applied (absence 1), applied (absence 2), then the empty board read closes the absent job (hold → apply → apply → read).",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "absentFromListing": true
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "ashby-large-board-collapse-confirmed-then-verification-closes",
+      "note": "A large Ashby board (12) that collapses to 0 is held for review; an empty read while held is inconclusive. After the operator confirms, two applied empty listings (absence run of 2, b7f1a76) and then the read close the job.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 11
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "absentFromListing": false
+        },
+        {
+          "kind": "confirm_shrink"
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "absentFromListing": true
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "ashby-empty-board-glitch-no-close",
+      "note": "PR #11 re-review HIGH control (LOW-1: asserted right after the read): one empty board read while the job is present (baseline 3) is a glitch — inconclusive, so no not_found is counted.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "absentFromListing": false
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0,
+        "consecutiveNotFound": 0
+      }
+    },
+    {
+      "id": "ashby-stale-zero-baseline-held-listing-no-close",
+      "note": "PR #11 re-review MEDIUM-1 scenario A: the board's first listing is empty (baseline 0); a1 then appears in a HELD listing (incomplete), which marks it present without moving the baseline. Two empty board reads must not close the live job: it was never marked absent by an applied listing, and the effective baseline (present jobs) is 1.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1",
+        "unlistedAtStart": true
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "incomplete": true
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          }
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveNotFound": 0
+      }
+    },
+    {
+      "id": "ashby-stale-zero-baseline-empty-glitch-no-close",
+      "note": "PR #11 re-review MEDIUM-1 scenario B: same start; then an empty glitch listing. With the effective baseline (1 present job) it gets the L2 one-run hold instead of being applied, so the following empty board read is inconclusive and nothing closes.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1",
+        "unlistedAtStart": true
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "incomplete": true
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          }
+        }
+      ],
+      "expect": {
+        "state": "VERIFIED_LIVE",
+        "consecutiveAbsences": 0,
+        "consecutiveNotFound": 0
+      }
+    },
+    {
+      "id": "ashby-full-board-read-corroborates-absence-run",
+      "note": "b7f1a76 control: absent from two applied listings (board of 100 without a1), the full-board read without a1 counts and the job closes.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 99
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 99
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 99
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          },
+          "fillers": 99
+        }
+      ],
+      "expect": {
+        "state": "CLOSED"
+      }
+    },
+    {
+      "id": "ashby-small-board-hold-rearmed-by-live-read",
+      "note": "b7f1a76 (V1b): baseline 3 → empty listing held → the board comes back and a1 is read live → the hold is re-armed, so the next empty listing is held again, the one after is applied (absence 1), and an empty read does not close.",
+      "start": {
+        "authority": "official_ats",
+        "provider": "ashby",
+        "externalId": "a1"
+      },
+      "events": [
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": [
+              {
+                "id": "a1",
+                "title": "Solutions Engineer"
+              }
+            ]
+          },
+          "fillers": 2
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "listing",
+          "raw": {
+            "jobs": []
+          }
+        },
+        {
+          "kind": "board_verification",
+          "raw": {
+            "jobs": []
+          }
+        }
+      ],
+      "expect": {
+        "state": "POSSIBLY_STALE",
+        "consecutiveNotFound": 0
+      }
+    }
+  ]
+}

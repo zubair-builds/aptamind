@@ -1,0 +1,20 @@
+{
+  "id": "relocation-explicit",
+  "description": "Relocation assistance explicitly provided. bc50be7: \"we can sponsor visas for non-EU candidates\" is scoped, so sponsorship stays unclear.",
+  "input": {
+    "title": "iOS Engineer",
+    "locationTexts": ["Lisbon, Portugal"],
+    "provider": {
+      "workplaceType": "hybrid"
+    },
+    "descriptionText": "We're hiring an iOS Engineer to join our Lisbon hub.\n\nRelocation assistance is provided for candidates moving to Portugal, and we can sponsor visas for non-EU candidates.\n\nWhat you'll need\n- Strong Swift and SwiftUI experience"
+  },
+  "expect": {
+    "relocation.value": "explicit_yes",
+    "relocation.confidence": "high",
+    "relocation.evidence.0.field": "description",
+    "sponsorship.value.status": "unclear",
+    "title.value.specialization": "mobile",
+    "workModel.value": "hybrid"
+  }
+}

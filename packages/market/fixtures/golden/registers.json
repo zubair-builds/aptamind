@@ -1,0 +1,954 @@
+{
+  "description": "Register evidence end to end (M8.4, M11.5): register file → register adapter (parser, route taxonomy, identity) → company observations → company reconciliation → job interpretation. A listing is company-level evidence for the register's own country only; it is never a role statement.",
+  "cases": [
+    {
+      "id": "nl-licence-not-uk-role",
+      "description": "An IND recognised sponsor (regular labour and highly skilled migrants) holds NL capability only. A London role at that company is unclear (the NL licence is not UK capability) and a stated \"Visa sponsorship: Yes\" in the posting is a statement, never a role yes; an Amsterdam role is company_capable (company capability, role silent), never explicit_yes.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-labour-t1.html",
+          "select": ["Voorbeeld Tech B.V."]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.capability.value": "licensed",
+        "employment.sponsorship.licenceCountries": ["NL"],
+        "employment.sponsorship.licences.length": 1,
+        "employment.sponsorship.licences.0.register": "nl_ind_recognised_sponsors",
+        "employment.sponsorship.licences.0.country": "NL",
+        "employment.sponsorship.licences.0.route": "Regular labour and highly skilled migrants",
+        "employment.sponsorship.licences.0.status": "listed",
+        "identity.externalIds": [
+          {
+            "namespace": "nl_kvk",
+            "id": "99000011"
+          }
+        ]
+      },
+      "jobs": [
+        {
+          "id": "london",
+          "locationTexts": ["London, United Kingdom"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.roleStatement": "none",
+            "sponsorship.value.companyCapability": "licensed",
+            "sponsorship.value.capabilityCountries": ["NL"],
+            "flags[code=sponsor_capability_other_country].severity": "info"
+          }
+        },
+        {
+          "id": "london-posting-says-yes",
+          "locationTexts": ["London, United Kingdom"],
+          "descriptionText": "Build and run our platform.\n\nVisa sponsorship: Yes",
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.roleStatement": "none",
+            "sponsorship.value.capabilityCountries": ["NL"],
+            "flags[code=sponsorship_stated].value": "yes"
+          }
+        },
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none",
+            "sponsorship.value.companyCapability": "licensed",
+            "sponsorship.value.capabilityCountries": ["NL"],
+            "sponsorship.confidence": "medium",
+            "sponsorship.basis": "company.sponsorLicence"
+          }
+        },
+        {
+          "id": "amsterdam-posting-says-yes",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "descriptionText": "Build and run our platform.\n\nVisa sponsorship: Yes",
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none",
+            "flags[code=sponsorship_stated].value": "yes"
+          }
+        },
+        {
+          "id": "berlin",
+          "locationTexts": ["Berlin, Germany"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.capabilityCountries": ["NL"],
+            "flags[code=sponsor_capability_other_country].severity": "info"
+          }
+        },
+        {
+          "id": "plain-remote",
+          "locationTexts": ["Remote"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "flags[code=sponsor_capability_job_country_unknown].severity": "info"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-non-labour-routes-ignored",
+      "description": "Organisations on the IND study, au pair / exchange and an unrecognised register only: none of it is employment sponsorship, so no licence is recorded and an Amsterdam role at such an organisation has no company capability.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-all-purposes.html",
+          "select": ["Taalschool Noord B.V.", "Au Pair Bureau Zonnebloem B.V.", "Kasgroen Tuinbouw B.V."]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none",
+            "sponsorship.value.capabilityCountries": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-research-and-study-keeps-research-only",
+      "description": "A university on both the research (Directive (EU) 2016/801) and the study register: the research listing is labour capability, the study listing is ignored.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-all-purposes.html",
+          "select": ["Universiteit van Voorbeeldstad"]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences.length": 1,
+        "employment.sponsorship.licences.0.route": "Researchers (Directive (EU) 2016/801)",
+        "employment.sponsorship.licenceCountries": ["NL"]
+      },
+      "jobs": [
+        {
+          "id": "utrecht",
+          "locationTexts": ["Utrecht, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-blue-card-is-nl-only",
+      "description": "An NL EU Blue Card listing is capability in the Netherlands only: never for another EU country.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-all-purposes.html",
+          "select": ["Havenkraan Engineering N.V."]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences.0.route": "EU Blue Card",
+        "employment.sponsorship.licenceCountries": ["NL"]
+      },
+      "jobs": [
+        {
+          "id": "rotterdam",
+          "locationTexts": ["Rotterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable"
+          }
+        },
+        {
+          "id": "berlin",
+          "locationTexts": ["Berlin, Germany"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "flags[code=sponsor_capability_other_country].severity": "info"
+          }
+        }
+      ]
+    },
+    {
+      "id": "uk-and-nl-licences-own-countries",
+      "description": "A company on the UK workers register and the IND labour register: each licence is capability for its own country; a Dublin role is covered by neither.",
+      "imports": [
+        {
+          "register": "uk_home_office_licensed_sponsors_workers",
+          "rows": [
+            {
+              "name": "Voorbeeld Tech B.V.",
+              "town": "London",
+              "county": null,
+              "typeRating": "Worker (A rating)",
+              "route": "Skilled Worker"
+            }
+          ]
+        },
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-labour-t1.html",
+          "select": ["Voorbeeld Tech B.V."]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licenceCountries": ["GB", "NL"],
+        "employment.sponsorship.licences.length": 2
+      },
+      "jobs": [
+        {
+          "id": "london",
+          "locationTexts": ["London, United Kingdom"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none"
+          }
+        },
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none"
+          }
+        },
+        {
+          "id": "dublin",
+          "locationTexts": ["Dublin, Ireland"],
+          "expect": {
+            "sponsorship.value.status": "unclear"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-delisted-licence-previously-licensed",
+      "description": "An IND listing absent from the latest complete import is kept as a no-longer-listed licence (history is not destroyed): past capability, never hiring history and never a role signal.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "fixture": "nl-ind/register-labour-t1.html",
+          "select": ["Molenwerk Software B.V."],
+          "observedAt": "2026-09-22T00:00:00Z",
+          "completeImportAt": "2026-09-29T00:00:00Z"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.capability.value": "previously_licensed",
+        "employment.sponsorship.licences.length": 1,
+        "employment.sponsorship.licences.0.status": "no_longer_listed",
+        "employment.sponsorship.licenceCountries": []
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "previously_licensed",
+            "flags[code=sponsor_licence_lapsed].severity": "info"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-seasonal-labour-ignored",
+      "description": "Review probe: an IND \"Seasonal labour\" listing is not recognised-sponsor labour capability (explicit ignored alias).",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "rows": [
+            {
+              "name": "Kasgroen Tuinbouw B.V.",
+              "identity": "99000112",
+              "route": "Seasonal labour"
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-seasonal-labour-pilot-ignored",
+      "description": "Review probe: \"Public register seasonal labour pilot\" only resembles a labour route (keyword \"labour\"): fail closed, ignored and unlisted, never labour.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "rows": [
+            {
+              "name": "Kasgroen Tuinbouw B.V.",
+              "identity": "99000112",
+              "route": "Public register seasonal labour pilot"
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-stagiair-ignored",
+      "description": "Review probe: \"Stagiair arbeid in loondienst\" (trainee in paid employment) contains \"arbeid\" but is the trainee purpose: explicit ignored alias, never labour.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "rows": [
+            {
+              "name": "Kasgroen Tuinbouw B.V.",
+              "identity": "99000112",
+              "route": "Stagiair arbeid in loondienst"
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-seizoensarbeid-ignored",
+      "description": "Review probe: \"Seizoensarbeid\" (seasonal work) is ignored (explicit alias).",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "rows": [
+            {
+              "name": "Kasgroen Tuinbouw B.V.",
+              "identity": "99000112",
+              "route": "Seizoensarbeid"
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-shared-heading-not-licensed",
+      "description": "Review repro: a study list follows a labour table under a bold-only paragraph (\"Studie\"). That paragraph is the second table's own label (delta review A-M2), so the language school is a study listing — never licensed.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "select": ["Taalschool B.V."],
+          "content": "<html><body><h2>Kennismigranten</h2><table><tr><th>Organisation</th><th>KvK number</th></tr><tr><td>A B.V.</td><td>99000131</td></tr></table><p><strong>Studie</strong></p><table><tr><th>Organisation</th><th>KvK number</th></tr><tr><td>Taalschool B.V.</td><td>99000142</td></tr></table></body></html>"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-researchers-dutch-heading-licensed",
+      "description": "Delta review A-M1: the Dutch research register heading \"Openbaar register Onderzoek in de zin van richtlijn (EU) 2016/801\" is the researcher route (prefix and directive reference normalised, then an exact alias): NL capability.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "select": ["Universiteit van Voorbeeldstad"],
+          "content": "<html><body><h2>Openbaar register Onderzoek in de zin van richtlijn (EU) 2016/801</h2><table><tr><th>Organisation</th><th>KvK number</th></tr><tr><td>Universiteit van Voorbeeldstad</td><td>99000088</td></tr></table></body></html>"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licenceCountries": ["NL"],
+        "employment.sponsorship.licences.0.route": "Researchers (Directive (EU) 2016/801)"
+      },
+      "jobs": [
+        {
+          "id": "utrecht",
+          "locationTexts": ["Utrecht, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-combined-blue-card-heading-licensed",
+      "description": "Delta review A-M1: \"Kennismigranten en Europese blauwe kaart\" is the labour register (exact alias): NL capability.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "select": ["Havenkraan Engineering N.V."],
+          "content": "<html><body><h2>Kennismigranten en Europese blauwe kaart</h2><table><tr><th>Organisation</th><th>KvK number</th></tr><tr><td>Havenkraan Engineering N.V.</td><td>99000055</td></tr></table></body></html>"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licenceCountries": ["NL"],
+        "employment.sponsorship.licences.0.route": "Regular labour and highly skilled migrants"
+      },
+      "jobs": [
+        {
+          "id": "utrecht",
+          "locationTexts": ["Utrecht, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.roleStatement": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "nl-figcaption-study-not-licensed",
+      "description": "Delta review A-M2 repro: a study table inside a <figure> with the figcaption \"Studie\", under a labour <h2>. The figcaption is the table's own label, so the listing is study — never labour.",
+      "imports": [
+        {
+          "register": "nl_ind_recognised_sponsors",
+          "select": ["Taalschool B.V."],
+          "content": "<html><body><h2>Kennismigranten</h2><figure><figcaption>Studie</figcaption><table><tr><th>Organisation</th><th>KvK number</th></tr><tr><td>Taalschool B.V.</td><td>99000142</td></tr></table></figure></body></html>"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.capability.status": "unknown"
+      },
+      "jobs": [
+        {
+          "id": "amsterdam",
+          "locationTexts": ["Amsterdam, Netherlands"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-history-not-role-yes",
+      "description": "US H-1B approvals (USCIS Employer Data Hub) are company hiring HISTORY: a US role at the company is historical_evidence at low confidence, with the role axis silent. A posting line \"H-1B sponsorship: Yes\" is a statement flag, never a role yes; nothing here is explicit_yes.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN JOSE",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 3,
+                "initialDenials": 0,
+                "continuingApprovals": 4,
+                "continuingDenials": 0,
+                "rowKey": "95113|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2024,
+                "initialApprovals": 10,
+                "initialDenials": 1,
+                "continuingApprovals": 20,
+                "continuingDenials": 1,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.historyCountries": ["US"],
+        "employment.sponsorship.history.length": 2,
+        "employment.sponsorship.history.0.fiscalYear": 2023,
+        "employment.sponsorship.history.0.initialApprovals": 15,
+        "employment.sponsorship.history.0.continuingApprovals": 34,
+        "employment.sponsorship.history.0.initialDenials": 1,
+        "employment.sponsorship.history.0.rows": 2,
+        "employment.sponsorship.history.0.route": "H-1B",
+        "employment.sponsorship.history.0.country": "US",
+        "employment.sponsorship.history.1.fiscalYear": 2024
+      },
+      "jobs": [
+        {
+          "id": "new-york",
+          "locationTexts": ["New York, NY, United States"],
+          "expect": {
+            "sponsorship.value.status": "historical_evidence",
+            "sponsorship.value.roleStatement": "none",
+            "sponsorship.value.companyCapability": "historical",
+            "sponsorship.value.capabilityCountries": ["US"],
+            "sponsorship.confidence": "low",
+            "sponsorship.basis": "company.historicalSponsorship"
+          }
+        },
+        {
+          "id": "austin-posting-says-yes",
+          "locationTexts": ["Austin, TX"],
+          "descriptionText": "Build and run our platform.\n\nH-1B sponsorship: Yes",
+          "expect": {
+            "sponsorship.value.status": "historical_evidence",
+            "sponsorship.value.roleStatement": "none",
+            "flags[code=sponsorship_stated].value": "yes"
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-not-capability",
+      "description": "H-1B history is never capability: it adds no licence, no licence country and no `licensed` capability. At a company with a UK licence and US H-1B history, a London role is company_capable (the UK licence) and a US role is historical_evidence (the history), never company_capable.",
+      "imports": [
+        {
+          "register": "uk_home_office_licensed_sponsors_workers",
+          "rows": [
+            {
+              "name": "Acme Analytics Inc",
+              "town": "London",
+              "county": null,
+              "typeRating": "Worker (A rating)",
+              "route": "Skilled Worker"
+            }
+          ]
+        },
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.licenceCountries": ["GB"],
+        "employment.sponsorship.licences.length": 1,
+        "employment.sponsorship.capability.value": "licensed",
+        "employment.sponsorship.historyCountries": ["US"],
+        "identity.displayName.value": "Acme Analytics Inc",
+        "identity.aliases": [],
+        "identity.legalName.value": "Acme Analytics Inc",
+        "identity.legalName.conflicts": [],
+        "identity.displayName.conflicts": [],
+        "geography.registeredLocations.length": 1
+      },
+      "jobs": [
+        {
+          "id": "london",
+          "locationTexts": ["London, United Kingdom"],
+          "expect": {
+            "sponsorship.value.status": "company_capable",
+            "sponsorship.value.companyCapability": "licensed",
+            "sponsorship.value.capabilityCountries": ["GB"]
+          }
+        },
+        {
+          "id": "san-francisco",
+          "locationTexts": ["San Francisco, CA"],
+          "expect": {
+            "sponsorship.value.status": "historical_evidence",
+            "sponsorship.value.companyCapability": "historical",
+            "sponsorship.value.capabilityCountries": ["US"],
+            "sponsorship.value.roleStatement": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-history-only-company-not-capable",
+      "description": "A company whose only sponsorship evidence is H-1B history has no capability fact (unknown, not licensed) and no licence countries.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.capability.status": "unknown",
+        "employment.sponsorship.licences": [],
+        "employment.sponsorship.licenceCountries": []
+      },
+      "jobs": [
+        {
+          "id": "seattle",
+          "locationTexts": ["Seattle, WA"],
+          "expect": {
+            "sponsorship.value.status": {
+              "$not": "company_capable"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-non-us-job-ignored",
+      "description": "US H-1B history is evidence for US jobs only: a London, Toronto or plain-remote role at a company with only H-1B history stays unclear (never historical_evidence).",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN JOSE",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 3,
+                "initialDenials": 0,
+                "continuingApprovals": 4,
+                "continuingDenials": 0,
+                "rowKey": "95113|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2024,
+                "initialApprovals": 10,
+                "initialDenials": 1,
+                "continuingApprovals": 20,
+                "continuingDenials": 1,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "jobs": [
+        {
+          "id": "london",
+          "locationTexts": ["London, United Kingdom"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "historical",
+            "sponsorship.value.capabilityCountries": ["US"],
+            "flags[code=sponsor_capability_other_country].severity": "info"
+          }
+        },
+        {
+          "id": "toronto",
+          "locationTexts": ["Toronto, ON, Canada"],
+          "expect": {
+            "sponsorship.value.status": "unclear"
+          }
+        },
+        {
+          "id": "plain-remote",
+          "locationTexts": ["Remote"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "flags[code=sponsor_capability_job_country_unknown].severity": "info"
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-denials-only-not-history",
+      "description": "Denied petitions alone are not sponsorship history: the rows are kept on the company's history, but the US is not a history country and a US role has no company evidence.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "NORTHWIND FREIGHT LTD",
+              "route": "H-1B",
+              "town": "HOUSTON",
+              "county": "TX",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 0,
+                "initialDenials": 2,
+                "continuingApprovals": 0,
+                "continuingDenials": 1,
+                "rowKey": "77002|1111"
+              }
+            }
+          ]
+        }
+      ],
+      "company": {
+        "employment.sponsorship.history.length": 1,
+        "employment.sponsorship.history.0.initialDenials": 2,
+        "employment.sponsorship.historyCountries": []
+      },
+      "jobs": [
+        {
+          "id": "houston",
+          "locationTexts": ["Houston, TX"],
+          "expect": {
+            "sponsorship.value.status": "unclear",
+            "sponsorship.value.companyCapability": "none"
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-rows-differing-by-naics-sum",
+      "description": "Review repro: two BETA CORP FY2022 rows that differ only by NAICS are two register rows (NAICS is in the row key), so the company's FY2022 history is 4 + 6 = 10 approvals, never one row replacing the other.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "content": "Fiscal Year,Employer,Initial Approval,Initial Denial,Continuing Approval,Continuing Denial,NAICS,Tax ID,State,City,ZIP\n2022,BETA CORP,4,0,0,0,54,7777,CA,IRVINE,92618\n2022,BETA CORP,6,0,0,0,51,7777,CA,IRVINE,92618\n"
+        }
+      ],
+      "company": {
+        "employment.sponsorship.history.length": 1,
+        "employment.sponsorship.history.0.fiscalYear": 2022,
+        "employment.sponsorship.history.0.initialApprovals": 10,
+        "employment.sponsorship.history.0.rows": 2
+      }
+    },
+    {
+      "id": "h1b-history-role-says-no-flag",
+      "description": "Review case: a US job whose posting says \"Visa sponsorship: No\" at a company with H-1B history: the stated no is flagged against the history (sponsorship_role_overrides_company), the status stays historical_evidence at low confidence — never a verdict.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN JOSE",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 3,
+                "initialDenials": 0,
+                "continuingApprovals": 4,
+                "continuingDenials": 0,
+                "rowKey": "95113|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2024,
+                "initialApprovals": 10,
+                "initialDenials": 1,
+                "continuingApprovals": 20,
+                "continuingDenials": 1,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "jobs": [
+        {
+          "id": "austin-no",
+          "locationTexts": ["Austin, TX"],
+          "descriptionText": "Build and run our platform.\n\nVisa sponsorship: No",
+          "expect": {
+            "sponsorship.value.status": "historical_evidence",
+            "sponsorship.confidence": "low",
+            "sponsorship.value.roleStatement": "none",
+            "flags[code=sponsorship_stated].value": "no",
+            "flags[code=sponsorship_role_overrides_company].message": "Company has sponsorship history but the posting states that this role does not offer sponsorship."
+          }
+        }
+      ]
+    },
+    {
+      "id": "h1b-history-rtw-tension-flag",
+      "description": "Review case: a US job that requires existing work authorization at a company with H-1B history: the right-to-work tension flag applies to history too; status historical_evidence, low.",
+      "imports": [
+        {
+          "register": "us_uscis_h1b_employer_data_hub",
+          "rows": [
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 12,
+                "initialDenials": 1,
+                "continuingApprovals": 30,
+                "continuingDenials": 2,
+                "rowKey": "94105|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN JOSE",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2023,
+                "initialApprovals": 3,
+                "initialDenials": 0,
+                "continuingApprovals": 4,
+                "continuingDenials": 0,
+                "rowKey": "95113|1234"
+              }
+            },
+            {
+              "name": "ACME ANALYTICS INC",
+              "route": "H-1B",
+              "town": "SAN FRANCISCO",
+              "county": "CA",
+              "history": {
+                "fiscalYear": 2024,
+                "initialApprovals": 10,
+                "initialDenials": 1,
+                "continuingApprovals": 20,
+                "continuingDenials": 1,
+                "rowKey": "94105|1234"
+              }
+            }
+          ]
+        }
+      ],
+      "jobs": [
+        {
+          "id": "austin-rtw",
+          "locationTexts": ["Austin, TX"],
+          "descriptionText": "Build and run our platform.\n\nCandidates must be authorized to work in the United States.",
+          "expect": {
+            "sponsorship.value.status": "historical_evidence",
+            "sponsorship.confidence": "low",
+            "flags[code=right_to_work_required_with_sponsor_capability].severity": "info"
+          }
+        }
+      ]
+    }
+  ]
+}

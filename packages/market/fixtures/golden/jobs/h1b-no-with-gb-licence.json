@@ -1,0 +1,20 @@
+{
+  "id": "h1b-no-with-gb-licence",
+  "description": "bc013e8 M4: a stated value keeps its key's country scope. A London + New York job whose posting says \"H-1B sponsorship: No\" at a company with a UK licence: the stated value is scoped to the US and worded from its key; it does not override the UK licence (no sponsorship_role_overrides_company, confidence stays medium).",
+  "input": {
+    "title": "Platform Engineer",
+    "locationTexts": ["London, United Kingdom", "New York, NY, United States"],
+    "descriptionText": "Join our platform team.\n\nH-1B sponsorship: No\nUK roles: Skilled Worker sponsorship considered.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.confidence": "medium",
+    "flags[code=sponsorship_stated].value": "no",
+    "flags[code=sponsorship_stated].scope": ["US"],
+    "flags[code=sponsorship_stated].message": { "$contains": "H-1B sponsorship: no" },
+    "flags[code=sponsorship_role_overrides_company]": { "$exists": false }
+  }
+}

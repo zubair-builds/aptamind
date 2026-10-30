@@ -1,0 +1,30 @@
+{
+  "id": "provider-structured-compensation-conflict",
+  "description": "Structured provider compensation wins over inconsistent text, with a warning.",
+  "input": {
+    "title": "Engineering Manager",
+    "locationTexts": ["San Francisco, CA"],
+    "provider": {
+      "compensation": {
+        "min": 180000,
+        "max": 220000,
+        "currency": "USD",
+        "period": "year",
+        "text": "$170,000 - $210,000 per year"
+      }
+    },
+    "descriptionText": "Lead a team of 6 engineers building our payments platform. You will hire, coach and grow the team."
+  },
+  "expect": {
+    "compensation.value.status": "parsed",
+    "compensation.value.min": 180000,
+    "compensation.value.max": 220000,
+    "compensation.value.currency": "USD",
+    "compensation.basis": "provider.compensation",
+    "compensation.value.originalText": "$170,000 - $210,000 per year",
+    "flags[code=compensation_source_conflict].severity": "warning",
+    "title.value.seniority": "manager",
+    "title.value.roleFamily": "engineering_management",
+    "responsibilities.management.present": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "auth-not-from-whether-or-not-sponsorship",
+  "description": "PR #21 review A-L2: 'Whether or not you require sponsorship, …' states no requirement.",
+  "input": {
+    "title": "HR Coordinator",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Support our people team.\n\nWhether or not you require sponsorship, we encourage you to apply.",
+    "company": null
+  },
+  "expect": {
+    "authorization.value.required": null,
+    "sponsorship.value.status": {
+      "$not": "explicit_no"
+    }
+  }
+}

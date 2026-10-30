@@ -1,0 +1,14 @@
+{
+  "id": "company-remote-first-only",
+  "description": "'We are remote-first.' is company-level wording: remote with low confidence only.",
+  "input": {
+    "title": "Designer",
+    "locationTexts": [],
+    "descriptionText": "We are remote-first."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.confidence": "low",
+    "workModel.basis": "description.weak"
+  }
+}

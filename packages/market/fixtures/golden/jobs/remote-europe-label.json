@@ -1,0 +1,20 @@
+{
+  "id": "remote-europe-label",
+  "description": "\"Remote (Europe)\" label with no body restriction → region EUROPE from the label.",
+  "input": {
+    "title": "Security Engineer",
+    "locationTexts": ["Remote (Europe)"],
+    "descriptionText": "Help us secure our cloud platform.\n\nResponsibilities\n- Run threat modelling and penetration testing\n- Respond to security incidents"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.basis": "location.label",
+    "remoteScope.value.type": "region",
+    "remoteScope.value.regions": ["EUROPE"],
+    "remoteScope.confidence": "medium",
+    "remoteScope.basis": "location.label",
+    "remoteScope.evidence.0.field": "location",
+    "locations.0.isRemoteLabel": true,
+    "title.value.roleFamily": "security"
+  }
+}

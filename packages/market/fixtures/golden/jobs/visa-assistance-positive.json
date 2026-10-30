@@ -1,0 +1,18 @@
+{
+  "id": "visa-assistance-positive",
+  "description": "M11.1: 'visa assistance' is a role-level offer of sponsorship support. Before: not recognised (unclear). Precision-first (DECISION_LOG 13f2ec9): outside the HIGH allowlist, at most medium. bc50be7: assistance is not sponsorship — never explicit_yes; the span is kept as evidence.",
+  "input": {
+    "title": "Machine Learning Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "Train and ship ranking models.\n\nWe offer visa assistance and relocation support for successful candidates.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.basis": "description.mention",
+    "sponsorship.evidence.0.quote": {
+      "$contains": "isa assistance"
+    }
+  }
+}

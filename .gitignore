@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.next/
+coverage/
+*.log
+.env
+.env.local
+.DS_Store
+.turbo/
+next-env.d.ts
+*.tsbuildinfo
+.local-infra/
+.pnpm-store/
+dump.rdb
+*.rdb

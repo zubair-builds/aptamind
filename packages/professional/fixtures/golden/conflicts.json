@@ -1,0 +1,1126 @@
+{
+  "description": "Conflict detection (prof-rec-1): compatible and incompatible value pairs per value type, including false-conflict traps (abbreviations, legal forms, precision, partial places) and true conflicts (disjoint dates, different organizations). Synthetic values only.",
+  "cases": [
+    {
+      "id": "date-year-vs-month-is-refinement",
+      "claimType": "certification",
+      "a": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2021,
+          "month": 4
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "date-different-months-conflict",
+      "claimType": "certification",
+      "a": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2021,
+          "month": 3
+        }
+      },
+      "b": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2021,
+          "month": 5
+        }
+      },
+      "compatible": false,
+      "conflicting": ["issued"]
+    },
+    {
+      "id": "date-different-years-conflict",
+      "claimType": "certification",
+      "a": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2020
+        }
+      },
+      "b": {
+        "name": "Cloud Practitioner",
+        "issuer": "Example Cloud",
+        "issued": {
+          "year": 2021,
+          "month": 1
+        }
+      },
+      "compatible": false,
+      "conflicting": ["issued"]
+    },
+    {
+      "id": "present-vs-later-end-compatible",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020,
+          "month": 2
+        },
+        "end": {
+          "open": true,
+          "asOf": "2022-01-15T00:00:00Z"
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020,
+          "month": 2
+        },
+        "end": {
+          "year": 2023,
+          "month": 6
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "present-vs-end-in-asof-month-compatible",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "open": true,
+          "asOf": "2022-01-15T00:00:00Z"
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "year": 2022
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "present-vs-earlier-end-true-conflict",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "open": true,
+          "asOf": "2022-06-01T00:00:00Z"
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "year": 2021,
+          "month": 12
+        }
+      },
+      "compatible": false,
+      "conflicting": ["end"]
+    },
+    {
+      "id": "present-vs-present-later-asof-more-precise",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "open": true,
+          "asOf": "2022-06-01T00:00:00Z"
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Data Analyst",
+        "titleKey": "data-analyst",
+        "start": {
+          "year": 2020
+        },
+        "end": {
+          "open": true,
+          "asOf": "2021-01-01T00:00:00Z"
+        }
+      },
+      "compatible": true,
+      "morePrecise": "a"
+    },
+    {
+      "id": "title-sr-vs-senior-trap",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Sr. Software Eng.",
+        "titleKey": "sr.-software-eng.",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Senior Software Engineer",
+        "titleKey": "senior-software-engineer",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "compatible": true,
+      "morePrecise": "equal"
+    },
+    {
+      "id": "title-vp-vs-vice-president-trap",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "VP Engineering",
+        "titleKey": "vp-engineering",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Vice President Engineering",
+        "titleKey": "vice-president-engineering",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "compatible": true
+    },
+    {
+      "id": "title-seniority-difference-conflicts-on-title-only",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Software Engineer",
+        "titleKey": "software-engineer",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Senior Software Engineer",
+        "titleKey": "senior-software-engineer",
+        "start": {
+          "year": 2019,
+          "month": 4
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "compatible": false,
+      "conflicting": ["title"]
+    },
+    {
+      "id": "title-level-numeral-conflict",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Software Engineer II",
+        "titleKey": "software-engineer-ii",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Software Engineer",
+        "titleKey": "software-engineer",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "compatible": false,
+      "conflicting": ["title"]
+    },
+    {
+      "id": "org-ltd-vs-limited-trap",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Fabrikam Ltd",
+          "key": "fabrikam-ltd"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "FABRIKAM Limited",
+          "key": "fabrikam-limited"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "compatible": true,
+      "morePrecise": "equal"
+    },
+    {
+      "id": "org-inc-and-the-company-trap",
+      "claimType": "education",
+      "a": {
+        "institution": {
+          "name": "The Contoso Institute Company",
+          "key": "the-contoso-institute-company"
+        },
+        "qualification": "MSc Data Science",
+        "status": "completed"
+      },
+      "b": {
+        "institution": {
+          "name": "Contoso Institute, Inc.",
+          "key": "contoso-institute-inc."
+        },
+        "qualification": "MSc Data Science",
+        "status": "completed"
+      },
+      "compatible": true
+    },
+    {
+      "id": "org-similar-name-is-not-compatibility",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Fabrikam",
+          "key": "fabrikam"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Fabrikam Labs",
+          "key": "fabrikam-labs"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "compatible": false,
+      "conflicting": ["organization"]
+    },
+    {
+      "id": "org-recorded-alias-compatible",
+      "claimType": "experience.role",
+      "aliases": [["globex", "initrode-holdings"]],
+      "a": {
+        "organization": {
+          "name": "Globex",
+          "key": "globex"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Initrode Holdings",
+          "key": "initrode-holdings"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "compatible": true
+    },
+    {
+      "id": "org-without-alias-conflict",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Globex",
+          "key": "globex"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Initrode Holdings",
+          "key": "initrode-holdings"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "compatible": false,
+      "conflicting": ["organization"]
+    },
+    {
+      "id": "role-location-absent-vs-present-refinement",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Fabrikam",
+          "key": "fabrikam"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Fabrikam",
+          "key": "fabrikam"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2018
+        },
+        "end": {
+          "year": 2019
+        },
+        "location": {
+          "city": "Lyon",
+          "country": "FR"
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "skill-proficiency-absent-vs-stated",
+      "claimType": "skill",
+      "a": {
+        "label": "TypeScript",
+        "concept": "typescript",
+        "kind": "skill",
+        "context": "listed"
+      },
+      "b": {
+        "label": "Typescript",
+        "concept": "typescript",
+        "kind": "skill",
+        "proficiency": "expert",
+        "context": "used_in_role"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "skill-proficiency-disagreement-conflict",
+      "claimType": "skill",
+      "a": {
+        "label": "TypeScript",
+        "concept": "typescript",
+        "kind": "skill",
+        "proficiency": "advanced",
+        "context": "listed"
+      },
+      "b": {
+        "label": "TypeScript",
+        "concept": "typescript",
+        "kind": "skill",
+        "proficiency": "expert",
+        "context": "listed"
+      },
+      "compatible": false,
+      "conflicting": ["proficiency"]
+    },
+    {
+      "id": "skill-unmatched-concept-same-label-refinement",
+      "claimType": "skill",
+      "a": {
+        "label": "Figma",
+        "concept": null,
+        "kind": "tool",
+        "context": "listed"
+      },
+      "b": {
+        "label": "figma",
+        "concept": "figma",
+        "kind": "tool",
+        "context": "listed"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "location-city-absent-trap",
+      "claimType": "location.current",
+      "a": {
+        "city": "Berlin",
+        "country": "DE"
+      },
+      "b": {
+        "country": "DE"
+      },
+      "compatible": true,
+      "morePrecise": "a"
+    },
+    {
+      "id": "location-city-and-region-union",
+      "claimType": "location.current",
+      "a": {
+        "city": "Munich",
+        "country": "DE"
+      },
+      "b": {
+        "region": "Bavaria",
+        "country": "DE"
+      },
+      "compatible": true,
+      "morePrecise": "both"
+    },
+    {
+      "id": "location-accent-insensitive-trap",
+      "claimType": "location.current",
+      "a": {
+        "city": "München",
+        "country": "DE"
+      },
+      "b": {
+        "city": "Munchen",
+        "country": "DE"
+      },
+      "compatible": true,
+      "morePrecise": "equal"
+    },
+    {
+      "id": "location-different-city-conflict",
+      "claimType": "location.current",
+      "a": {
+        "city": "Berlin",
+        "country": "DE"
+      },
+      "b": {
+        "city": "Hamburg",
+        "country": "DE"
+      },
+      "compatible": false,
+      "conflicting": ["place"]
+    },
+    {
+      "id": "location-different-country-conflict",
+      "claimType": "location.current",
+      "a": {
+        "country": "DE"
+      },
+      "b": {
+        "country": "FR"
+      },
+      "compatible": false,
+      "conflicting": ["place"]
+    },
+    {
+      "id": "workauth-different-valid-until-conflict",
+      "claimType": "work_authorization",
+      "a": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "visaType": "Skilled Worker",
+        "validUntil": {
+          "year": 2026,
+          "month": 5
+        },
+        "sponsorshipRequired": "yes"
+      },
+      "b": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "visaType": "Skilled Worker",
+        "validUntil": {
+          "year": 2027,
+          "month": 1
+        },
+        "sponsorshipRequired": "yes"
+      },
+      "compatible": false,
+      "conflicting": ["validUntil"]
+    },
+    {
+      "id": "workauth-status-conflict",
+      "claimType": "work_authorization",
+      "a": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "sponsorshipRequired": "yes"
+      },
+      "b": {
+        "jurisdiction": "GB",
+        "status": "permanent",
+        "sponsorshipRequired": "no"
+      },
+      "compatible": false,
+      "conflicting": ["sponsorshipRequired", "status"]
+    },
+    {
+      "id": "workauth-sponsorship-unknown-vs-yes-trap",
+      "claimType": "work_authorization",
+      "a": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "visaType": "skilled worker",
+        "sponsorshipRequired": "unknown"
+      },
+      "b": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "visaType": "Skilled Worker",
+        "sponsorshipRequired": "yes"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "education-in-progress-vs-completed-trap",
+      "claimType": "education",
+      "a": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "B.Sc. Computer Science",
+        "status": "in_progress",
+        "start": {
+          "year": 2016
+        }
+      },
+      "b": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Computer Science",
+        "status": "completed",
+        "start": {
+          "year": 2016
+        },
+        "end": {
+          "year": 2019
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "education-different-qualification-conflict",
+      "claimType": "education",
+      "a": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Computer Science",
+        "status": "completed"
+      },
+      "b": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Mathematics",
+        "status": "completed"
+      },
+      "compatible": false,
+      "conflicting": ["qualification"]
+    },
+    {
+      "id": "certification-issuer-legal-form-trap",
+      "claimType": "certification",
+      "a": {
+        "name": "Solutions Architect",
+        "issuer": "Example Cloud Services"
+      },
+      "b": {
+        "name": "Solutions Architect",
+        "issuer": "Example Cloud Services, Inc.",
+        "issued": {
+          "year": 2022
+        }
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "remote-preference-order-insensitive",
+      "claimType": "preference.remote",
+      "a": {
+        "acceptable": ["remote", "hybrid"]
+      },
+      "b": {
+        "acceptable": ["hybrid", "remote"]
+      },
+      "compatible": true,
+      "morePrecise": "equal"
+    },
+    {
+      "id": "remote-preference-different-sets-conflict",
+      "claimType": "preference.remote",
+      "a": {
+        "acceptable": ["remote"]
+      },
+      "b": {
+        "acceptable": ["remote", "hybrid"]
+      },
+      "compatible": false,
+      "conflicting": ["acceptable"]
+    },
+    {
+      "id": "project-technologies-subset-trap",
+      "claimType": "project",
+      "a": {
+        "name": "Route Planner",
+        "technologies": ["TypeScript", "PostgreSQL"]
+      },
+      "b": {
+        "name": "Route planner",
+        "technologies": ["typescript", "PostgreSQL", "Redis"]
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "project-technologies-disjoint-conflict",
+      "claimType": "project",
+      "a": {
+        "name": "Route Planner",
+        "technologies": ["Go"]
+      },
+      "b": {
+        "name": "Route Planner",
+        "technologies": ["Rust"]
+      },
+      "compatible": false,
+      "conflicting": ["technologies"]
+    },
+    {
+      "id": "language-proficiency-conflict",
+      "claimType": "language",
+      "a": {
+        "label": "French",
+        "language": "french",
+        "proficiency": "professional"
+      },
+      "b": {
+        "label": "Français",
+        "language": "french",
+        "proficiency": "fluent"
+      },
+      "compatible": false,
+      "conflicting": ["proficiency"]
+    },
+    {
+      "id": "headline-case-and-punctuation-trap",
+      "claimType": "positioning.headline",
+      "a": {
+        "text": "Data engineer — streaming systems"
+      },
+      "b": {
+        "text": "Data Engineer, Streaming Systems"
+      },
+      "compatible": true,
+      "morePrecise": "equal"
+    },
+    {
+      "id": "headline-different-text-conflict",
+      "claimType": "positioning.headline",
+      "a": {
+        "text": "Data engineer"
+      },
+      "b": {
+        "text": "Engineering manager"
+      },
+      "compatible": false,
+      "conflicting": ["text"]
+    },
+    {
+      "id": "skill-cpp-vs-csharp-true-conflict",
+      "claimType": "skill",
+      "a": {
+        "label": "C++",
+        "concept": null,
+        "kind": "skill",
+        "context": "listed"
+      },
+      "b": {
+        "label": "C#",
+        "concept": null,
+        "kind": "skill",
+        "context": "listed"
+      },
+      "compatible": false,
+      "conflicting": ["skill"]
+    },
+    {
+      "id": "project-technologies-cpp-vs-csharp-conflict",
+      "claimType": "project",
+      "a": {
+        "name": "Engine",
+        "technologies": ["C++"]
+      },
+      "b": {
+        "name": "Engine",
+        "technologies": ["C#"]
+      },
+      "compatible": false,
+      "conflicting": ["technologies"]
+    },
+    {
+      "id": "title-equal-key-differing-seniority-conflict",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Engineer",
+        "titleKey": "engineer",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        },
+        "seniority": "senior"
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Engineer",
+        "titleKey": "engineer",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        },
+        "seniority": "mid"
+      },
+      "compatible": false,
+      "conflicting": ["title"]
+    },
+    {
+      "id": "title-equal-key-differing-role-family-conflict",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        },
+        "roleFamily": "data_analytics"
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        },
+        "roleFamily": "finance"
+      },
+      "compatible": false,
+      "conflicting": ["title"]
+    },
+    {
+      "id": "title-equal-key-one-side-classified-refinement",
+      "claimType": "experience.role",
+      "a": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        }
+      },
+      "b": {
+        "organization": {
+          "name": "Northwind Labs",
+          "key": "northwind-labs"
+        },
+        "title": "Analyst",
+        "titleKey": "analyst",
+        "start": {
+          "year": 2019
+        },
+        "end": {
+          "year": 2021
+        },
+        "roleFamily": "data_analytics",
+        "seniority": "mid"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "workauth-valid-until-precision-difference-is-conflict",
+      "claimType": "work_authorization",
+      "a": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "validUntil": {
+          "year": 2026
+        },
+        "sponsorshipRequired": "yes"
+      },
+      "b": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "validUntil": {
+          "year": 2026,
+          "month": 5
+        },
+        "sponsorshipRequired": "yes"
+      },
+      "compatible": false,
+      "conflicting": ["validUntil"]
+    },
+    {
+      "id": "workauth-valid-until-absent-vs-present-refinement",
+      "claimType": "work_authorization",
+      "a": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "sponsorshipRequired": "yes"
+      },
+      "b": {
+        "jurisdiction": "GB",
+        "status": "visa",
+        "validUntil": {
+          "year": 2026,
+          "month": 5
+        },
+        "sponsorshipRequired": "yes"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "education-in-progress-then-later-completed-compatible",
+      "claimType": "education",
+      "asOf": {
+        "a": "2018-01-01",
+        "b": "2020-01-01"
+      },
+      "a": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Physics",
+        "status": "in_progress"
+      },
+      "b": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Physics",
+        "status": "completed"
+      },
+      "compatible": true,
+      "morePrecise": "b"
+    },
+    {
+      "id": "education-completed-then-later-in-progress-conflict",
+      "claimType": "education",
+      "asOf": {
+        "a": "2020-01-01",
+        "b": "2022-01-01"
+      },
+      "a": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Physics",
+        "status": "completed"
+      },
+      "b": {
+        "institution": {
+          "name": "Contoso University",
+          "key": "contoso-university"
+        },
+        "qualification": "BSc Physics",
+        "status": "in_progress"
+      },
+      "compatible": false,
+      "conflicting": ["status"]
+    }
+  ]
+}

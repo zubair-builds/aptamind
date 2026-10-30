@@ -1,0 +1,100 @@
+{
+  "description": "Job entity-resolution golden cases (syndication, repost, requisitions, distinct openings).",
+  "description_text": "Build and operate our payments platform in Go. Own services end to end, partner with product, and mentor engineers across the backend team. You will design APIs, run on-call, and improve reliability.",
+  "existing": [
+    {
+      "id": "job_official",
+      "sourceId": "src_gh",
+      "sourceKey": "src_gh:1",
+      "state": "VERIFIED_LIVE",
+      "titleKey": "senior backend engineer",
+      "locationKey": "london uk",
+      "urls": ["boards.greenhouse.io/acme/jobs/1"],
+      "requisitionId": "R-100"
+    },
+    {
+      "id": "job_closed",
+      "sourceId": "src_gh",
+      "sourceKey": "src_gh:9",
+      "state": "CLOSED",
+      "titleKey": "data engineer",
+      "locationKey": "remote",
+      "present": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "same-source-record",
+      "candidate": {
+        "sourceId": "src_gh",
+        "sourceKey": "src_gh:1",
+        "titleKey": "senior backend engineer",
+        "locationKey": "london uk"
+      },
+      "expect": { "kind": "existing", "jobId": "job_official", "relation": "same_source" }
+    },
+    {
+      "id": "syndicated-by-apply-url",
+      "candidate": {
+        "sourceId": "src_agg",
+        "sourceKey": "src_agg:x1",
+        "titleKey": "senior backend engineer",
+        "locationKey": "remote worldwide",
+        "urls": ["boards.greenhouse.io/acme/jobs/1"]
+      },
+      "expect": { "kind": "existing", "jobId": "job_official", "relation": "syndicated" }
+    },
+    {
+      "id": "syndicated-by-content",
+      "candidate": {
+        "sourceId": "src_agg",
+        "sourceKey": "src_agg:x2",
+        "titleKey": "senior backend engineer",
+        "locationKey": "london uk"
+      },
+      "expect": { "kind": "existing", "jobId": "job_official", "relation": "syndicated" }
+    },
+    {
+      "id": "same-requisition-other-location",
+      "candidate": {
+        "sourceId": "src_gh",
+        "sourceKey": "src_gh:2",
+        "titleKey": "senior backend engineer",
+        "locationKey": "berlin germany",
+        "requisitionId": "R-100"
+      },
+      "expect": { "kind": "new" }
+    },
+    {
+      "id": "repost-of-closed-job",
+      "candidate": {
+        "sourceId": "src_gh",
+        "sourceKey": "src_gh:10",
+        "titleKey": "data engineer",
+        "locationKey": "remote"
+      },
+      "expect": { "kind": "existing", "jobId": "job_closed", "relation": "repost" }
+    },
+    {
+      "id": "two-openings-same-board",
+      "candidate": {
+        "sourceId": "src_gh",
+        "sourceKey": "src_gh:3",
+        "titleKey": "senior backend engineer",
+        "locationKey": "london uk"
+      },
+      "expect": { "kind": "new" }
+    },
+    {
+      "id": "different-job",
+      "candidate": {
+        "sourceId": "src_gh",
+        "sourceKey": "src_gh:4",
+        "titleKey": "product designer",
+        "locationKey": "london uk",
+        "description": "Design delightful experiences for shippers using Figma and research."
+      },
+      "expect": { "kind": "new" }
+    }
+  ]
+}

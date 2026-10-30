@@ -1,0 +1,231 @@
+{
+  "apiVersion": "1",
+  "jobs": [
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e01",
+      "title": "Senior ML Engineer",
+      "department": "Engineering",
+      "team": "Applied ML",
+      "employmentType": "FullTime",
+      "location": "Remote",
+      "secondaryLocations": [],
+      "publishedAt": "2026-09-08T14:03:21.118+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressLocality": null,
+          "addressRegion": null,
+          "addressCountry": "United States"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e01",
+      "applyUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e01/application",
+      "descriptionHtml": "<p><strong>About Gamma</strong></p><p>Gamma builds AI copilots for insurance underwriters.</p><p><strong>Location</strong></p><p>Remote (US only). You must be authorized to work in the United States; we are not able to consider candidates based outside the US.</p><ul><li>5+ years shipping ML systems</li><li>PyTorch, Ray</li></ul>",
+      "descriptionPlain": "About Gamma\nGamma builds AI copilots for insurance underwriters.\nLocation\nRemote (US only). You must be authorized to work in the United States; we are not able to consider candidates based outside the US.\n- 5+ years shipping ML systems\n- PyTorch, Ray",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "compensation": {
+        "compensationTierSummary": "$180K – $230K • Offers Equity",
+        "scrapeableCompensationSalarySummary": "$180K - $230K",
+        "compensationTiers": [
+          {
+            "id": "tier-1",
+            "tierSummary": "$180K – $230K • Offers Equity",
+            "title": null,
+            "additionalInformation": null,
+            "components": []
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "Salary",
+            "interval": "1 YEAR",
+            "currencyCode": "USD",
+            "minValue": 180000,
+            "maxValue": 230000
+          },
+          {
+            "compensationType": "EquityPercentage",
+            "interval": "NONE",
+            "currencyCode": null,
+            "minValue": 0.05,
+            "maxValue": 0.15
+          }
+        ]
+      }
+    },
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e02",
+      "title": "Solutions Engineer, EMEA",
+      "department": "Sales",
+      "team": "Solutions",
+      "employmentType": "FullTime",
+      "location": "Remote - Europe",
+      "secondaryLocations": [
+        {
+          "location": "Dublin, Ireland",
+          "address": {
+            "postalAddress": {
+              "addressLocality": "Dublin",
+              "addressRegion": null,
+              "addressCountry": "Ireland"
+            }
+          }
+        },
+        {
+          "location": "Remote - UK",
+          "address": {
+            "postalAddress": {
+              "addressLocality": null,
+              "addressRegion": null,
+              "addressCountry": "United Kingdom"
+            }
+          }
+        }
+      ],
+      "publishedAt": "2026-09-12T09:00:00.000+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "address": {
+        "postalAddress": {
+          "addressLocality": null,
+          "addressRegion": null,
+          "addressCountry": null
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e02",
+      "applyUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e02/application",
+      "descriptionHtml": "<p>Support our insurer customers across EMEA.</p><p>Work remotely from anywhere in Europe, the UK or Israel. Occasional travel to customer sites (up to 20%).</p>",
+      "descriptionPlain": "Support our insurer customers across EMEA.\nWork remotely from anywhere in Europe, the UK or Israel. Occasional travel to customer sites (up to 20%).",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "compensation": {
+        "compensationTierSummary": "€90K – €115K",
+        "scrapeableCompensationSalarySummary": "€90K - €115K",
+        "compensationTiers": [
+          {
+            "id": "tier-1",
+            "tierSummary": "€90K – €115K",
+            "title": null,
+            "additionalInformation": null,
+            "components": []
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "Salary",
+            "interval": "1 YEAR",
+            "currencyCode": "EUR",
+            "minValue": 90000,
+            "maxValue": 115000
+          }
+        ]
+      }
+    },
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e03",
+      "title": "Product Designer",
+      "department": "Product",
+      "team": "Design",
+      "employmentType": "FullTime",
+      "location": "San Francisco, CA",
+      "secondaryLocations": [],
+      "publishedAt": "2026-08-30T17:45:00.000+00:00",
+      "isListed": true,
+      "isRemote": false,
+      "workplaceType": "Hybrid",
+      "address": {
+        "postalAddress": {
+          "addressLocality": "San Francisco",
+          "addressRegion": "California",
+          "addressCountry": "United States"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e03",
+      "applyUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e03/application",
+      "descriptionHtml": "<p>Design underwriting workflows used by thousands of analysts.</p><p>Hybrid: 3 days a week in our San Francisco office.</p><p><em>Gamma is unable to sponsor visas for this position.</em></p>",
+      "descriptionPlain": "Design underwriting workflows used by thousands of analysts.\nHybrid: 3 days a week in our San Francisco office.\nGamma is unable to sponsor visas for this position.",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "compensation": null
+    },
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e04",
+      "title": "Data Engineering Intern",
+      "department": "Engineering",
+      "team": "Data",
+      "employmentType": "Intern",
+      "location": "New York, NY",
+      "secondaryLocations": [],
+      "publishedAt": "2026-09-15T12:00:00.000+00:00",
+      "isListed": true,
+      "isRemote": false,
+      "workplaceType": "OnSite",
+      "address": {
+        "postalAddress": {
+          "addressLocality": "New York",
+          "addressRegion": "New York",
+          "addressCountry": "United States"
+        }
+      },
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e04",
+      "applyUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e04/application",
+      "descriptionHtml": "<p>Summer 2027 internship based in our New York office.</p>",
+      "descriptionPlain": "Summer 2027 internship based in our New York office.",
+      "shouldDisplayCompensationOnJobPostings": true,
+      "compensation": {
+        "compensationTierSummary": "$45 – $55 per hour",
+        "scrapeableCompensationSalarySummary": "$45 - $55",
+        "compensationTiers": [
+          {
+            "id": "tier-1",
+            "tierSummary": "$45 – $55 per hour",
+            "title": null,
+            "additionalInformation": null,
+            "components": []
+          }
+        ],
+        "summaryComponents": [
+          {
+            "compensationType": "Salary",
+            "interval": "1 HOUR",
+            "currencyCode": "USD",
+            "minValue": 45,
+            "maxValue": 55
+          }
+        ]
+      }
+    },
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e05",
+      "title": "Chief of Staff (confidential search)",
+      "department": "Operations",
+      "team": null,
+      "employmentType": "FullTime",
+      "location": "San Francisco, CA",
+      "secondaryLocations": [],
+      "publishedAt": "2026-09-01T00:00:00.000+00:00",
+      "isListed": false,
+      "isRemote": false,
+      "workplaceType": "OnSite",
+      "address": null,
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e05",
+      "applyUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e05/application",
+      "descriptionHtml": "<p>Confidential search.</p>",
+      "descriptionPlain": "Confidential search.",
+      "shouldDisplayCompensationOnJobPostings": false,
+      "compensation": null
+    },
+    {
+      "id": "3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e99",
+      "title": "",
+      "department": "Engineering",
+      "employmentType": "FullTime",
+      "location": "Remote",
+      "isListed": true,
+      "isRemote": true,
+      "publishedAt": "2026-09-20T00:00:00.000+00:00",
+      "jobUrl": "https://jobs.ashbyhq.com/gamma/3b0f5a52-8f1e-4c63-9d1c-1a2b3c4d5e99"
+    }
+  ]
+}

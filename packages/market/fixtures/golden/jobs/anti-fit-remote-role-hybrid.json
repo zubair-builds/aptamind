@@ -1,0 +1,14 @@
+{
+  "id": "anti-fit-remote-role-hybrid",
+  "description": "'Candidates who want fully remote work should not apply; role is hybrid.' \u2014 remote is an anti-signal; the role is hybrid.",
+  "input": {
+    "title": "Account Executive",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Candidates who want fully remote work should not apply; role is hybrid."
+  },
+  "expect": {
+    "workModel.value": "hybrid",
+    "workModel.basis": "description.explicit",
+    "officeAttendance.value.required": true
+  }
+}

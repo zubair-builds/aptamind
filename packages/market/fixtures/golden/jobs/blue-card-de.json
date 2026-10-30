@@ -1,0 +1,15 @@
+{
+  "id": "blue-card-de",
+  "description": "012d041 L3: the EU Blue Card applies in the EU except IE and DK. A Blue Card line for a job in Munich, Germany is a stated value.",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": ["Munich, Germany"],
+    "descriptionText": "Join our backend team.\n\nWhat we offer\n- EU Blue Card sponsorship: Yes\n- 30 days holiday",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "flags[code=sponsorship_stated].value": "yes"
+  }
+}

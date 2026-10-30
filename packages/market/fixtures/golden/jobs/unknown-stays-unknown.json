@@ -1,0 +1,35 @@
+{
+  "id": "unknown-stays-unknown",
+  "description": "Sparse posting: nothing is invented.",
+  "input": {
+    "title": "Engineer",
+    "descriptionText": "Join our team. Apply now."
+  },
+  "expect": {
+    "workModel.value": "unclear",
+    "workModel.confidence": "unknown",
+    "workModel.evidence": [],
+    "remoteScope.value.type": "unclear",
+    "remoteScope.confidence": "unknown",
+    "officeAttendance.value.required": null,
+    "officeAttendance.confidence": "unknown",
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "unknown",
+    "sponsorship.confidence": "unknown",
+    "authorization.value.required": null,
+    "relocation.value": "unclear",
+    "relocation.confidence": "unknown",
+    "compensation.value.status": "unknown",
+    "compensation.value.min": null,
+    "compensation.value.max": null,
+    "compensation.value.annualized": null,
+    "compensation.confidence": "unknown",
+    "employmentType.value": "unclear",
+    "employmentType.confidence": "unknown",
+    "title.value.seniority": "unclear",
+    "requirements": [],
+    "locations": [],
+    "flags": []
+  }
+}

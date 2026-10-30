@@ -1,0 +1,64 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .list {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .tab {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-6);
+    height: var(--control);
+    padding: 0 var(--space-8);
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-weight: var(--weight-medium);
+    cursor: pointer;
+  }
+
+  .tab:hover {
+    color: var(--text);
+  }
+
+  .tab[aria-selected='true'] {
+    color: var(--text);
+  }
+
+  .tab[aria-selected='true']::after {
+    position: absolute;
+    right: var(--space-8);
+    bottom: -1px;
+    left: var(--space-8);
+    height: 2px;
+    border-radius: var(--radius-full);
+    background: var(--accent);
+    content: '';
+  }
+
+  .tab:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .count {
+    color: var(--text-tertiary);
+    font-size: var(--text-xs);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .panel {
+    padding-top: var(--space-12);
+  }
+
+  .panel:focus-visible {
+    outline-offset: 2px;
+  }
+}

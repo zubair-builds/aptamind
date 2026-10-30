@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+coverage
+pnpm-lock.yaml
+docs/product/*.md
+docs/architecture/market-context-and-requirements.md
+docs/execution/autonomous-execution-prompt.md
+packages/market/fixtures/**/*.csv
+packages/market/fixtures/**/*.html

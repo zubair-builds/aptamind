@@ -1,0 +1,28 @@
+{
+  "id": "rtw-required-with-licence",
+  "description": "M11.1: 'You must have the right to work in the UK' at a licensed UK sponsor. The requirement is in tension with the capability (the role may not sponsor): still company_capable (capability tier), but low confidence and an info flag. Before: medium, no flag.",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Build reliable data pipelines for our analytics platform.\n\nYou must have the right to work in the UK.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"],
+      "historicalSponsorshipCountries": [],
+      "hqCountry": "GB"
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.confidence": "low",
+    "authorization.value.required": true,
+    "authorization.value.countries": ["GB"],
+    "flags": {
+      "$contains": {
+        "code": "right_to_work_required_with_sponsor_capability",
+        "message": "The role requires existing right to work (GB) although the company holds a sponsor licence (GB); sponsorship for this role is doubtful.",
+        "severity": "info"
+      }
+    }
+  }
+}

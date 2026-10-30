@@ -1,0 +1,64 @@
+{
+  "source": "JobHub Global",
+  "generated_at": "2026-09-21T06:00:00Z",
+  "jobs": [
+    {
+      "id": "jh-881201",
+      "company": "Acme",
+      "title": "Senior Backend Engineer",
+      "location": "Remote (Worldwide)",
+      "remote": true,
+      "employment_type": "Full-time",
+      "salary": {
+        "min": 90000,
+        "max": 110000,
+        "currency": "usd",
+        "period": "yearly",
+        "text": "$90k - $110k"
+      },
+      "url": "https://jobhub.example.com/jobs/jh-881201-senior-backend-engineer-acme",
+      "apply_url": "https://job-boards.greenhouse.io/acme/jobs/4012345001",
+      "posted_at": "2026-09-02",
+      "description": "<p>Acme is hiring a Senior Backend Engineer to own shipment-tracking APIs. Work from anywhere!</p>"
+    },
+    {
+      "id": "jh-881202",
+      "company": "Acme",
+      "title": "Platform Engineer, EMEA",
+      "location": ["Remote - EMEA"],
+      "remote": true,
+      "employment_type": "Full-time",
+      "salary": null,
+      "url": "https://jobhub.example.com/jobs/jh-881202-platform-engineer-emea-acme",
+      "apply_url": "https://job-boards.greenhouse.io/acme/jobs/4012345002",
+      "posted_at": "2026-08-29",
+      "description": "&lt;p&gt;Run Kubernetes infrastructure across AWS EU regions.&lt;/p&gt;"
+    },
+    {
+      "id": "jh-881377",
+      "company": "Northwind Freight",
+      "title": "Logistics Coordinator",
+      "location": "Manchester, United Kingdom",
+      "remote": false,
+      "employment_type": "Full-time",
+      "salary": {
+        "min": 28000,
+        "max": 32000,
+        "currency": "GBP",
+        "period": "annual",
+        "text": "£28,000 - £32,000"
+      },
+      "url": "https://jobhub.example.com/jobs/jh-881377-logistics-coordinator-northwind",
+      "apply_url": null,
+      "posted_at": "2026-09-19",
+      "description": "<p>Coordinate inbound freight for our Manchester depot.</p>"
+    },
+    {
+      "id": "jh-881399",
+      "company": "Unknown Co",
+      "title": null,
+      "location": "Remote",
+      "url": "https://jobhub.example.com/jobs/jh-881399"
+    }
+  ]
+}

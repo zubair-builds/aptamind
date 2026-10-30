@@ -1,0 +1,74 @@
+{
+  "description": "ATS board regions end to end (M6.3): a board URL found by careers discovery → detection → the job source it is registered as (key, listing endpoint) → the URL its jobs are verified on. An EU board does not exist on the default (US) host: a 404 there must never be taken as 'not found'.",
+  "cases": [
+    {
+      "id": "greenhouse-eu-board-page",
+      "note": "M6.3 regression: detected, but registered, fetched and verified on boards-api.greenhouse.io.",
+      "url": "https://job-boards.eu.greenhouse.io/acme-eu/jobs/501",
+      "expect": {
+        "provider": "greenhouse",
+        "boardToken": "acme-eu",
+        "sourceKey": "greenhouse:eu:acme-eu",
+        "listingUrl": "https://boards-api.eu.greenhouse.io/v1/boards/acme-eu/jobs?content=true",
+        "jobUrl": "https://boards-api.eu.greenhouse.io/v1/boards/acme-eu/jobs/123?pay_transparency=true"
+      }
+    },
+    {
+      "id": "greenhouse-eu-embed",
+      "note": "M6.3 regression: the EU embed script of a careers page.",
+      "url": "https://boards.eu.greenhouse.io/embed/job_board/js?for=acme-eu",
+      "expect": {
+        "provider": "greenhouse",
+        "boardToken": "acme-eu",
+        "sourceKey": "greenhouse:eu:acme-eu",
+        "listingUrl": "https://boards-api.eu.greenhouse.io/v1/boards/acme-eu/jobs?content=true",
+        "jobUrl": "https://boards-api.eu.greenhouse.io/v1/boards/acme-eu/jobs/123?pay_transparency=true"
+      }
+    },
+    {
+      "id": "lever-eu-board-page",
+      "note": "M6.3 regression: detected, but registered, fetched and verified on api.lever.co.",
+      "url": "https://jobs.eu.lever.co/beta-eu/0f1e2d3c",
+      "expect": {
+        "provider": "lever",
+        "boardToken": "beta-eu",
+        "sourceKey": "lever:eu:beta-eu",
+        "listingUrl": "https://api.eu.lever.co/v0/postings/beta-eu?mode=json",
+        "jobUrl": "https://api.eu.lever.co/v0/postings/beta-eu/123"
+      }
+    },
+    {
+      "id": "greenhouse-us-unchanged",
+      "url": "https://boards.greenhouse.io/acme",
+      "expect": {
+        "provider": "greenhouse",
+        "boardToken": "acme",
+        "sourceKey": "greenhouse:acme",
+        "listingUrl": "https://boards-api.greenhouse.io/v1/boards/acme/jobs?content=true",
+        "jobUrl": "https://boards-api.greenhouse.io/v1/boards/acme/jobs/123?pay_transparency=true"
+      }
+    },
+    {
+      "id": "lever-us-unchanged",
+      "url": "https://jobs.lever.co/beta-co",
+      "expect": {
+        "provider": "lever",
+        "boardToken": "beta-co",
+        "sourceKey": "lever:beta-co",
+        "listingUrl": "https://api.lever.co/v0/postings/beta-co?mode=json",
+        "jobUrl": "https://api.lever.co/v0/postings/beta-co/123"
+      }
+    },
+    {
+      "id": "ashby-single-host",
+      "url": "https://jobs.ashbyhq.com/gamma",
+      "expect": {
+        "provider": "ashby",
+        "boardToken": "gamma",
+        "sourceKey": "ashby:gamma",
+        "listingUrl": "https://api.ashbyhq.com/posting-api/job-board/gamma?includeCompensation=true",
+        "jobUrl": "https://api.ashbyhq.com/posting-api/job-board/gamma?includeCompensation=true"
+      }
+    }
+  ]
+}

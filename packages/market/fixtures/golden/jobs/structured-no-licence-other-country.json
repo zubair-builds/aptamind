@@ -1,0 +1,20 @@
+{
+  "id": "structured-no-licence-other-country",
+  "description": "8d96663 (5): a stated no at a company licensed in another country than the job's: unclear, sponsor_capability_other_country emitted as before, the stated value a flag; role_overrides_company is not set (the licence does not cover the job).",
+  "input": {
+    "title": "Platform Engineer",
+    "locationTexts": ["Berlin, Germany"],
+    "descriptionText": "Join our platform team.\n\nWhat we offer\n- Visa sponsorship: No\n- 30 days holiday",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.companyCapability": "licensed",
+    "sponsorship.basis": "description.stated",
+    "flags[code=sponsorship_stated].value": "no",
+    "flags[code=sponsor_capability_other_country].severity": "info",
+    "flags[code=sponsorship_role_overrides_company]": { "$exists": false }
+  }
+}

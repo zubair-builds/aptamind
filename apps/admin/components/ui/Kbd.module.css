@@ -1,0 +1,20 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: var(--space-20);
+    height: var(--space-20);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "structured-yes-withheld-by-restriction",
+  "description": "012d041 + 8d96663 (5): a stated yes with other related content: sponsorship_stated (yes) plus sponsorship_mixed_statement and sponsorship_mentioned; the status follows the company axis (company_capable), the right-to-work requirement lowering it to low confidence.",
+  "input": {
+    "title": "Data Engineer",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Benefits\n- Visa sponsorship: Yes\n- Pension\n\nPlease note: not for this role, which requires existing right to work.",
+    "company": {
+      "sponsorLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "company_capable",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.confidence": "low",
+    "flags[code=sponsorship_stated].value": "yes",
+    "flags[code=sponsorship_mixed_statement].severity": "info",
+    "flags[code=sponsorship_mentioned].severity": "info"
+  }
+}

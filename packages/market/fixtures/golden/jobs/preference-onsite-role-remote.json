@@ -1,0 +1,14 @@
+{
+  "id": "preference-onsite-role-remote",
+  "description": "'You prefer onsite work; this role is remote.' \u2014 the candidate's preference is not the role's work model.",
+  "input": {
+    "title": "Backend Engineer",
+    "locationTexts": [],
+    "descriptionText": "You prefer onsite work; this role is remote."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.basis": "description.explicit",
+    "workModel.confidence": "high"
+  }
+}

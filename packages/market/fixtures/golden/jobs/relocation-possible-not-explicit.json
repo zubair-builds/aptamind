@@ -1,0 +1,15 @@
+{
+  "id": "relocation-possible-not-explicit",
+  "description": "Hedged relocation stays \"possible\".",
+  "input": {
+    "title": "Principal Engineer",
+    "locationTexts": ["Zurich, Switzerland"],
+    "descriptionText": "This role is based in our Zurich office. Relocation support may be considered for exceptional candidates.\n\nRequirements\n- Experience leading large-scale architecture changes"
+  },
+  "expect": {
+    "relocation.value": "possible",
+    "relocation.confidence": "medium",
+    "title.value.seniority": "principal",
+    "locations.0.country": "CH"
+  }
+}

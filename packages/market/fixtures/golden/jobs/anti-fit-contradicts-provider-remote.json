@@ -1,0 +1,16 @@
+{
+  "id": "anti-fit-contradicts-provider-remote",
+  "description": "Provider says remote but the description warns people who want remote work not to apply: remote is kept only with low confidence and a review-level flag.",
+  "input": {
+    "title": "Field Engineer",
+    "locationTexts": ["Remote"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "Candidates who want fully remote work should not apply.\n\nYou will visit customer sites weekly."
+  },
+  "expect": {
+    "workModel.confidence": "low",
+    "flags[code=work_model_anti_signal].severity": "high"
+  }
+}

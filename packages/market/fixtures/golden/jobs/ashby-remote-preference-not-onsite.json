@@ -1,0 +1,23 @@
+{
+  "id": "ashby-remote-preference-not-onsite",
+  "description": "LIVE REGRESSION (audit H-2): Ashby posting \u2014 provider remote, 'Remote - US'/'Remote - Canada' locations; the description's 'You prefer an in-person role over remote (Ashby operates remotely)' describes a candidate who would NOT fit. Must stay remote.",
+  "input": {
+    "title": "Senior Software Engineer, Product",
+    "locationTexts": ["Remote - US", "Remote - Canada", "San Francisco, CA", "New York, NY", "Toronto, ON"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "About Ashby\nAshby builds software for talent teams to hire efficiently.\n\nYou might not be a fit if:\n- You want to work in a large engineering organization.\n- You prefer an in-person role over remote (Ashby operates remotely).\n- You're not excited about building for recruiters.\n\nWhat you'll do\nDesign and ship product features end to end."
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "workModel.basis": "provider.workplaceType",
+    "workModel.confidence": {
+      "$in": ["high", "medium"]
+    },
+    "officeAttendance.value.required": false,
+    "flags[code=work_model_conflict]": {
+      "$exists": false
+    }
+  }
+}

@@ -1,0 +1,461 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    min-width: 0;
+  }
+
+  /* ------------------------------------------------------------------ view bar */
+
+  .viewBar {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    min-width: 0;
+  }
+
+  .views {
+    display: flex;
+    gap: var(--space-4);
+    /* Many views on a phone: the tab row scrolls inside itself, never the page. */
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border-subtle);
+    scrollbar-width: thin;
+  }
+
+  /* Phones: fade the right edge so it reads as a row that scrolls. */
+  @media (max-width: 767px) {
+    .views {
+      padding-right: var(--space-24);
+      mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent);
+    }
+  }
+
+  .viewTab {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--control);
+    padding: 0 var(--space-8);
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    white-space: nowrap;
+  }
+
+  .viewTab:hover {
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .modifiedDot {
+    width: 6px;
+    height: 6px;
+    margin-left: var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--tone-warning-dot);
+  }
+
+  .viewTab[data-modified] {
+    border-bottom-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  .viewTab[aria-current='page'] {
+    border-bottom-color: var(--accent);
+    color: var(--text);
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-8);
+  }
+
+  .search {
+    display: flex;
+    flex: 1 1 240px;
+    gap: var(--space-6);
+    min-width: 0;
+    max-width: 420px;
+  }
+
+  .input {
+    flex: 1;
+    min-width: 0;
+    height: var(--control-sm);
+    padding: 0 var(--space-8);
+    border: 1px solid var(--border-control);
+    border-radius: var(--radius);
+    background: var(--bg-surface);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-sm);
+  }
+
+  .fieldset .input {
+    flex: none;
+  }
+
+  .density {
+    font-size: var(--text-sm);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-6);
+    font-size: var(--text-sm);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 100%;
+    min-height: var(--hit-min);
+    padding: 0 var(--space-4) 0 var(--space-8);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--bg-subtle);
+    overflow-wrap: anywhere;
+  }
+
+  .chipRemove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--hit-min);
+    height: var(--hit-min);
+    border-radius: var(--radius-full);
+    color: var(--text-secondary);
+    font-size: var(--text-md);
+    line-height: 1;
+  }
+
+  .chipRemove:hover {
+    background: var(--bg-hover);
+    text-decoration: none;
+  }
+
+  .ignored {
+    margin: 0;
+    color: var(--tone-warning-fg);
+    font-size: var(--text-sm);
+  }
+
+  /* ------------------------------------------------------------------ panels (GET forms) */
+
+  .filterForm,
+  .columnsForm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    max-height: min(70vh, 640px);
+    overflow: auto;
+  }
+
+  .filterGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+    gap: var(--space-12);
+  }
+
+  .fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .legend {
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+  }
+
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-12);
+  }
+
+  .option {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-6);
+    /* The whole label is the hit area; rows stay ≥ 24 px apart (WCAG 2.5.8). */
+    min-height: 28px;
+    padding-right: var(--space-4);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .option input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+
+  .formNote {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .formActions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-12);
+    position: sticky;
+    bottom: 0;
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+
+  /* ------------------------------------------------------------------ table */
+
+  .scroller {
+    max-width: 100%;
+    /* Scrolls both ways inside its region, so the sticky header and name column stay in view:
+       the header sticks to the top of this region, not the page (it has its own scroll). */
+    max-height: max(320px, calc(100dvh - 240px));
+    overflow: auto;
+    overscroll-behavior: contain;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .scroller:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  .table {
+    /* Columns keep their natural width (cells never squeeze into tall, wrapped rows); the table
+       fills the region when it is narrower and scrolls inside it when it is wider. */
+    width: max-content;
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--text-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .table th,
+  .table td {
+    height: var(--row-compact);
+    padding: 0 var(--space-8);
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .table[data-density='comfortable'] th,
+  .table[data-density='comfortable'] td {
+    height: var(--row-comfortable);
+  }
+
+  .table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-subtle);
+    color: var(--text-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--weight-medium);
+  }
+
+  .table tbody tr:hover > * {
+    background: var(--bg-subtle);
+  }
+
+  /* The row with keyboard focus (j/k, Tab): the design's selected row, accent bar on the left. */
+  .table tbody tr:has([data-row-link]:focus-visible) > * {
+    background: var(--bg-selected);
+  }
+
+  .table tbody tr:has([data-row-link]:focus-visible) > .identity {
+    box-shadow:
+      inset 2px 0 0 var(--accent),
+      1px 0 0 var(--border-subtle);
+  }
+
+  .table tbody tr:has([data-row-link]:focus-visible) .rowLink {
+    outline: none;
+    text-decoration: underline;
+  }
+
+  /* First column = identity, sticky on horizontal scroll. */
+  .identity {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    max-width: 250px;
+    background: var(--bg-app);
+    box-shadow: 1px 0 0 var(--border-subtle);
+  }
+
+  .table thead th.identity {
+    z-index: 3;
+    background: var(--bg-subtle);
+  }
+
+  .table tbody th.identity {
+    font-weight: var(--weight-semibold);
+  }
+
+  .previewSlot {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+  }
+
+  .identityCell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .rowLink {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    text-overflow: ellipsis;
+  }
+
+  /* Identity columns whose distinguishing part is at the end wrap to two lines on phones. */
+  @media (max-width: 767px) {
+    .identityWrap .rowLink {
+      display: -webkit-box;
+      overflow: hidden;
+      white-space: normal;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+    }
+  }
+
+  .rowLink:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .cell {
+    display: block;
+    max-width: 280px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wrap {
+    white-space: normal;
+  }
+
+  .table td.wrap {
+    min-width: 240px;
+    white-space: normal;
+  }
+
+  .wrap .cell {
+    max-width: 420px;
+    white-space: normal;
+  }
+
+  .num,
+  .table th.num,
+  .table td.num {
+    text-align: right;
+  }
+
+  .sortLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: var(--hit-min);
+    color: inherit;
+  }
+
+  .sortLink:hover {
+    color: var(--text);
+  }
+
+  /* ------------------------------------------------------------------ peek, pager */
+
+  .peek {
+    /* The panel sits inside the row header in the DOM: reset its bold, centred type. */
+    font-weight: var(--weight-regular);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+    font-size: var(--text-sm);
+    white-space: normal;
+  }
+
+  .peekTitle {
+    margin: 0;
+    font-weight: var(--weight-semibold);
+  }
+
+  .peekOpen {
+    align-self: flex-start;
+  }
+
+  .pager {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-8);
+    font-size: var(--text-sm);
+  }
+
+  .range {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pageSizes {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-8);
+    color: var(--text-secondary);
+  }
+
+  .pageSizes a,
+  .pageSizeCurrent {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--hit-min);
+    min-height: var(--hit-min);
+  }
+
+  .pageSizeCurrent {
+    color: var(--text);
+    font-weight: var(--weight-semibold);
+  }
+
+  .pagerLinks {
+    display: flex;
+    gap: var(--space-16);
+  }
+
+  .pagerLinks a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--hit-min);
+  }
+}

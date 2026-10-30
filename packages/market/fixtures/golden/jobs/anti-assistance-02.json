@@ -1,0 +1,18 @@
+{
+  "id": "anti-assistance-02-at-present-we-are-not-able-for-this-particular-r",
+  "description": "PR #21 review HIGH anti-golden: \"At present we are not able for this particular role to offer immigration support.\" is not an offer of visa assistance to the candidate; it must never be explicit_yes.",
+  "input": {
+    "title": "Operations Specialist",
+    "locationTexts": ["London, United Kingdom"],
+    "descriptionText": "Join our operations team.\n\nAt present we are not able for this particular role to offer immigration support.",
+    "company": null
+  },
+  "expect": {
+    "sponsorship.value.status": {
+      "$not": "explicit_yes"
+    },
+    "sponsorship.value.roleStatement": {
+      "$not": "yes"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "description-overrides-provider-remote",
+  "description": "Provider says remote but the description says the role is on-site → onsite with an override flag.",
+  "input": {
+    "title": "Hardware Test Engineer",
+    "locationTexts": ["Austin, TX"],
+    "provider": {
+      "workplaceType": "remote"
+    },
+    "descriptionText": "This role is fully on-site at our Austin lab; it is not a remote position.\n\nYou will run validation tests on our embedded devices."
+  },
+  "expect": {
+    "workModel.value": "onsite",
+    "workModel.basis": "description.explicit",
+    "flags[code=work_model_overridden].severity": "warning",
+    "remoteScope.value.type": "not_applicable",
+    "officeAttendance.value.required": true,
+    "locations.0.region": "Texas",
+    "locations.0.country": "US"
+  }
+}

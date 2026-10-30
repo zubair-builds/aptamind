@@ -1,0 +1,115 @@
+@layer reset, tokens, base, components, utilities;
+
+@layer components {
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-6);
+    height: var(--control);
+    padding: 0 var(--space-12);
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    font: inherit;
+    font-weight: var(--weight-medium);
+    line-height: var(--text-md-lh);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--dur-fast) var(--ease);
+  }
+
+  .button:hover {
+    text-decoration: none;
+  }
+
+  .button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .button[aria-busy='true'] {
+    cursor: progress;
+  }
+
+  .sm {
+    height: var(--control-sm);
+    padding: 0 var(--space-8);
+    font-size: var(--text-sm);
+  }
+
+  .md {
+    height: var(--control);
+  }
+
+  .primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+
+  .primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 88%, var(--text));
+  }
+
+  .secondary {
+    border-color: var(--border-control);
+    background: var(--bg-surface);
+    color: var(--text);
+  }
+
+  .secondary:hover:not(:disabled),
+  .ghost:hover:not(:disabled) {
+    background: var(--bg-hover);
+  }
+
+  .ghost {
+    background: transparent;
+    color: var(--text-secondary);
+  }
+
+  .ghost:hover:not(:disabled) {
+    color: var(--text);
+  }
+
+  .danger {
+    border-color: var(--tone-danger-fg);
+    background: var(--bg-surface);
+    color: var(--tone-danger-fg);
+  }
+
+  .danger:hover:not(:disabled) {
+    background: var(--tone-danger-bg);
+  }
+
+  .iconOnly {
+    width: var(--control);
+    padding: 0;
+  }
+
+  .iconOnly.sm {
+    width: var(--control-sm);
+  }
+
+  .spinner {
+    width: var(--space-12);
+    height: var(--space-12);
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: var(--radius-full);
+    animation: spin 700ms linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spinner {
+      animation: none;
+      border-right-color: currentColor;
+      opacity: 0.6;
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}

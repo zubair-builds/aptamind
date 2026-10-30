@@ -1,0 +1,15 @@
+{
+  "id": "overlap-cet-timezone",
+  "description": "Remote with an overlap requirement anchored on CET.",
+  "input": {
+    "title": "Senior Frontend Engineer",
+    "locationTexts": ["Remote"],
+    "descriptionText": "This is a 100% remote role. You must overlap 4 hours with CET each working day.\n\nWhat you'll need\n- Expert knowledge of TypeScript and React"
+  },
+  "expect": {
+    "workModel.value": "remote",
+    "remoteScope.value.type": "timezone",
+    "remoteScope.value.timezone.minUtcOffset": -3,
+    "remoteScope.value.timezone.maxUtcOffset": 5
+  }
+}

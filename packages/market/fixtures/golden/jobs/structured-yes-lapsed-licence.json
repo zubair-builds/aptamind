@@ -1,0 +1,19 @@
+{
+  "id": "structured-yes-lapsed-licence",
+  "description": "8d96663 (5): a stated value does not suppress company-level evidence. A stated yes at a company whose licence has lapsed: the status follows the company axis (unclear, capability previously_licensed), sponsor_licence_lapsed is emitted as before, and the stated value stays a flag.",
+  "input": {
+    "title": "Platform Engineer",
+    "locationTexts": ["Manchester, United Kingdom"],
+    "descriptionText": "Join our platform team.\n\nWhat we offer\n- Visa sponsorship: Yes\n- 25 days holiday",
+    "company": {
+      "previousLicenceCountries": ["GB"]
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.companyCapability": "previously_licensed",
+    "sponsorship.basis": "company.previousLicence",
+    "flags[code=sponsorship_stated].value": "yes",
+    "flags[code=sponsor_licence_lapsed].severity": "info"
+  }
+}

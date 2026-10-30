@@ -1,0 +1,33 @@
+{
+  "id": "stored-copy-lapsed-licence-same-country",
+  "description": "M6.4 regression: a stored copy of a London job silent on sponsorship, for a company whose UK licence lapsed. The old inspection input dropped the lapsed licence entirely (companyCapability `none`). M11.1: reconciliation passes it as past capability (`previously_licensed`), so the status is `unclear` — never a role statement, never hiring history.",
+  "stored": {
+    "payload": {
+      "externalId": "4012345003",
+      "title": "Product Analyst",
+      "department": "Data",
+      "locations": [
+        {
+          "text": "London, United Kingdom"
+        }
+      ],
+      "descriptionText": "Work with product teams to measure what matters. SQL and experimentation experience required.",
+      "provider": {
+        "name": "greenhouse",
+        "boardToken": "acme"
+      }
+    },
+    "company": {
+      "licenceCountries": [],
+      "lapsedLicenceCountries": ["GB"],
+      "hqCountry": "GB"
+    }
+  },
+  "expect": {
+    "sponsorship.value.status": "unclear",
+    "sponsorship.value.roleStatement": "none",
+    "sponsorship.value.companyCapability": "previously_licensed",
+    "sponsorship.value.capabilityCountries": ["GB"],
+    "title.value.department": "Data"
+  }
+}

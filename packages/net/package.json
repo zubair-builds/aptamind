@@ -1,0 +1,17 @@
+{
+  "name": "@aptamind/net",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@aptamind/contracts": "workspace:*",
+    "ipaddr.js": "^2.5.0",
+    "undici": "^7.16.0"
+  }
+}

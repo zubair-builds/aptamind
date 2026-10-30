@@ -1,0 +1,1675 @@
+{
+  "description": "Assertion reconciliation (prof-rec-1): basis tiers, current-state chronology, compatible refinement and merging, historical disagreement (per attribute), set membership and absence, support withdrawal. Event sequences on one item; every step must apply through its write guards and be a fixed point. Synthetic values only.",
+  "cases": [
+    {
+      "id": "current-state-newer-unconfirmed-replaces-older",
+      "claimType": "positioning.headline",
+      "values": {
+        "H1": {
+          "text": "Backend engineer"
+        },
+        "H2": {
+          "text": "Platform engineer"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "H1",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "H1",
+              "status": "known",
+              "basis": "extracted"
+            },
+            "versions": 1,
+            "requests": []
+          }
+        },
+        {
+          "observe": {
+            "value": "H2",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "H2",
+              "status": "known",
+              "basis": "extracted"
+            },
+            "states": {
+              "H1": "SUPERSEDED",
+              "H2": "PROPOSED"
+            },
+            "events": ["H1:PROPOSED>SUPERSEDED:newer_state"],
+            "versions": 2,
+            "requests": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "current-state-material-change-asks-confirm-change",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "requests": ["confirm_new/unconfirmed_material:LON"]
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "BER",
+              "basis": "extracted"
+            },
+            "states": {
+              "LON": "SUPERSEDED"
+            },
+            "requests": ["confirm_change/newer_state:BER,LON"],
+            "versions": 2
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true,
+            "requests": ["confirm_change/newer_state:BER,LON"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "current-state-a-b-a-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "LON",
+              "status": "known",
+              "basis": "extracted",
+              "assertion": "LON"
+            },
+            "states": {
+              "LON": "PROPOSED",
+              "BER": "SUPERSEDED"
+            },
+            "events": ["LON:SUPERSEDED>PROPOSED:revived", "BER:PROPOSED>SUPERSEDED:newer_state"],
+            "requests": ["confirm_change/newer_state:BER,LON"],
+            "versions": 3,
+            "confidence": {
+              "level": "high",
+              "reasons": ["extracted", "2 sources agree"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "older-snapshot-processed-after-newer",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "versions": 1,
+            "requests": ["confirm_new/unconfirmed_material:BER"]
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "BER"
+            },
+            "states": {
+              "LON": "SUPERSEDED",
+              "BER": "PROPOSED"
+            },
+            "events": ["LON:PROPOSED>SUPERSEDED:newer_state"],
+            "versions": 1,
+            "requests": ["confirm_new/unconfirmed_material:BER"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "older-snapshot-reprocessed-after-newer-never-revives",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01",
+            "declared": true
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2023-01-01",
+            "declared": true
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv1",
+            "extractor": 2
+          },
+          "expect": {
+            "noChange": true,
+            "states": {
+              "LON": "SUPERSEDED"
+            }
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv1"
+          },
+          "expect": {
+            "noChange": true,
+            "states": {
+              "LON": "SUPERSEDED"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "BER"
+        },
+        "versions": 2
+      }
+    },
+    {
+      "id": "compatible-refinement-year-vs-month-and-present-vs-end",
+      "claimType": "experience.role",
+      "values": {
+        "R1": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "open": true,
+            "asOf": "2022-01-15T00:00:00Z"
+          }
+        },
+        "R2": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019,
+            "month": 3
+          },
+          "end": {
+            "year": 2023,
+            "month": 6
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "R1",
+            "source": "cv1",
+            "asOf": "2022-01-15"
+          },
+          "expect": {
+            "canonical": {
+              "value": "R1",
+              "status": "known"
+            },
+            "requests": ["confirm_new/unconfirmed_material:R1"]
+          }
+        },
+        {
+          "observe": {
+            "value": "R2",
+            "source": "cv2",
+            "asOf": "2023-07-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "R2",
+              "status": "known",
+              "assertion": "R2",
+              "basis": "extracted"
+            },
+            "states": {
+              "R1": "PROPOSED",
+              "R2": "PROPOSED"
+            },
+            "conflicts": [],
+            "versions": 2,
+            "requests": ["confirm_new/unconfirmed_material:R2"],
+            "confidence": {
+              "level": "high",
+              "reasons": ["2 sources agree"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "compatible-merge-takes-precision-from-each-value",
+      "claimType": "experience.role",
+      "values": {
+        "R1": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019,
+            "month": 3
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "R2": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021,
+            "month": 8
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "R1",
+            "source": "cv1",
+            "asOf": "2021-09-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "R2",
+            "source": "cv2",
+            "asOf": "2022-02-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": {
+            "literal": {
+              "organization": {
+                "name": "Northwind Labs",
+                "key": "northwind-labs"
+              },
+              "title": "Data Analyst",
+              "titleKey": "data-analyst",
+              "start": {
+                "year": 2019,
+                "month": 3
+              },
+              "end": {
+                "year": 2021,
+                "month": 8
+              }
+            }
+          }
+        },
+        "states": {
+          "R1": "PROPOSED",
+          "R2": "PROPOSED"
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "historical-disagreement-title-only",
+      "claimType": "experience.role",
+      "values": {
+        "A": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Software Engineer",
+          "titleKey": "software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Senior Software Engineer",
+          "titleKey": "senior-software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "B",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": null,
+              "status": "conflicting",
+              "basis": "extracted"
+            },
+            "states": {
+              "A": "CONFLICTED",
+              "B": "CONFLICTED"
+            },
+            "attributes": {
+              "title": "conflicting",
+              "start": "known",
+              "end": "known",
+              "organization": "known"
+            },
+            "conflicts": ["same_basis:A,B@title"],
+            "requests": ["resolve_conflict/same_basis_conflict:A,B"],
+            "versions": 2,
+            "confidence": {
+              "level": "low"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "historical-title-abbreviation-is-not-a-conflict",
+      "claimType": "experience.role",
+      "values": {
+        "A": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Sr. Software Eng.",
+          "titleKey": "sr.-software-eng.",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Senior Software Engineer",
+          "titleKey": "senior-software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "B",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "B"
+        },
+        "states": {
+          "A": "PROPOSED",
+          "B": "PROPOSED"
+        },
+        "conflicts": [],
+        "requests": ["confirm_new/unconfirmed_material:B"]
+      }
+    },
+    {
+      "id": "historical-three-way-date-conflict",
+      "claimType": "certification",
+      "values": {
+        "A": {
+          "name": "Cloud Practitioner",
+          "issuer": "Example Cloud",
+          "issued": {
+            "year": 2021
+          }
+        },
+        "B": {
+          "name": "Cloud Practitioner",
+          "issuer": "Example Cloud",
+          "issued": {
+            "year": 2021,
+            "month": 3
+          }
+        },
+        "C": {
+          "name": "Cloud Practitioner",
+          "issuer": "Example Cloud",
+          "issued": {
+            "year": 2021,
+            "month": 5
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "A",
+            "source": "cv1",
+            "asOf": "2021-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "B",
+            "source": "cv2",
+            "asOf": "2022-06-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "C",
+            "source": "cv3",
+            "asOf": "2023-06-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "conflicting",
+          "value": null
+        },
+        "states": {
+          "A": "PROPOSED",
+          "B": "CONFLICTED",
+          "C": "CONFLICTED"
+        },
+        "attributes": {
+          "issued": "conflicting",
+          "name": "known",
+          "issuer": "known"
+        },
+        "conflicts": ["same_basis:B,C@issued"],
+        "requests": ["resolve_conflict/same_basis_conflict:B,C"]
+      }
+    },
+    {
+      "id": "set-member-absence-never-removes",
+      "claimType": "skill",
+      "values": {
+        "TS": {
+          "label": "TypeScript",
+          "concept": "typescript",
+          "kind": "skill",
+          "context": "listed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "TS",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "canonical": {
+              "value": "TS",
+              "status": "known"
+            },
+            "requests": []
+          }
+        },
+        {
+          "sourceWithout": {
+            "source": "cv2",
+            "asOf": "2024-01-01"
+          },
+          "expect": {
+            "noChange": true,
+            "states": {
+              "TS": "PROPOSED"
+            }
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv1",
+            "extractor": 2
+          },
+          "expect": {
+            "noChange": true,
+            "states": {
+              "TS": "PROPOSED"
+            }
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "TS",
+          "status": "known"
+        },
+        "versions": 1
+      }
+    },
+    {
+      "id": "set-member-support-withdrawn-and-returned",
+      "claimType": "skill",
+      "values": {
+        "TS": {
+          "label": "TypeScript",
+          "concept": "typescript",
+          "kind": "skill",
+          "context": "listed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "TS",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "quarantine": "cv1",
+          "expect": {
+            "states": {
+              "TS": "WITHDRAWN"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null,
+              "basis": null
+            },
+            "events": ["TS:PROPOSED>WITHDRAWN:no_current_support"],
+            "versions": 2
+          }
+        },
+        {
+          "unquarantine": "cv1",
+          "expect": {
+            "states": {
+              "TS": "PROPOSED"
+            },
+            "canonical": {
+              "status": "known",
+              "value": "TS"
+            },
+            "events": ["TS:WITHDRAWN>PROPOSED:support_returned"],
+            "versions": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "set-member-attribute-disagreement-is-conflict-not-replacement",
+      "claimType": "language",
+      "values": {
+        "FRP": {
+          "label": "French",
+          "language": "french",
+          "proficiency": "professional"
+        },
+        "FRF": {
+          "label": "French",
+          "language": "french",
+          "proficiency": "fluent"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "FRP",
+            "source": "cv1",
+            "asOf": "2021-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "FRF",
+            "source": "cv2",
+            "asOf": "2024-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "conflicting",
+          "value": null
+        },
+        "states": {
+          "FRP": "CONFLICTED",
+          "FRF": "CONFLICTED"
+        },
+        "attributes": {
+          "proficiency": "conflicting",
+          "language": "known"
+        },
+        "conflicts": ["same_basis:FRF,FRP@proficiency"],
+        "requests": []
+      }
+    },
+    {
+      "id": "set-member-stated-proficiency-outranks-listed-skill",
+      "claimType": "skill",
+      "values": {
+        "TSX": {
+          "label": "TypeScript",
+          "concept": "typescript",
+          "kind": "skill",
+          "context": "listed"
+        },
+        "TSS": {
+          "label": "TypeScript",
+          "concept": "typescript",
+          "kind": "skill",
+          "proficiency": "expert",
+          "context": "listed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "TSX",
+            "source": "cv1",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "TSS",
+            "source": "form1",
+            "asOf": "2022-01-01",
+            "mode": "stated"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "TSS",
+          "basis": "stated"
+        },
+        "states": {
+          "TSX": "PROPOSED",
+          "TSS": "PROPOSED"
+        },
+        "refinements": [],
+        "conflicts": [],
+        "confidence": {
+          "level": "high",
+          "reasons": ["stated"]
+        }
+      }
+    },
+    {
+      "id": "stated-beats-newer-extracted-current-state",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "form1",
+            "asOf": "2023-01-01",
+            "mode": "stated"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv1",
+            "asOf": "2024-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "LON",
+          "basis": "stated",
+          "status": "known"
+        },
+        "states": {
+          "LON": "PROPOSED",
+          "BER": "CONFLICTED"
+        },
+        "conflicts": ["lower_basis_newer:BER,LON@place"],
+        "requests": ["resolve_conflict/lower_basis_conflict:BER,LON"],
+        "confidence": {
+          "reasons": ["stated", "lower basis conflict"]
+        }
+      }
+    },
+    {
+      "id": "stated-newer-replaces-older-extracted",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "form1",
+            "asOf": "2023-01-01",
+            "mode": "stated"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "BER",
+          "basis": "stated"
+        },
+        "states": {
+          "LON": "SUPERSEDED",
+          "BER": "PROPOSED"
+        },
+        "conflicts": [],
+        "requests": ["confirm_change/newer_state:BER,LON"]
+      }
+    },
+    {
+      "id": "extracted-beats-newer-inferred-no-request-when-immaterial",
+      "claimType": "positioning.headline",
+      "values": {
+        "H1": {
+          "text": "Backend engineer"
+        },
+        "H2": {
+          "text": "Engineering manager"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "H1",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "H2",
+            "source": "gh1",
+            "asOf": "2024-01-01",
+            "mode": "inferred",
+            "authorship": "other"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "H1",
+          "basis": "extracted"
+        },
+        "states": {
+          "H1": "PROPOSED",
+          "H2": "CONFLICTED"
+        },
+        "conflicts": ["lower_basis_newer:H1,H2@text"],
+        "requests": [],
+        "confidence": {
+          "level": "medium"
+        }
+      }
+    },
+    {
+      "id": "lower-basis-historical-conflict-on-immaterial-attribute",
+      "claimType": "experience.role",
+      "values": {
+        "E": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          },
+          "employmentType": "full_time"
+        },
+        "I": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          },
+          "employmentType": "contract"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "E",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "I",
+            "source": "ai1",
+            "asOf": "2023-01-01",
+            "mode": "inferred",
+            "authorship": "other"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "E",
+          "basis": "extracted",
+          "status": "known"
+        },
+        "states": {
+          "E": "PROPOSED",
+          "I": "CONFLICTED"
+        },
+        "conflicts": ["lower_basis:E,I@employmentType"],
+        "requests": ["confirm_new/unconfirmed_material:E"],
+        "confidence": {
+          "level": "medium",
+          "reasons": ["extracted", "lower basis conflict"]
+        }
+      }
+    },
+    {
+      "id": "lower-basis-historical-material-conflict-asks",
+      "claimType": "education",
+      "values": {
+        "E": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "Computer Science",
+          "level": "bachelor",
+          "status": "completed"
+        },
+        "I": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "Computer Science",
+          "level": "master",
+          "status": "completed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "E",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "I",
+            "source": "ai1",
+            "asOf": "2023-01-01",
+            "mode": "inferred",
+            "authorship": "other"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "E",
+          "basis": "extracted"
+        },
+        "states": {
+          "E": "PROPOSED",
+          "I": "CONFLICTED"
+        },
+        "conflicts": ["lower_basis:E,I@level"],
+        "requests": ["resolve_conflict/lower_basis_conflict:E,I"]
+      }
+    },
+    {
+      "id": "current-state-same-date-tie-is-conflict",
+      "claimType": "preference.remote",
+      "values": {
+        "RA": {
+          "acceptable": ["remote"]
+        },
+        "RB": {
+          "acceptable": ["hybrid"]
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "RA",
+            "source": "form1",
+            "asOf": "2024-01-01",
+            "mode": "stated"
+          }
+        },
+        {
+          "observe": {
+            "value": "RB",
+            "source": "form2",
+            "asOf": "2024-01-01",
+            "mode": "stated"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "conflicting",
+          "value": null
+        },
+        "states": {
+          "RA": "CONFLICTED",
+          "RB": "CONFLICTED"
+        },
+        "conflicts": ["same_basis:RA,RB@acceptable"],
+        "requests": []
+      }
+    },
+    {
+      "id": "withdrawn-when-new-extractor-drops-value",
+      "claimType": "positioning.headline",
+      "values": {
+        "H1": {
+          "text": "Backend engineer"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "H1",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "reprocess": {
+            "source": "cv1",
+            "extractor": 2,
+            "drop": ["H1"]
+          },
+          "expect": {
+            "states": {
+              "H1": "WITHDRAWN"
+            },
+            "canonical": {
+              "status": "unknown",
+              "value": null
+            },
+            "events": ["H1:PROPOSED>WITHDRAWN:no_current_support"]
+          }
+        }
+      ]
+    },
+    {
+      "id": "inferred-unverified-span-low-confidence",
+      "claimType": "skill",
+      "values": {
+        "K8S": {
+          "label": "Kubernetes",
+          "concept": "kubernetes",
+          "kind": "tool",
+          "context": "repo"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "K8S",
+            "source": "gh1",
+            "asOf": "2024-01-01",
+            "mode": "inferred",
+            "authorship": "other",
+            "unverified": true
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "basis": "inferred"
+        },
+        "confidence": {
+          "level": "low",
+          "reasons": ["inferred", "unverified_span"]
+        }
+      }
+    },
+    {
+      "id": "inactive-item-is-skipped",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "deactivate": true,
+          "expect": {
+            "skipped": "item_inactive",
+            "requests": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "education-completed-then-newer-in-progress-is-conflict",
+      "claimType": "education",
+      "values": {
+        "DONE": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "BSc Physics",
+          "status": "completed"
+        },
+        "WIP": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "BSc Physics",
+          "status": "in_progress"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "DONE",
+            "source": "cv1",
+            "asOf": "2020-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "WIP",
+            "source": "cv2",
+            "asOf": "2022-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "conflicting",
+          "value": null
+        },
+        "states": {
+          "DONE": "CONFLICTED",
+          "WIP": "CONFLICTED"
+        },
+        "attributes": {
+          "status": "conflicting",
+          "qualification": "known"
+        }
+      }
+    },
+    {
+      "id": "education-in-progress-then-newer-completed-merges",
+      "claimType": "education",
+      "values": {
+        "WIP": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "BSc Physics",
+          "status": "in_progress"
+        },
+        "DONE": {
+          "institution": {
+            "name": "Contoso University",
+            "key": "contoso-university"
+          },
+          "qualification": "BSc Physics",
+          "status": "completed"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "WIP",
+            "source": "cv1",
+            "asOf": "2018-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "DONE",
+            "source": "cv2",
+            "asOf": "2020-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "DONE"
+        },
+        "states": {
+          "DONE": "PROPOSED",
+          "WIP": "PROPOSED"
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "current-state-winning-tier-pairwise-older-incompatible-superseded",
+      "claimType": "location.current",
+      "values": {
+        "DE": {
+          "country": "DE"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        },
+        "MUC": {
+          "city": "Munich",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "DE",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "MUC",
+            "source": "cv1",
+            "asOf": "2021-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2022-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "BER",
+          "assertion": "BER"
+        },
+        "states": {
+          "DE": "PROPOSED",
+          "BER": "PROPOSED",
+          "MUC": "SUPERSEDED"
+        },
+        "conflicts": []
+      }
+    },
+    {
+      "id": "current-state-winning-tier-pairwise-same-date-is-conflict",
+      "claimType": "location.current",
+      "values": {
+        "DE": {
+          "country": "DE"
+        },
+        "BER": {
+          "city": "Berlin",
+          "country": "DE"
+        },
+        "MUC": {
+          "city": "Munich",
+          "country": "DE"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "MUC",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "BER",
+            "source": "cv2",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "DE",
+            "source": "cv3",
+            "asOf": "2024-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "conflicting",
+          "value": null
+        },
+        "states": {
+          "DE": "PROPOSED",
+          "BER": "CONFLICTED",
+          "MUC": "CONFLICTED"
+        },
+        "conflicts": ["same_basis:BER,MUC@place"],
+        "requests": ["resolve_conflict/same_basis_conflict:BER,MUC"]
+      }
+    },
+    {
+      "id": "historical-immaterial-attribute-disagreement-stays-known",
+      "claimType": "experience.role",
+      "values": {
+        "FT": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          },
+          "employmentType": "full_time"
+        },
+        "CT": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Data Analyst",
+          "titleKey": "data-analyst",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          },
+          "employmentType": "contract"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "FT",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "CT",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "CT",
+          "assertion": "CT",
+          "basis": "extracted"
+        },
+        "states": {
+          "FT": "CONFLICTED",
+          "CT": "CONFLICTED"
+        },
+        "attributes": {
+          "employmentType": "conflicting",
+          "title": "known",
+          "start": "known"
+        },
+        "conflicts": ["same_basis:CT,FT@employmentType"],
+        "requests": ["confirm_new/unconfirmed_material:CT"]
+      }
+    },
+    {
+      "id": "representative-is-deterministic-not-most-supported",
+      "claimType": "experience.role",
+      "values": {
+        "LONG": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Senior Software Engineer",
+          "titleKey": "senior-software-engineer",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        },
+        "ABBR": {
+          "organization": {
+            "name": "Northwind Labs",
+            "key": "northwind-labs"
+          },
+          "title": "Sr. Software Eng.",
+          "titleKey": "sr.-software-eng.",
+          "start": {
+            "year": 2019
+          },
+          "end": {
+            "year": 2021
+          }
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LONG",
+            "source": "cv1",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "ABBR",
+            "source": "cv2",
+            "asOf": "2023-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "ABBR",
+            "source": "cv3",
+            "asOf": "2023-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "status": "known",
+          "value": "LONG",
+          "assertion": "LONG"
+        },
+        "states": {
+          "LONG": "PROPOSED",
+          "ABBR": "PROPOSED"
+        }
+      }
+    },
+    {
+      "id": "one-source-stating-two-compatible-values-is-one-source",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        },
+        {
+          "observe": {
+            "value": "GB",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          }
+        }
+      ],
+      "expect": {
+        "canonical": {
+          "value": "LON",
+          "status": "known"
+        },
+        "confidence": {
+          "level": "medium",
+          "reasonsExclude": ["2 sources agree"]
+        }
+      }
+    },
+    {
+      "id": "corroboration-is-a-derived-change-not-a-version",
+      "claimType": "location.current",
+      "values": {
+        "LON": {
+          "city": "London",
+          "country": "GB"
+        },
+        "GB": {
+          "country": "GB"
+        }
+      },
+      "steps": [
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv1",
+            "asOf": "2022-01-01"
+          },
+          "expect": {
+            "versions": 1
+          }
+        },
+        {
+          "observe": {
+            "value": "LON",
+            "source": "cv2",
+            "asOf": "2022-06-01"
+          },
+          "expect": {
+            "versions": 1,
+            "derivedChanged": true,
+            "confidence": {
+              "reasons": ["2 sources agree"]
+            }
+          }
+        },
+        {
+          "reconcile": true,
+          "expect": {
+            "noChange": true
+          }
+        }
+      ]
+    }
+  ]
+}
