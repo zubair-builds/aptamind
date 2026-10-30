@@ -24,7 +24,7 @@ export default async function RootLayout({ children, actions }: { children: Reac
   const theme = parseTheme(jar.get(THEME_COOKIE)?.value);
   return (
     // "system" leaves data-theme off so CSS follows prefers-color-scheme without a script.
-    <html lang="en" data-theme={theme === 'system' ? undefined : theme}>
+    <html lang="en" data-theme={theme === 'system' ? undefined : theme} suppressHydrationWarning>
       <body>
         <ToastProvider>
           <Shell
