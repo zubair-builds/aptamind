@@ -18,11 +18,19 @@ let page: () => Promise<Buffer | string>;
 const LABOUR_PATH =
   '/en/public-register-recognised-sponsors/public-register-regular-labour-and-highly-skilled-migrants';
 
+const REAL_PATH = '/en/public-register-recognised-sponsors/public-register-work';
+
 beforeAll(async () => {
   infra = await createTestInfra('market_nl_register');
   t = await createMarketTestRuntime(infra);
   page = () => t.fixture('nl-ind', 'register-labour-t1.html');
   server = await startFixtureServer(async (req, res) => {
+    if ((req.url ?? '').split('?')[0] === REAL_PATH) {
+      res
+        .writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
+        .end(await t.fixture('nl-ind', 'real-register-work-2026-10.html'));
+      return;
+    }
     if ((req.url ?? '').split('?')[0] !== LABOUR_PATH) {
       res.writeHead(404, { 'content-type': 'text/plain' }).end('not found');
       return;
@@ -281,5 +289,20 @@ describe('NL IND register (M8.4)', () => {
       ['Skilled Worker', 'GB'],
     ]);
     expect(acme?.identityKeys).toContain('ext:uk_sponsor_register:acme ltd|london');
+  });
+});
+
+describe('NL IND real-file gate (2026-10, scratch database)', () => {
+  it('imports the trimmed live page: 25 labour licences, KvK identity, nothing unlisted', async () => {
+    const source = await register('nl-ind-real-gate', `${server.url}${REAL_PATH}`);
+    const run = await t.runSource(source._id);
+    expect(run.state).toBe('COMPLETED');
+    expect(run.output).toMatchObject({ complete: true, anomaly: null, delistedCompanies: 0 });
+    expect(await parseOutput(run._id)).toMatchObject({
+      format: 'html_table',
+      count: 25,
+      routes: [{ id: 'regular_labour_highly_skilled', meaning: 'labour', rows: 25 }],
+    });
+    expect(await company('02076358')).not.toBeNull();
   });
 });

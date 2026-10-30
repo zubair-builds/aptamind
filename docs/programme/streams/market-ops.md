@@ -249,3 +249,10 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   checks; ids starting 0 or 7 are still refused (fail closed).
 - Admin ask: `/imports/new/jobs` (URL column mapping; same flow as `ats_boards`).
 - Not yet verified on the owner's real job link file (Source DoD 1/7).
+
+## Real-file gates (2026-10-30)
+
+- NL IND passed after a fix; USCIS H-1B passed for the legacy archive export only. Details,
+  numbers and fixtures: DECISION_LOG 2026-10-30. Tests:
+  `sources/providers/registers/real-file-gate.test.ts` and the scratch-database import in
+  `nl-register.int.test.ts`. Enabling either source on the MVP database is a separate step.

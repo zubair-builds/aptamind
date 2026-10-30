@@ -126,8 +126,8 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
     5-lever: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     6-generic-careers: planned
     7-uk-sponsor-register: planned
-    8-nl-ind: 'planned (real-file gate first)'
-    9-uscis-h1b: 'planned (real-file gate first)'
+    8-nl-ind: 'real-file gate PASSED 2026-10-30 after a parser fix (DECISION_LOG); not yet enabled on the MVP database (owner/supervisor step)'
+    9-uscis-h1b: 'real-file gate passed for the legacy archive export (FY2009-2023) 2026-10-30; current FY2024+ export not statically downloadable, gate open for it'
     10-dol-lca: planned
     11-yc: planned
     12-a16z: planned
@@ -265,6 +265,7 @@ integration:
     - '#27 M8.1 merged 2026-09-30 as 354f677 (head 5835b91) on the local gate: check 8950 unit + 1107 golden, integration 781/793 (12 accepted browser), perf worst row 27.8 ms. rv19 Highs fixed by one focused repair (ed7b71a) + targeted verification; identity-namespaces.ts folded into external-ids.ts; migration 2026-09-30-005 last'
     - '#36 supervisor docs (claude/aptamind-programme-setup-34y4ze): carries this handoff; merged as the last action of the session on a local format:check'
   gates:
+    - 'NL IND: passed 2026-10-30 (fixture nl-ind/real-register-work-2026-10.html). USCIS H-1B: legacy export passed 2026-10-30; current export still gated.'
     - 'Before the first production import of NL IND or USCIS H-1B data: verify parser, route/category mapping and encoding against a real downloaded file on a non-production database; commit a trimmed recorded fixture; log in DECISION_LOG; only then enable the source (DECISION_LOG 14d07ad (9))'
   supervisor_follow_ups:
     - 'append-only collection fingerprint history CI check'
