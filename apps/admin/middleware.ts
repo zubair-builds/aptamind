@@ -7,9 +7,10 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // API routes are called server-side from Server Components.
-  // Pages are protected; API is same-origin only.
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  const path = request.nextUrl.pathname;
+
+  // Server-side fetches and health checks must not require browser auth.
+  if (path.startsWith("/api/") || path === "/ready" || path === "/health") {
     return NextResponse.next();
   }
 
@@ -39,5 +40,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
