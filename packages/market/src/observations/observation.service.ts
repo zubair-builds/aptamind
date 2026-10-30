@@ -134,8 +134,9 @@ export class ObservationService {
       {
         // Each fetch of the same bytes extends expiry ($max keeps a later hold); a snapshot whose
         // bytes were released is fetched again as new evidence, so the release mark is cleared.
+        // `bytesDeletedAt` clears with it: ArtifactStore.put uploads the bytes again.
         $max: { expiresAt: expiresAtFor(retentionClass, now) },
-        $unset: { expiredAt: '' },
+        $unset: { expiredAt: '', bytesDeletedAt: '' },
         $set: {
           lastFetchedAt: now,
           updatedAt: now,

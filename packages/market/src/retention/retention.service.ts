@@ -1,18 +1,8 @@
 import { getCollection } from '@aptamind/db';
-import { companiesCollection } from '../companies/company.schema';
 import type { MarketContext } from '../context';
-import { jobEvidenceCollection } from '../jobs/evidence';
-import { jobsCollection } from '../jobs/job.schema';
-import {
-  companyObservationsCollection,
-  jobObservationsCollection,
-  RETENTION_HOLD_REASONS,
-  snapshotsCollection,
-  type SnapshotDoc,
-} from '../observations/schemas';
-import { reviewItemsCollection } from '../review/schemas';
-import { signalsCollection } from '../signals/schemas';
+import { RETENTION_HOLD_REASONS, snapshotsCollection, type SnapshotDoc } from '../observations/schemas';
 import { sourcesCollection } from '../sources/source.schema';
+import { artifactReferenceHold, snapshotHoldReason } from './artifact-references';
 import { expiresAtFor, RETENTION_POLICY_VERSION, RETENTION_TTL_MS, retentionClassFor } from './policy';
 
 export type HoldReason = (typeof RETENTION_HOLD_REASONS)[number];
@@ -26,9 +16,18 @@ export interface RetentionSweepResult {
   dryRun: boolean;
 }
 
+export interface RetentionPurgeResult {
+  scanned: number;
+  deletable: number;
+  deleted: number;
+  keptReferenced: number;
+  dryRun: boolean;
+}
+
 /**
- * OPS-3 retention sweep over Market snapshots. A snapshot past `expiresAt` is released only when
- * nothing still needs it; otherwise it is held and its expiry extended:
+ * OPS-3 retention sweep over Market snapshots, and the FE-4 purge of released bytes.
+ * A snapshot past `expiresAt` is released only when nothing still needs it; otherwise it is
+ * held and its expiry extended:
  *  - it is the latest snapshot of its source (the unchanged-content comparison and replay read it);
  *  - an open review item cites it as evidence (held to at least the review-evidence TTL);
  *  - a current (non-superseded) observation came from it;
@@ -36,13 +35,15 @@ export interface RetentionSweepResult {
  *  - a market signal's evidence cites it;
  *  - canonical company or job fact evidence (or a legacy job `listingMarks` entry) cites it.
  * Pinned snapshots are never selected. Releasing sets `expiredAt` only; the snapshot record and
- * every observation stay (history is never destroyed, no dangling evidence references). Deleting
- * the raw bytes waits for an ArtifactStore delete (Foundation Exception, not in this change).
+ * every observation stay (history is never destroyed, no dangling evidence references).
  *
  * The release is check-then-write. After `expiredAt` is set, `holdReason` is read again and the
- * release is reverted when a citation appeared in between. Two windows remain (the residual race):
- * a citation inserted after that re-check, and a byte delete (FE-4) that observes `expiredAt`
- * before the revert lands. Either can still drop bytes a later citation needed.
+ * release is reverted when a citation appeared in between. `purgeReleased` deletes the raw bytes
+ * only when every snapshot of that artifact is released and unpinned, none of them is held for
+ * any hold reason, and no other market document stores the artifact id. That check runs again
+ * inside `ArtifactStore.deleteBytes`, immediately before the object delete, so a reverted
+ * release blocks deletion. A citation that lands after that immediate check can still drop
+ * bytes (residual race). A delete sets `bytesDeletedAt` on the released snapshots.
  */
 export class RetentionService {
   constructor(private readonly ctx: MarketContext) {}
@@ -85,57 +86,7 @@ export class RetentionService {
   }
 
   async holdReason(s: Pick<SnapshotDoc, '_id' | 'sourceId'>): Promise<HoldReason | null> {
-    const latest = await this.snapshots
-      .find({ sourceId: s.sourceId }, { projection: { _id: 1 } })
-      .sort({ lastFetchedAt: -1, _id: -1 })
-      .limit(1)
-      .next();
-    if (latest?._id === s._id) return 'latest_of_source';
-    const review = await getCollection(this.ctx.db, reviewItemsCollection).findOne(
-      { 'evidence.snapshotId': s._id, status: 'open' },
-      { projection: { _id: 1 } },
-    );
-    if (review) return 'open_review';
-    const current = { snapshotId: s._id, superseded: { $ne: true } };
-    const obs =
-      (await getCollection(this.ctx.db, companyObservationsCollection).findOne(current, {
-        projection: { _id: 1 },
-      })) ??
-      (await getCollection(this.ctx.db, jobObservationsCollection).findOne(current, {
-        projection: { _id: 1 },
-      }));
-    if (obs) return 'current_observation';
-    const evidence = await getCollection(this.ctx.db, jobEvidenceCollection).findOne(
-      { snapshotId: s._id },
-      { projection: { _id: 1 } },
-    );
-    if (evidence) return 'job_evidence';
-    const signal = await getCollection(this.ctx.db, signalsCollection).findOne(
-      { 'evidence.snapshotId': s._id },
-      { projection: { _id: 1 } },
-    );
-    if (signal) return 'signal_evidence';
-    if (await this.citedByCanonicalFact(s._id)) return 'canonical_fact';
-    return null;
-  }
-
-  /** Company or job fact evidence, or a legacy job listing mark, names this snapshot. */
-  private async citedByCanonicalFact(snapshotId: string): Promise<boolean> {
-    const company = await getCollection(this.ctx.db, companiesCollection).findOne(
-      factSnapshotFilter(COMPANY_FACT_PATHS, COMPANY_EVIDENCE_PATHS, snapshotId),
-      { projection: { _id: 1 } },
-    );
-    if (company) return true;
-    const job = await getCollection(this.ctx.db, jobsCollection).findOne(
-      {
-        $or: [
-          ...factSnapshotClauses(JOB_FACT_PATHS, snapshotId, true),
-          { $expr: listingMarkCites(snapshotId) },
-        ],
-      },
-      { projection: { _id: 1 } },
-    );
-    return !!job;
+    return snapshotHoldReason(this.ctx.db, s);
   }
 
   async sweep(opts: { limit?: number; dryRun?: boolean } = {}): Promise<RetentionSweepResult> {
@@ -228,6 +179,84 @@ export class RetentionService {
     );
   }
 
+  /**
+   * Delete bytes of artifacts cited by released snapshots. `limit` is how many distinct
+   * artifact ids to consider (kept ones count). Dry-run counts and writes nothing.
+   * The reference check runs again inside `ArtifactStore.deleteBytes`, immediately before
+   * the object delete. It re-reads `expiredAt` and `holdReason` for every snapshot that
+   * shares the artifact, so a refetch or a reverted release wins.
+   */
+  async purgeReleased(opts: { limit?: number; dryRun?: boolean } = {}): Promise<RetentionPurgeResult> {
+    const limit = opts.limit ?? 500;
+    const dryRun = opts.dryRun ?? false;
+    const now = this.ctx.clock.now();
+    const ids = await this.releasedArtifactIds(limit);
+    let deletable = 0;
+    let deleted = 0;
+    let keptReferenced = 0;
+    for (const artifactId of ids) {
+      if (await this.bytesHeld(artifactId)) {
+        keptReferenced += 1;
+        continue;
+      }
+      deletable += 1;
+      if (dryRun) continue;
+      const outcome = await this.ctx.artifacts.deleteBytes(artifactId, (id) => this.bytesHeld(id));
+      if (outcome !== 'deleted') {
+        // Re-check refused, or the artifact document is already gone.
+        deletable -= 1;
+        if (outcome === 'referenced') keptReferenced += 1;
+        else await this.markBytesDeleted(artifactId, now);
+        continue;
+      }
+      deleted += 1;
+      await this.markBytesDeleted(artifactId, now);
+    }
+    const result = { scanned: ids.length, deletable, deleted, keptReferenced, dryRun };
+    this.ctx.logger.info(result, 'market retention purge');
+    return result;
+  }
+
+  /** Distinct artifact ids on released snapshots whose bytes have not been deleted yet. */
+  private async releasedArtifactIds(limit: number): Promise<string[]> {
+    if (limit <= 0) return [];
+    const cursor = this.snapshots
+      .find(
+        { expiredAt: { $exists: true }, bytesDeletedAt: { $exists: false } },
+        { projection: { 'artifact.artifactId': 1 } },
+      )
+      .sort({ expiredAt: 1, _id: 1 });
+    const ids: string[] = [];
+    const seen = new Set<string>();
+    try {
+      for await (const s of cursor) {
+        const id = s.artifact?.artifactId;
+        if (!id || seen.has(id)) continue;
+        seen.add(id);
+        ids.push(id);
+        if (ids.length >= limit) break;
+      }
+    } finally {
+      await cursor.close();
+    }
+    return ids;
+  }
+
+  private bytesHeld(artifactId: string): Promise<boolean> {
+    return artifactReferenceHold(this.ctx.db, artifactId).then((reason) => reason !== null);
+  }
+
+  private async markBytesDeleted(artifactId: string, at: Date): Promise<void> {
+    await this.snapshots.updateMany(
+      {
+        'artifact.artifactId': artifactId,
+        expiredAt: { $exists: true },
+        bytesDeletedAt: { $exists: false },
+      },
+      { $set: { bytesDeletedAt: at, updatedAt: at } },
+    );
+  }
+
   async pin(snapshotId: string, reason: string): Promise<boolean> {
     const r = await this.snapshots.updateOne(
       { _id: snapshotId },
@@ -253,100 +282,5 @@ function emptyHeld(): Record<HoldReason, number> {
     job_evidence: 0,
     signal_evidence: 0,
     canonical_fact: 0,
-  };
-}
-
-/** Fact paths (`path.evidence` and `path.conflicts.evidence`) on a canonical company. */
-const COMPANY_FACT_PATHS = [
-  'identity.displayName',
-  'identity.legalName',
-  'identity.domain',
-  'identity.website',
-  'classification.industries',
-  'classification.stage',
-  'classification.businessModel',
-  'firmographics.foundedYear',
-  'firmographics.employeeEstimate',
-  'firmographics.employeeRange',
-  'firmographics.fundingStage',
-  'geography.headquarters',
-  'geography.hiringCountries',
-  'employment.careersUrls',
-  'employment.ats',
-  'employment.remotePolicy',
-  'employment.sponsorship.capability',
-  'employment.relocationSupport',
-  'employment.eorIndicators',
-];
-
-/** Arrays of `{ evidence }` that are not facts (licences, history, schemes, people). */
-const COMPANY_EVIDENCE_PATHS = [
-  'classification.schemes',
-  'employment.sponsorship.licences',
-  'employment.sponsorship.history',
-  'organization.founders',
-  'organization.leadership',
-];
-
-/** Fact paths on a canonical job. */
-const JOB_FACT_PATHS = [
-  'identity.title',
-  'identity.roleFamily',
-  'identity.specialization',
-  'identity.department',
-  'identity.seniority',
-  'employment.employmentType',
-  'geography.workModel',
-  'geography.remoteScope',
-  'geography.officeAttendance',
-  'immigration.sponsorship',
-  'immigration.authorization',
-  'immigration.relocation',
-  'compensation',
-  'requirements',
-  'responsibilities',
-];
-
-function factSnapshotClauses(
-  paths: readonly string[],
-  snapshotId: string,
-  withConflicts: boolean,
-): Record<string, string>[] {
-  const or: Record<string, string>[] = [];
-  for (const p of paths) {
-    or.push({ [`${p}.evidence.snapshotId`]: snapshotId });
-    if (withConflicts) or.push({ [`${p}.conflicts.evidence.snapshotId`]: snapshotId });
-  }
-  return or;
-}
-
-function factSnapshotFilter(
-  facts: readonly string[],
-  evidenceArrays: readonly string[],
-  snapshotId: string,
-): { $or: Record<string, string>[] } {
-  return {
-    $or: [
-      ...factSnapshotClauses(facts, snapshotId, true),
-      ...factSnapshotClauses(evidenceArrays, snapshotId, false),
-    ],
-  };
-}
-
-/** True when any legacy `lifecycle.listingMarks` value names this snapshot. */
-function listingMarkCites(snapshotId: string) {
-  return {
-    $gt: [
-      {
-        $size: {
-          $filter: {
-            input: { $objectToArray: { $ifNull: ['$lifecycle.listingMarks', {}] } },
-            as: 'm',
-            cond: { $eq: ['$$m.v.snapshotId', snapshotId] },
-          },
-        },
-      },
-      0,
-    ],
   };
 }

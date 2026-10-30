@@ -752,17 +752,21 @@ export const freshnessSweepWorkflow: WorkflowSpec = {
   defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
 };
 
-/** OPS-3 — daily retention sweep over Market snapshots (release marks only). */
+/** OPS-3 release marks, then FE-4 byte purge (at most 500 artifacts; on by default). */
 export const retentionSweepWorkflow: WorkflowSpec = {
   key: 'market.retention.sweep',
   title: 'Retention sweep',
   description:
-    'Releases raw snapshots past their retention window that no open review, current observation, job or signal evidence, canonical fact, or latest-of-source read still needs.',
+    'Releases raw snapshots past their retention window that no open review, current observation, job or signal evidence, canonical fact, or latest-of-source read still needs, then deletes bytes of artifacts whose every snapshot is released and unpinned and that no other market record cites (at most 500 per run).',
   nodes: [
     scheduleTrigger,
     { id: 'sweep', capability: { type: 'market.retention_sweep', version: 1 }, input: {} },
+    { id: 'purge', capability: { type: 'market.retention_purge', version: 1 }, input: { limit: 500 } },
   ],
-  edges: [{ from: 'trigger', to: 'sweep' }],
+  edges: [
+    { from: 'trigger', to: 'sweep' },
+    { from: 'sweep', to: 'purge' },
+  ],
   labels: { domain: 'market' },
   defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
 };

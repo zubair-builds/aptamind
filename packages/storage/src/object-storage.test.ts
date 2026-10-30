@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { S3ObjectStorage, s3ClientConfig } from './object-storage';
+import { MemoryObjectStorage, S3ObjectStorage, s3ClientConfig } from './object-storage';
 
 const base = { region: 'us-east-1', forcePathStyle: true };
 const keys = { accessKeyId: 'local-key-id', secretAccessKey: 'local-secret-value' };
@@ -60,5 +60,19 @@ describe('s3ClientConfig (FE-3)', () => {
           secretAccessKey: undefined,
         }),
     ).toThrow(/Refusing to fall back/);
+  });
+});
+
+describe('MemoryObjectStorage.delete', () => {
+  it('removes the object, and deleting again or a missing key is a no-op', async () => {
+    const storage = new MemoryObjectStorage();
+    await storage.put('k', new Uint8Array([1, 2, 3]), 'application/octet-stream');
+    expect(await storage.exists('k')).toBe(true);
+    await storage.delete('k');
+    expect(await storage.exists('k')).toBe(false);
+    await expect(storage.get('k')).rejects.toThrow(/not found/);
+    await storage.delete('k');
+    await storage.delete('missing');
+    expect(storage.objects.size).toBe(0);
   });
 });

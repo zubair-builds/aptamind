@@ -1,5 +1,6 @@
 import {
   CreateBucketCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   HeadBucketCommand,
   HeadObjectCommand,
@@ -16,6 +17,8 @@ export interface ObjectStorage {
   put(key: string, body: Uint8Array, contentType: string, metadata?: Record<string, string>): Promise<void>;
   get(key: string): Promise<Uint8Array>;
   exists(key: string): Promise<boolean>;
+  /** Remove the object. A missing key is success (delete is idempotent). */
+  delete(key: string): Promise<void>;
   ensureReady(): Promise<void>;
   ping(): Promise<boolean>;
 }
@@ -98,8 +101,18 @@ export class S3ObjectStorage implements ObjectStorage {
       await this.client.send(new HeadObjectCommand({ Bucket: this.opts.bucket, Key: key }));
       return true;
     } catch (err) {
-      const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
-      if (status === 404) return false;
+      if (isMissingObject(err)) return false;
+      throw err;
+    }
+  }
+
+  async delete(key: string): Promise<void> {
+    try {
+      await this.client.send(new DeleteObjectCommand({ Bucket: this.opts.bucket, Key: key }));
+    } catch (err) {
+      // DeleteObject is defined to succeed when the key is already gone. Some S3-compatible
+      // servers answer 404 instead; that is the same outcome.
+      if (isMissingObject(err)) return;
       throw err;
     }
   }
@@ -127,6 +140,13 @@ export class S3ObjectStorage implements ObjectStorage {
   }
 }
 
+function isMissingObject(err: unknown): boolean {
+  const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata?.httpStatusCode;
+  if (status === 404) return true;
+  const name = (err as { name?: string }).name;
+  return name === 'NotFound' || name === 'NoSuchKey';
+}
+
 /** In-memory implementation for unit tests and deterministic fixtures. */
 export class MemoryObjectStorage implements ObjectStorage {
   readonly objects = new Map<string, { body: Uint8Array; contentType: string }>();
@@ -140,6 +160,9 @@ export class MemoryObjectStorage implements ObjectStorage {
   }
   async exists(key: string): Promise<boolean> {
     return this.objects.has(key);
+  }
+  async delete(key: string): Promise<void> {
+    this.objects.delete(key);
   }
   async ensureReady(): Promise<void> {}
   async ping(): Promise<boolean> {
