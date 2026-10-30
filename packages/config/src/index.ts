@@ -80,7 +80,7 @@ export const envSchema = z.object({
 
   BROWSER_EXECUTABLE_PATH: z.string().optional(),
 
-  AI_PROVIDER: z.enum(['none', 'anthropic', 'fixture']).default('none'),
+  AI_PROVIDER: z.enum(['none', 'anthropic', 'gemini', 'fixture']).default('none'),
   AI_MODEL: z.string().default('claude-opus-5'),
   AI_API_KEY_ENV: z.string().default('ANTHROPIC_API_KEY'),
   AI_TIMEOUT_MS: z.coerce.number().int().min(1000).default(60_000),

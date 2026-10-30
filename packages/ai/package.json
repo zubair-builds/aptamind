@@ -12,6 +12,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
     "@aptamind/contracts": "workspace:*",
+    "@google/genai": "^2.32.0",
     "zod": "^4.6.5"
   }
 }
