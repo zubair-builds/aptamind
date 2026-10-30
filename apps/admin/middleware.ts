@@ -9,13 +9,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check cookie first (set after successful login)
+  // Allow API routes if the cookie is present (set by page login)
   const cookie = request.cookies.get(COOKIE_NAME);
-  if (cookie?.value === password) {
+  const hasValidCookie = cookie?.value === password;
+
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    if (hasValidCookie) return NextResponse.next();
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  // For pages: accept cookie or Basic Auth
+  if (hasValidCookie) {
     return NextResponse.next();
   }
 
-  // Check Basic Auth header
   const authHeader = request.headers.get("authorization");
   if (authHeader) {
     const [scheme, encoded] = authHeader.split(" ");
@@ -26,10 +33,10 @@ export function middleware(request: NextRequest) {
         const response = NextResponse.next();
         response.cookies.set(COOKIE_NAME, password, {
           httpOnly: true,
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
           path: "/",
-          maxAge: 60 * 60 * 24 * 7, // 7 days
+          maxAge: 60 * 60 * 24 * 7,
         });
         return response;
       }
