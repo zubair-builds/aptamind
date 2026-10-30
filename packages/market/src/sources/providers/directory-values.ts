@@ -1109,15 +1109,23 @@ export function decodeStable(s: string): string {
  * address used as the "domain", a contact URI, or an email / phone number anywhere in its path,
  * query or fragment (decoded until stable).
  */
-/** Hosts of ATS job links whose posting id is set aside by `urlHasContactValue` (OPS-5). */
-const ATS_JOB_HOSTS = new Set([
-  'boards.greenhouse.io',
-  'job-boards.greenhouse.io',
-  'job-boards.eu.greenhouse.io',
-  'jobs.ashbyhq.com',
-  'jobs.lever.co',
-  'jobs.eu.lever.co',
-]);
+
+/**
+ * Board hosts of Greenhouse, Lever and Ashby (pages, embeds and public APIs; EU hosts too).
+ * Shared with `boardRefFromUrl` so a host the board parser accepts is the same host whose
+ * posting id the contact guard may set aside.
+ */
+export const ATS_BOARD_HOST =
+  /^((job-)?boards(\.eu)?\.greenhouse\.io|boards-api(\.eu)?\.greenhouse\.io|(jobs|api)(\.eu)?\.lever\.co|(jobs|api)\.ashbyhq\.com)$/;
+
+/** Greenhouse board pages (not the public API): posting id is `/<board>/jobs/<id>`. */
+const GREENHOUSE_BOARD_HOST = /^(job-)?boards(\.eu)?\.greenhouse\.io$/;
+
+/** Ashby and Lever job pages: posting id is `/<board>/<uuid>`. API hosts are not. */
+const ATS_UUID_POSTING_HOST = /^(jobs\.ashbyhq\.com|jobs(\.eu)?\.lever\.co)$/;
+
+/** A whole digit run of 10–16 digits starting 0 or 44 (a phone, including a long `44…` id). */
+const PHONE_DIGIT_RUN = /^(?:0|44)\d{8,14}$/;
 
 /**
  * `opts.atsJobIds` (OPS-5, job URL and board files only): the posting id of a job link on an ATS
@@ -1151,11 +1159,11 @@ export function urlHasContactValue(value: string, opts: { atsJobIds?: boolean } 
   if (AT_LIKE.test(host) || hasContactValue(host, { atTokens: false }) || longestDigitRun(host) >= 9)
     return true;
   // Every path is scanned raw and decoded first, before any id is set aside (DECISION_LOG
-  // 621f14c): a digits-only segment shaped like a phone number (10–13 digits starting 0, 00 or
-  // 44), and an email, phone or handle anywhere in the path (a LinkedIn job slug included).
+  // 621f14c): a digits-only segment shaped like a phone number (10–16 digits starting 0 or 44),
+  // and an email, phone or handle anywhere in the path (a LinkedIn job slug included).
   const decoded = decodeStable(u.pathname);
   for (const p of [u.pathname, decoded, normalizedPath(decoded)]) {
-    if (p.split('/').some((seg) => /^(?=\d{10,13}$)(?:0|44)\d+$/.test(seg.replace(/^\+/, '')))) return true;
+    if (p.split('/').some((seg) => PHONE_DIGIT_RUN.test(seg.replace(/^\+/, '')))) return true;
     if (hasContactValue(p)) return true;
   }
   // Structural: 9+ digits separated only by non-letters in the decoded path is a phone
@@ -1168,13 +1176,8 @@ export function urlHasContactValue(value: string, opts: { atsJobIds?: boolean } 
     ? normalizedPath(decoded)
         .replace(/^(\/company\/)[1-9]\d{0,8}(?=\/|$)/i, '$1_')
         .replace(/^(\/jobs\/view\/(?:[\p{L}\p{N}-]*-)?)(?!7)[1-9]\d{9}(?=\/|$)/iu, '$1_')
-    : opts.atsJobIds && ATS_JOB_HOSTS.has(lowerHost)
-      ? // OPS-5: an ATS job link's own posting id (after the slug and the phone-shaped segment
-        // checks above): Greenhouse `/<board>/jobs/<id>` (digits not starting 0 or 7), Ashby and
-        // Lever `/<board>/<uuid>`.
-        normalizedPath(decoded)
-          .replace(/^(\/[^/]+\/jobs\/)(?![07])[1-9]\d{5,15}(?=\/|$)/, '$1_')
-          .replace(/^(\/[^/]+\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/i, '$1_')
+    : opts.atsJobIds
+      ? setAsideAtsPostingId(normalizedPath(decoded), lowerHost)
       : decoded;
   if (longestDigitRun(digitPath) >= 9) return true;
   // A person's page or card (`/team/jane-smith`, `/people/…`, `….vcf`).
@@ -1184,6 +1187,26 @@ export function urlHasContactValue(value: string, opts: { atsJobIds?: boolean } 
   // In the query a `+` may be a space.
   const parts = [decodeStable(u.search), decodeStable(u.search.replace(/\+/g, ' ')), decodeStable(u.hash)];
   return parts.some((p) => hasContactValue(p));
+}
+
+/**
+ * The posting id of an ATS job link, set aside only in its own position (OPS-5). Greenhouse:
+ * `/<board>/jobs/<id>`, and not a phone-length run (10–16 digits starting 0 or 44) or an id
+ * starting with 7. Ashby and Lever job pages: `/<board>/<uuid>` only. A UUID anywhere else,
+ * including a Greenhouse board token, stays in the path so a digit run inside it is still a contact.
+ */
+function setAsideAtsPostingId(path: string, host: string): string {
+  if (!ATS_BOARD_HOST.test(host)) return path;
+  if (GREENHOUSE_BOARD_HOST.test(host)) {
+    return path.replace(/^(\/[^/]+\/jobs\/)(?!7)(?!(?:0|44)\d{8,14}(?:\/|$))[1-9]\d{5,15}(?=\/|$)/, '$1_');
+  }
+  if (ATS_UUID_POSTING_HOST.test(host)) {
+    return path.replace(
+      /^(\/[^/]+\/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(?=\/|$)/i,
+      '$1_',
+    );
+  }
+  return path;
 }
 
 /** Placeholder text that means "no value". */

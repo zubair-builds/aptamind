@@ -81,10 +81,13 @@ Body: the file bytes (`text/csv` for `companies` and `ats_boards`; the source's 
   `job_urls:<runId>:<sourceId>`), so the posted jobs become canonical jobs without waiting for
   the 6-hourly schedule. The report is the board import report. A plain `ats_boards` import
   never refreshes.
-- In board and job URL files only, the posting id of a job link on an ATS host
-  (Greenhouse `/<board>/jobs/<digits>` not starting 0 or 7; Ashby and Lever `/<board>/<uuid>`) is
-  set aside by the contact guard after the phone-shaped segment checks. Company-file URL cells
-  keep the stricter rule (a 10-digit Greenhouse job id there is still `contact_value`).
+- In board and job URL files only, the posting id of a job link on an ATS board host (the same
+  hosts as `boardRefFromUrl`, including `boards.eu.greenhouse.io`) is set aside by the contact
+  guard after the phone-shaped segment checks: Greenhouse only `/<board>/jobs/<digits>` (not a
+  phone-length run of 10–16 digits starting 0 or 44, and not an id starting with 7); Ashby and
+  Lever job pages only `/<board>/<uuid>`. A UUID on any other host, including Greenhouse, is not
+  set aside. Company-file URL cells keep the stricter rule (a 10-digit Greenhouse job id there
+  is still `contact_value`).
   The shared error codes have no `not_supported` code, so it is a problem code instead.
 - The query is strict: an unknown parameter is `400 validation_failed`.
 - If the run cannot start after the snapshot is stored, the record keeps `error` and

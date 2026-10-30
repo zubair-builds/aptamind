@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { defineCapability } from '@aptamind/workflow-sdk';
 import { MARKET } from '../market-domain';
+import type { HoldReason } from '../retention/retention.service';
 
 /** OPS-3 retention and OPS-4 signal capabilities. */
 
@@ -10,7 +11,7 @@ export const retentionSweep = defineCapability({
   version: 1,
   title: 'Retention Sweep',
   description:
-    'Backfills retention metadata, then releases snapshots past expiry that no open review, current observation or latest-of-source read still needs; held ones get their expiry extended.',
+    'Backfills retention metadata, then releases snapshots past expiry that nothing still cites (latest of source, open review, current observation, job evidence, signal evidence, or a canonical fact); held ones get their expiry extended.',
   category: 'domain',
   inputSchema: z.object({ limit: z.number().int().positive().max(5000).optional() }),
   outputSchema: z.object({
@@ -22,7 +23,10 @@ export const retentionSweep = defineCapability({
       latest_of_source: z.number().int(),
       open_review: z.number().int(),
       current_observation: z.number().int(),
-    }),
+      job_evidence: z.number().int(),
+      signal_evidence: z.number().int(),
+      canonical_fact: z.number().int(),
+    } satisfies Record<HoldReason, z.ZodType<number>>),
     dryRun: z.boolean(),
   }),
   configSchema: z.object({}),
@@ -45,7 +49,7 @@ export const writeLifecycleSignals = defineCapability({
   version: 1,
   title: 'Write Lifecycle Signals',
   description:
-    'Writes job_discovered/changed/closed/reopened/reposted signals, with evidence, for lifecycle transitions of jobs written since the writer cursor.',
+    'Writes job_discovered/changed/closed/reopened/reposted signals, with evidence, for lifecycle transitions. The first sourced VERIFIED_LIVE (authoritative first sighting) is job_discovered. Resumes from the stored job watermark.',
   category: 'domain',
   inputSchema: z.object({ maxJobs: z.number().int().positive().max(100_000).optional() }),
   outputSchema: z.object({
@@ -74,7 +78,7 @@ export const writeCompanyChangeSignals = defineCapability({
   version: 1,
   title: 'Write Company Change Signals',
   description:
-    'Compares each company with the state last seen and writes sponsorship_change, remote_policy_change, role_family_expansion, new_location_hiring and hiring_acceleration signals with evidence (first pass: baseline only).',
+    'Compares each company with the state last seen and writes sponsorship_change, remote_policy_change, role_family_expansion, new_location_hiring and hiring_acceleration signals with evidence (first pass: baseline only; acceleration waits for a later pass with a positive prior window). Resumes from the stored company id.',
   category: 'domain',
   inputSchema: z.object({ maxCompanies: z.number().int().positive().max(1_000_000).optional() }),
   outputSchema: z.object({

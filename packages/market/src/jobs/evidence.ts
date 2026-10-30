@@ -99,6 +99,15 @@ export const jobEvidenceCollection = defineCollection<JobEvidenceDoc>({
       rationale:
         "A job's own (job-level) baseline evidence up to a time: with `by_copy_time`, the checkpoint's evidence count is answered from the indexes.",
     },
+    {
+      key: { snapshotId: 1 },
+      options: {
+        name: 'by_snapshot',
+        partialFilterExpression: { snapshotId: { $exists: true } },
+      },
+      rationale:
+        'Retention sweep (OPS-3): a snapshot cited as job evidence is held. Partial: evidence without a snapshot is not indexed.',
+    },
   ],
 });
 

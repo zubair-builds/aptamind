@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { artifactRefSchema, SYSTEM_ACTOR } from '@aptamind/contracts';
+import { AppError, artifactRefSchema, SYSTEM_ACTOR } from '@aptamind/contracts';
 import { defineCapability, recordSetSchema, TerminalError } from '@aptamind/workflow-sdk';
 import { importReportSchema, reviewsOpenedSince, TraceCollector } from '../imports/import-report';
 import { NET_CLIENT } from '@aptamind/workflow-nodes';
@@ -788,9 +788,15 @@ export const refreshImportedBoards = defineCapability({
         );
         runIds.push(runId);
       } catch (err) {
-        // A disabled or upload-only source is not refreshed; the import itself stays successful.
-        skipped++;
-        market.ctx.logger.warn({ sourceId: id, err }, 'job url import: board refresh not started');
+        // A disabled source throws invalid_state and is not refreshed; the import stays successful.
+        // Upload-only sources throw validation_failed, and a missing launcher throws unavailable:
+        // those are rethrown so this retryable node runs again with job_urls:<runId>:<sourceId>.
+        if (err instanceof AppError && err.code === 'invalid_state') {
+          skipped++;
+          market.ctx.logger.warn({ sourceId: id, err }, 'job url import: board refresh not started');
+          continue;
+        }
+        throw err;
       }
     }
     return { enabled: true, boards: ids.size, started: runIds.length, skipped, runIds };

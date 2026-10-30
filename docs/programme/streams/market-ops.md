@@ -212,22 +212,30 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   `manual_import` sources), `review_evidence` 180 d. Each fetch of the same bytes extends `expiresAt`.
 - `market.retention.sweep` (daily) backfills legacy snapshots, then for each snapshot past expiry
   holds it (extending expiry, recording `retentionHold`) when it is the latest snapshot of its
-  source, is cited by an open review item, or produced a current (non-superseded) observation;
-  otherwise sets `expiredAt`. Pinned snapshots never expire. Nothing is deleted: records and
-  observations stay, so evidence references never dangle.
+  source, is cited by an open review item, produced a current (non-superseded) observation, is
+  cited by `market_job_evidence.snapshotId` or signal evidence, or is named on canonical company
+  or job fact evidence (including a legacy job `listingMarks` entry); otherwise sets `expiredAt`.
+  After that write the sweep reads the hold again and clears `expiredAt` if a citation appeared
+  in between. A citation that lands after that re-check, or a byte delete that sees `expiredAt`
+  before the revert, can still drop bytes (residual race). Pinned snapshots never expire.
+  Nothing is deleted: records and observations stay, so evidence references never dangle.
+  `market_snapshots.by_expires` is a plain `{expiresAt:1}` index (`$exists: false` is not a legal
+  partial filter). Observation `by_snapshot` indexes are partial on `snapshotId` existing.
 - Not done: deleting released bytes. `ArtifactStore` has no delete and artifacts are
   content-addressed across snapshots, so it needs a Foundation Exception (candidate FE-4: a
   reference-counted delete of an artifact only when every snapshot using it is released).
-- Gap: "current fact" is approximated by current observations; canonical fact evidence that cites a
-  snapshot directly is not checked separately (facts cite observations of that snapshot).
 
 ## OPS-4 signals — lifecycle part (implemented 2026-10-30)
 
 - `LifecycleSignalWriter` (`packages/market/src/signals/lifecycle-signals.ts`, writer `lifecycle/1`)
-  and the hourly `market.signals.lifecycle` workflow. For jobs written since the cursor (latest
-  signal of this writer minus a 2 h overlap; first run scans all), each lifecycle history entry
-  whose target is DISCOVERED, CHANGED, CLOSED, REOPENED or REPOSTED and that names a source becomes
-  one `job_*` signal. Id and dedupe key are deterministic (job, target state, transition time).
+  and the hourly `market.signals.lifecycle` workflow. Progress is a stored `(updatedAt, _id)`
+  watermark in `market_signal_writer_cursors` (`_id: lifecycle`), advanced only over jobs the pass
+  scanned. The next run continues after it. Jobs in the 2 h before that watermark are re-read
+  (dedupe keys make the overlap a no-op); that re-read does not move the watermark or consume
+  `maxJobs`. Each lifecycle history entry whose target is DISCOVERED, CHANGED, CLOSED, REOPENED
+  or REPOSTED and that names a source becomes one `job_*` signal. The first history entry, when it
+  is a sourced `VERIFIED_LIVE` (an authoritative ATS first sighting; there is no `DISCOVERED`),
+  is `job_discovered`. Id and dedupe key are deterministic (job, target state, transition time).
 - Evidence: the `market_job_evidence` records of the same job, source and time (ids in
   `facts.evidenceIds`, snapshot ids in `evidence[]`); confidence `high`. When none is found (a
   merged copy's evidence lives under its copy key) the signal cites the job's lifecycle history and
@@ -245,8 +253,12 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   `contracts/market-imports.md`.
 - Found while testing: the board-file contact guard refused real Greenhouse job links (a 10-digit
   posting id reads as a phone number) and Lever/Ashby UUID links with long digit runs. In board and
-  job URL files only, the posting id on an ATS host is now set aside after the phone-shaped segment
-  checks; ids starting 0 or 7 are still refused (fail closed).
+  job URL files only, the posting id is set aside on the same hosts `boardRefFromUrl` accepts
+  (including `boards.eu.greenhouse.io`): Greenhouse only `/<board>/jobs/<id>`, Ashby and Lever
+  job pages only `/<board>/<uuid>`. A phone-length run (10–16 digits starting 0 or 44) and an id
+  starting with 7 are still refused. `market.refresh_imported_boards` swallows only `invalid_state`
+  (a disabled source). Any other `runNow` error fails the node so the retry uses
+  `job_urls:<runId>:<sourceId>`.
 - Admin ask: `/imports/new/jobs` (URL column mapping; same flow as `ats_boards`).
 - Not yet verified on the owner's real job link file (Source DoD 1/7).
 
@@ -268,9 +280,12 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
 ## OPS-4 signals — canonical-change part (implemented 2026-10-30)
 
 - `CompanyChangeSignalWriter` (`signals/company-change-signals.ts`), daily
-  `market.signals.company_changes`. Rules in DECISION_LOG 2026-10-30. Test:
-  `company-change-signals.int.test.ts` (baseline, each signal type, replay, acceleration window,
-  no-evidence skip). Not done: `funding_event`, team/leadership (no source yet).
+  `market.signals.company_changes`. Rules in DECISION_LOG 2026-10-30. A field whose signal was not
+  written for lack of evidence stays at the previous value and is retried. Hiring acceleration is
+  not emitted on the first comparison after baseline, nor when the prior 28-day window is empty.
+  The pass resumes from the last company id in `market_signal_writer_cursors` and wraps to the
+  start when the id space is exhausted. Test: `company-change-signals.int.test.ts`. Not done:
+  `funding_event`, team/leadership (no source yet).
 
 ## FE-4 artifact delete (approved 2026-10-30)
 

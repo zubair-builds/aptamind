@@ -16,6 +16,7 @@ import {
 } from './company-directory';
 import { beginRow, endRow } from './contact-grammar';
 import {
+  ATS_BOARD_HOST,
   canonicalText,
   contactValueVerdict,
   directoryDomain,
@@ -63,10 +64,6 @@ export function boardDirectoryColumns(config: AtsBoardDirectoryConfig): string[]
   const c = config.columns;
   return [c.provider, c.token, c.company, c.domain, c.url].filter((x): x is string => !!x);
 }
-
-/** Board hosts of Greenhouse, Lever and Ashby (pages, embeds and public APIs; EU hosts too). */
-const ATS_BOARD_HOST =
-  /^((job-)?boards(\.eu)?\.greenhouse\.io|boards-api(\.eu)?\.greenhouse\.io|(jobs|api)(\.eu)?\.lever\.co|(jobs|api)\.ashbyhq\.com)$/;
 
 /**
  * The board named by a board or job URL (OPS-1b). `invalid`: a board host, but no readable

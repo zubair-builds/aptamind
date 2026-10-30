@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { DAY_MS } from '@aptamind/contracts';
 import { createTestInfra, type TestInfra } from '@aptamind/testing';
 import type { MarketContext } from './context';
 import { LifecycleSignalWriter } from './signals/lifecycle-signals';
@@ -65,5 +66,64 @@ describe('lifecycle signals (OPS-4)', () => {
     expect(again.existing).toBe(3);
     expect(await infra.db.collection('market_signals').countDocuments()).toBe(3);
     expect(await w.cursor()).not.toBeNull();
+  });
+
+  it('resumes after the stored job watermark when maxJobs is smaller than the backlog', async () => {
+    const w = new LifecycleSignalWriter(ctx);
+    const base = new Date('2026-04-01T00:00:00.000Z');
+    const at = (days: number) => new Date(base.getTime() + days * DAY_MS);
+    await infra.db.collection('market_jobs').insertMany(
+      [1, 2, 3, 4].map((n) => ({
+        _id: `job_w${n}`,
+        companyId: 'co_1',
+        updatedAt: at(n),
+        lifecycle: {
+          history: [{ at: at(n), from: null, to: 'DISCOVERED', reason: 'listing', sourceId: 'src_1' }],
+        },
+      })) as never[],
+    );
+
+    const first = await w.run({ maxJobs: 2 });
+    expect(first.scannedJobs).toBe(2);
+    expect(first.written).toBe(2);
+    expect(await w.cursor()).toEqual(at(2));
+
+    const second = await w.run({ maxJobs: 2 });
+    expect(second.scannedJobs).toBe(2);
+    expect(second.written).toBe(2);
+    expect(await w.cursor()).toEqual(at(4));
+    expect(
+      await infra.db
+        .collection('market_signals')
+        .countDocuments({
+          type: 'job_discovered',
+          'facts.jobId': { $in: ['job_w1', 'job_w2', 'job_w3', 'job_w4'] },
+        }),
+    ).toBe(4);
+
+    // A job already passed in the keyset, then updated, is scanned on the next pass.
+    const bumped = at(10);
+    await infra.db.collection('market_jobs').updateOne(
+      { _id: 'job_w1' } as never,
+      {
+        $set: { updatedAt: bumped },
+        $push: {
+          'lifecycle.history': {
+            at: bumped,
+            from: 'DISCOVERED',
+            to: 'CLOSED',
+            reason: 'absent',
+            sourceId: 'src_1',
+          },
+        },
+      } as never,
+    );
+    const third = await w.run({ maxJobs: 2 });
+    expect(third.scannedJobs).toBe(1);
+    expect(third.written).toBe(1);
+    expect(await w.cursor()).toEqual(bumped);
+    expect(
+      await infra.db.collection('market_signals').findOne({ type: 'job_closed', 'facts.jobId': 'job_w1' }),
+    ).toMatchObject({ facts: { to: 'CLOSED' } });
   });
 });

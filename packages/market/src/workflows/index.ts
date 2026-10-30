@@ -757,7 +757,7 @@ export const retentionSweepWorkflow: WorkflowSpec = {
   key: 'market.retention.sweep',
   title: 'Retention sweep',
   description:
-    'Releases raw snapshots past their retention window that no open review, current observation or latest-of-source read still needs.',
+    'Releases raw snapshots past their retention window that no open review, current observation, job or signal evidence, canonical fact, or latest-of-source read still needs.',
   nodes: [
     scheduleTrigger,
     { id: 'sweep', capability: { type: 'market.retention_sweep', version: 1 }, input: {} },

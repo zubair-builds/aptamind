@@ -75,7 +75,16 @@ export const signalsCollection = defineCollection<SignalDoc>({
     {
       key: { 'facts.writer': 1, createdAt: -1 },
       options: { name: 'by_writer_time', sparse: true },
-      rationale: 'OPS-4 writer cursor: the latest signal a writer recorded.',
+      rationale:
+        'Signals of one writer, newest first. Resume points live in market_signal_writer_cursors, not here.',
+    },
+    {
+      key: { 'evidence.snapshotId': 1 },
+      options: {
+        name: 'by_evidence_snapshot',
+        partialFilterExpression: { 'evidence.snapshotId': { $exists: true } },
+      },
+      rationale: 'Retention sweep (OPS-3): a snapshot cited by signal evidence is held.',
     },
   ],
 });
@@ -103,5 +112,38 @@ export const companySignalStateCollection = defineCollection<CompanySignalStateD
   description: 'Derived per-company state the OPS-4 canonical-change signal writer compares against.',
   schema: companySignalStateDocSchema,
   schemaVersion: SIGNAL_SCHEMA_VERSION,
+  indexes: [],
+});
+
+/** `_id` of the lifecycle writer's resume document in `market_signal_writer_cursors`. */
+export const LIFECYCLE_SIGNAL_CURSOR_ID = 'lifecycle';
+/** `_id` of the company-change writer's resume document. */
+export const COMPANY_CHANGE_CURSOR_ID = 'company_change';
+
+/**
+ * OPS-4 signal-writer resume points. Derived bookkeeping: dropping a document only makes the next
+ * pass rescan (signal dedupe keys make that a no-op). The lifecycle writer stores the
+ * `(updatedAt, _id)` of the last job it scanned; the company-change writer stores the last company
+ * id (`''` means the next pass starts at the beginning).
+ */
+export const signalWriterCursorDocSchema = z.object({
+  _id: z.string(),
+  /** Lifecycle writer: `updatedAt` of the last job scanned. */
+  jobUpdatedAt: z.date().optional(),
+  /** Lifecycle writer: `_id` of that job (keyset tiebreak). */
+  jobId: z.string().optional(),
+  /** Company-change writer: last company id scanned; `''` wraps to the start. */
+  companyId: z.string().optional(),
+  updatedAt: z.date(),
+});
+export type SignalWriterCursorDoc = z.infer<typeof signalWriterCursorDocSchema>;
+
+export const signalWriterCursorsCollection = defineCollection<SignalWriterCursorDoc>({
+  name: 'market_signal_writer_cursors',
+  description:
+    'Resume points of the OPS-4 signal writers (lifecycle job keyset and company-change company id).',
+  schema: signalWriterCursorDocSchema,
+  schemaVersion: SIGNAL_SCHEMA_VERSION,
+  // One document per writer, read by `_id`. The job keyset uses `market_jobs.by_updated`.
   indexes: [],
 });

@@ -121,4 +121,56 @@ describe('retention (OPS-3)', () => {
     expect(l?.retentionClass).toBe('register_snapshot');
     expect(l?.expiresAt).toEqual(at(365));
   });
+
+  it('holds a snapshot cited only by job evidence, a signal, or a canonical fact', async () => {
+    await infra.db.collection('market_sources').insertOne({
+      _id: 'src_cite',
+      category: 'job_source',
+      authority: { tier: 'company_controlled' },
+    } as never);
+    now = at(500);
+    const jobEv = await snap('src_cite', 'only-job-evidence');
+    const sigEv = await snap('src_cite', 'only-signal');
+    const companyFact = await snap('src_cite', 'only-company-fact');
+    const jobFact = await snap('src_cite', 'only-job-fact');
+    now = at(501);
+    const latest = await snap('src_cite', 'cite-latest');
+    await infra.db.collection('market_job_evidence').insertOne({
+      _id: 'jev_hold',
+      jobId: 'job_hold',
+      snapshotId: jobEv._id,
+    } as never);
+    await infra.db.collection('market_signals').insertOne({
+      _id: 'sig_hold',
+      evidence: [{ sourceId: 'src_cite', snapshotId: sigEv._id, observedAt: now }],
+    } as never);
+    await infra.db.collection('market_companies').insertOne({
+      _id: 'co_hold',
+      identity: {
+        displayName: { evidence: [{ sourceId: 'src_cite', snapshotId: companyFact._id, observedAt: now }] },
+      },
+    } as never);
+    await infra.db.collection('market_jobs').insertOne({
+      _id: 'job_fact_hold',
+      identity: {
+        title: { evidence: [{ sourceId: 'src_cite', snapshotId: jobFact._id, observedAt: now }] },
+      },
+    } as never);
+
+    now = at(600);
+    const res = await ret.sweep();
+    expect((await get(jobEv._id))?.expiredAt).toBeUndefined();
+    expect((await get(sigEv._id))?.expiredAt).toBeUndefined();
+    expect((await get(companyFact._id))?.expiredAt).toBeUndefined();
+    expect((await get(jobFact._id))?.expiredAt).toBeUndefined();
+    expect((await get(latest._id))?.expiredAt).toBeUndefined();
+    expect((await get(jobEv._id))?.retentionHold?.reason).toBe('job_evidence');
+    expect((await get(sigEv._id))?.retentionHold?.reason).toBe('signal_evidence');
+    expect((await get(companyFact._id))?.retentionHold?.reason).toBe('canonical_fact');
+    expect((await get(jobFact._id))?.retentionHold?.reason).toBe('canonical_fact');
+    expect((await get(latest._id))?.retentionHold?.reason).toBe('latest_of_source');
+    expect(res.held.job_evidence).toBeGreaterThanOrEqual(1);
+    expect(res.held.signal_evidence).toBeGreaterThanOrEqual(1);
+    expect(res.held.canonical_fact).toBeGreaterThanOrEqual(2);
+  });
 });
