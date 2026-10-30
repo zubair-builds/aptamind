@@ -67,3 +67,32 @@ export const writeLifecycleSignals = defineCapability({
     return ctx.services.get(MARKET).lifecycleSignals.run({ maxJobs: input.maxJobs });
   },
 });
+
+/** OPS-4: canonical-change signals (sponsorship, remote policy, role family, location, acceleration). */
+export const writeCompanyChangeSignals = defineCapability({
+  type: 'market.write_company_change_signals',
+  version: 1,
+  title: 'Write Company Change Signals',
+  description:
+    'Compares each company with the state last seen and writes sponsorship_change, remote_policy_change, role_family_expansion, new_location_hiring and hiring_acceleration signals with evidence (first pass: baseline only).',
+  category: 'domain',
+  inputSchema: z.object({ maxCompanies: z.number().int().positive().max(1_000_000).optional() }),
+  outputSchema: z.object({
+    scanned: z.number().int(),
+    baselined: z.number().int(),
+    written: z.record(z.string(), z.number().int()),
+    skippedNoEvidence: z.number().int(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'Signal dedupe keys include the state revision compared against; the state advances by compare-and-set after the signals, so a replay writes the same keys (duplicates ignored).',
+    defaultTimeoutMs: 30 * 60_000,
+  },
+  async execute(ctx, input) {
+    return ctx.services.get(MARKET).companyChangeSignals.run({ maxCompanies: input.maxCompanies });
+  },
+});

@@ -21,6 +21,11 @@ export const SIGNAL_TYPES = [
   'job_closed',
   'job_reopened',
   'job_reposted',
+  // Vocabulary v1 canonical-change signals (OPS-4, writer company-change/1).
+  'hiring_acceleration',
+  'role_family_expansion',
+  'new_location_hiring',
+  'sponsorship_change',
 ] as const;
 
 /**
@@ -73,4 +78,30 @@ export const signalsCollection = defineCollection<SignalDoc>({
       rationale: 'OPS-4 writer cursor: the latest signal a writer recorded.',
     },
   ],
+});
+
+/**
+ * OPS-4 canonical-change detection state: what the company-change writer last saw per company.
+ * A DERIVED cache (rebuildable); `rev` fences concurrent passes. The first pass of a company only
+ * records a baseline (no signals): unknown history stays unknown, never a burst of "new" signals.
+ */
+export const companySignalStateDocSchema = z.object({
+  _id: z.string(),
+  writer: z.string(),
+  capability: z.string(),
+  remotePolicy: z.string().nullable(),
+  roleFamilies: z.array(z.string()),
+  locations: z.array(z.string()),
+  rev: z.number().int(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+export type CompanySignalStateDoc = z.infer<typeof companySignalStateDocSchema>;
+
+export const companySignalStateCollection = defineCollection<CompanySignalStateDoc>({
+  name: 'market_company_signal_state',
+  description: 'Derived per-company state the OPS-4 canonical-change signal writer compares against.',
+  schema: companySignalStateDocSchema,
+  schemaVersion: SIGNAL_SCHEMA_VERSION,
+  indexes: [],
 });

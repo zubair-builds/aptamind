@@ -781,6 +781,21 @@ export const lifecycleSignalsWorkflow: WorkflowSpec = {
   defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
 };
 
+/** OPS-4 — daily canonical-change signal writer (vocabulary v1). */
+export const companyChangeSignalsWorkflow: WorkflowSpec = {
+  key: 'market.signals.company_changes',
+  title: 'Company change signals',
+  description:
+    'Records sponsorship, remote policy, role family, location and hiring acceleration signals from canonical changes.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'signals', capability: { type: 'market.write_company_change_signals', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'signals' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
+};
+
 /** WF5 — re-run interpretation/reconciliation for a job (e.g. after a logic version bump). */
 export const jobReinterpret: WorkflowSpec = {
   key: 'market.job.reinterpret',
@@ -899,6 +914,7 @@ export const marketWorkflows: WorkflowSpec[] = [
   freshnessSweepWorkflow,
   retentionSweepWorkflow,
   lifecycleSignalsWorkflow,
+  companyChangeSignalsWorkflow,
   jobReinterpret,
   jobsReinterpretOutdated,
   sourceRecomputeJobs,

@@ -264,3 +264,10 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   (`process_sponsor_row` → `skipped_ignored_route`) and the generic register import.
 - Never-delist (`company-policy/3`): see DECISION_LOG 2026-10-30. Test:
   `uk-route-taxonomy.int.test.ts` (fails when the reconciler skip is removed).
+
+## OPS-4 signals — canonical-change part (implemented 2026-10-30)
+
+- `CompanyChangeSignalWriter` (`signals/company-change-signals.ts`), daily
+  `market.signals.company_changes`. Rules in DECISION_LOG 2026-10-30. Test:
+  `company-change-signals.int.test.ts` (baseline, each signal type, replay, acceleration window,
+  no-evidence skip). Not done: `funding_event`, team/leadership (no source yet).
