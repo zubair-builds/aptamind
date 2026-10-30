@@ -256,3 +256,11 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   numbers and fixtures: DECISION_LOG 2026-10-30. Tests:
   `sources/providers/registers/real-file-gate.test.ts` and the scratch-database import in
   `nl-register.int.test.ts`. Enabling either source on the MVP database is a separate step.
+
+## M8.4b UK route taxonomy (implemented 2026-10-30)
+
+- `UK_ROUTES` (`registers/uk.ts`, `uk-routes/1`): Government Authorised Exchange, Seasonal Worker,
+  International Agreement are ignored by `market.uk_sponsor_register.import`
+  (`process_sponsor_row` → `skipped_ignored_route`) and the generic register import.
+- Never-delist (`company-policy/3`): see DECISION_LOG 2026-10-30. Test:
+  `uk-route-taxonomy.int.test.ts` (fails when the reconciler skip is removed).

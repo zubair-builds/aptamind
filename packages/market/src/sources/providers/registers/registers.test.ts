@@ -45,14 +45,17 @@ describe('register adapter registry', () => {
   });
 });
 
-describe('UK register adapter (behaviour unchanged)', () => {
+describe('UK register adapter (M2 mapping; M8.4b route taxonomy)', () => {
   it('maps every fixture row exactly as the M2 workflow mapping does', () => {
     const parsed = ukSponsorRegisterAdapter.parse(fixture('uk-sponsor', 'register-t1.csv'));
     expect(parsed.format).toBe('csv');
     expect(parsed.rows).toHaveLength(23);
     expect(parsed.skipped.map((s) => s.reason)).toEqual(['no_name', 'no_route']);
     for (const row of parsed.rows) {
-      expect(classifyRoute(ukSponsorRegisterAdapter, row.route).meaning).toBe('labour');
+      // M8.4b: Government Authorised Exchange is ignored; every other fixture route stays labour.
+      expect(classifyRoute(ukSponsorRegisterAdapter, row.route).meaning).toBe(
+        row.route === 'Government Authorised Exchange' ? 'ignored' : 'labour',
+      );
       expect(ukSponsorRegisterAdapter.toObservation(row)).toEqual(sponsorRowToPayload(row));
     }
     const acme = ukSponsorRegisterAdapter.toObservation(parsed.rows[0]!);
@@ -60,6 +63,25 @@ describe('UK register adapter (behaviour unchanged)', () => {
       externalId: 'acme ltd|london|skilled worker',
       payload: { sponsorLicence: { register: 'uk_home_office_licensed_sponsors_workers', country: 'GB' } },
     });
+  });
+
+  it('M8.4b: ignores exactly the three Temporary Worker routes; unlisted routes stay labour', () => {
+    for (const r of [
+      'Government Authorised Exchange',
+      'Seasonal Worker',
+      'International Agreement',
+      'temporary worker - seasonal worker',
+    ])
+      expect(classifyRoute(ukSponsorRegisterAdapter, r).meaning, r).toBe('ignored');
+    for (const r of [
+      'Skilled Worker',
+      'Global Business Mobility: Senior or Specialist Worker',
+      'Creative Worker',
+      'Charity Worker',
+      'Scale-up',
+      'Seasonal Worker Pilot Extension',
+    ])
+      expect(classifyRoute(ukSponsorRegisterAdapter, r).meaning, r).toBe('labour');
   });
 
   it('refuses an HTML page and a CSV without the register columns', () => {

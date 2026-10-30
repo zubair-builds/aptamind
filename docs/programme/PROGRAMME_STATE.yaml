@@ -187,7 +187,7 @@ streams:
     status: 'idle — M8.1 merged (PR 27); next per roadmap.public_market'
     follow_ups:
       - 'Test fixtures: verification-races ashbyBoard job() descriptions collide (race-tp-fresh merges into race-tp at 0.89 similarity); give each board a non-colliding description'
-      - 'M8.4b UK route taxonomy: ignore Government Authorised Exchange, Seasonal Worker, International Agreement (policy bump + reconcile that never delists)'
+      - 'M8.4b UK route taxonomy: DONE 2026-10-30 on prog/market-ops-next (uk-routes/1, company-policy/3, never-delist reconcile; PR 2)'
       - 'Generic sponsorship history shape before DOL LCA (M11.5 remainder); historyCountries recency window; NL no-KvK collision key; historyCountries in the company list API'
       - 'Exact-name lookups never find qualified keys (name:x#gb), so later rows for a qualified company re-review (PR 27 note)'
       - 'Header guard over-refuses headers starting/ending with a person token (Telecoms, Hotel) (PR 27, Low)'

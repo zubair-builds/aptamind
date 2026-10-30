@@ -279,9 +279,9 @@ describe('NL IND register (M8.4)', () => {
     expect(run.output).toMatchObject({ complete: true, anomaly: null });
     expect(await parseOutput(run._id)).toMatchObject({
       register: 'uk_home_office_licensed_sponsors_workers',
-      count: 23,
+      count: 22, // M8.4b: the Government Authorised Exchange row is ignored
     });
-    expect(await t.market.observations.companyObservations.countDocuments({ sourceId: source._id })).toBe(23);
+    expect(await t.market.observations.companyObservations.countDocuments({ sourceId: source._id })).toBe(22);
     const acme = await t.market.companies.col.findOne({ 'identity.normalizedName': 'acme ltd' });
     expect(acme?.employment.sponsorship.licences.map((l) => [l.route, l.country]).sort()).toEqual([
       ['Global Business Mobility: Senior or Specialist Worker', 'GB'],

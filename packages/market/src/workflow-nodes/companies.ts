@@ -25,6 +25,7 @@ import {
   registerAdapterForProvider,
 } from '../sources/providers/registers';
 import { sponsorRowToPayload, UK_SPONSOR_PARSER } from '../sources/providers/uk-sponsor-register';
+import { classifyRoute, ukSponsorRegisterAdapter } from '../sources/providers/registers';
 
 const processOutcome = z.object({
   outcome: z.string(),
@@ -201,6 +202,9 @@ export const processSponsorRow = defineCapability({
       'Observation id = hash(source, row, payload); resolution and reconciliation are deterministic and recompute from evidence.',
   },
   async execute(ctx, input) {
+    // M8.4b: a route the UK taxonomy ignores is not evidence (same rule as the generic import).
+    if (input.row.route && classifyRoute(ukSponsorRegisterAdapter, input.row.route).meaning === 'ignored')
+      return { outcome: 'skipped_ignored_route' };
     const mapped = sponsorRowToPayload(input.row);
     if (!mapped) return { outcome: 'skipped_invalid_row' };
     const r = await ctx.services.get(MARKET).companyPipeline.process({
