@@ -15,6 +15,12 @@ export const SIGNAL_TYPES = [
   'product_launch',
   'remote_policy_change',
   'job_mention',
+  // Signal vocabulary v1 (DECISION_LOG 2026-10-01 O): lifecycle signals written by OPS-4.
+  'job_discovered',
+  'job_changed',
+  'job_closed',
+  'job_reopened',
+  'job_reposted',
 ] as const;
 
 /**
@@ -60,6 +66,11 @@ export const signalsCollection = defineCollection<SignalDoc>({
       key: { type: 1, state: 1, observedAt: -1 },
       options: { name: 'by_type_state' },
       rationale: 'Signal triage lists.',
+    },
+    {
+      key: { 'facts.writer': 1, createdAt: -1 },
+      options: { name: 'by_writer_time', sparse: true },
+      rationale: 'OPS-4 writer cursor: the latest signal a writer recorded.',
     },
   ],
 });

@@ -751,6 +751,20 @@ export const retentionSweepWorkflow: WorkflowSpec = {
   defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
 };
 
+/** OPS-4 — hourly lifecycle signal writer (vocabulary v1). */
+export const lifecycleSignalsWorkflow: WorkflowSpec = {
+  key: 'market.signals.lifecycle',
+  title: 'Lifecycle signals',
+  description: 'Records a market signal, with evidence, for each new job lifecycle transition.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'signals', capability: { type: 'market.write_lifecycle_signals', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'signals' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
+};
+
 /** WF5 — re-run interpretation/reconciliation for a job (e.g. after a logic version bump). */
 export const jobReinterpret: WorkflowSpec = {
   key: 'market.job.reinterpret',
@@ -868,6 +882,7 @@ export const marketWorkflows: WorkflowSpec[] = [
   verifyDueJobs,
   freshnessSweepWorkflow,
   retentionSweepWorkflow,
+  lifecycleSignalsWorkflow,
   jobReinterpret,
   jobsReinterpretOutdated,
   sourceRecomputeJobs,

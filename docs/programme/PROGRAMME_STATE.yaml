@@ -112,7 +112,9 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
     OPS-3:
       branch: prog/market-ops-next
       status: 'implemented 2026-10-30 (PR pending review): retentionClass/expiresAt/pinned/expiredAt on market_snapshots, policy retention/1, market.retention.sweep daily workflow (release marks only; holds latest-of-source, open-review evidence, current observations). Byte deletion needs an ArtifactStore delete = Foundation Exception candidate FE-4.'
-    OPS-4: { branch: market/ops-4-signals, status: planned, after: MKT-OPS-1 }
+    OPS-4:
+      branch: prog/market-ops-next
+      status: 'lifecycle part implemented 2026-10-30 (PR pending review): market.signals.lifecycle hourly writer, vocabulary v1 job_discovered/changed/closed/reopened/reposted with job-evidence ids and snapshot ids, deterministic dedupe. Remaining vocabulary (HIRING_ACCELERATION, ROLE_FAMILY_EXPANSION, NEW_LOCATION_HIRING, REMOTE_POLICY_CHANGE, FUNDING_EVENT, SPONSORSHIP_CHANGE, TEAM_OR_LEADERSHIP_CHANGE) needs canonical-change writers: planned.'
     OPS-5: { branch: market/ops-5-job-urls, status: planned, after: MKT-OPS-1 }
   sources: # wave -> status (done only per the source Definition of Done in streams/market-ops.md)
     1-company-lists: 'operational (live company import 2026-10-02; careers discovery found all 3 boards)'

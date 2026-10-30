@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { defineCapability } from '@aptamind/workflow-sdk';
 import { MARKET } from '../market-domain';
 
+/** OPS-3 retention and OPS-4 signal capabilities. */
+
 /** OPS-3: release expired, unreferenced Market snapshots (marks only; never deletes records). */
 export const retentionSweep = defineCapability({
   type: 'market.retention_sweep',
@@ -34,5 +36,34 @@ export const retentionSweep = defineCapability({
   },
   async execute(ctx, input) {
     return ctx.services.get(MARKET).retention.sweep({ limit: input.limit });
+  },
+});
+
+/** OPS-4: lifecycle signals (vocabulary v1) from recorded job lifecycle transitions. */
+export const writeLifecycleSignals = defineCapability({
+  type: 'market.write_lifecycle_signals',
+  version: 1,
+  title: 'Write Lifecycle Signals',
+  description:
+    'Writes job_discovered/changed/closed/reopened/reposted signals, with evidence, for lifecycle transitions of jobs written since the writer cursor.',
+  category: 'domain',
+  inputSchema: z.object({ maxJobs: z.number().int().positive().max(100_000).optional() }),
+  outputSchema: z.object({
+    scannedJobs: z.number().int(),
+    written: z.number().int(),
+    existing: z.number().int(),
+    since: z.date().nullable(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'Each signal has a deterministic id and unique dedupe key (job, target state, transition time); a replay inserts nothing new.',
+    defaultTimeoutMs: 10 * 60_000,
+  },
+  async execute(ctx, input) {
+    return ctx.services.get(MARKET).lifecycleSignals.run({ maxJobs: input.maxJobs });
   },
 });

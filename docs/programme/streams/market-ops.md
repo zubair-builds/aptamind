@@ -220,3 +220,19 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   reference-counted delete of an artifact only when every snapshot using it is released).
 - Gap: "current fact" is approximated by current observations; canonical fact evidence that cites a
   snapshot directly is not checked separately (facts cite observations of that snapshot).
+
+## OPS-4 signals — lifecycle part (implemented 2026-10-30)
+
+- `LifecycleSignalWriter` (`packages/market/src/signals/lifecycle-signals.ts`, writer `lifecycle/1`)
+  and the hourly `market.signals.lifecycle` workflow. For jobs written since the cursor (latest
+  signal of this writer minus a 2 h overlap; first run scans all), each lifecycle history entry
+  whose target is DISCOVERED, CHANGED, CLOSED, REOPENED or REPOSTED and that names a source becomes
+  one `job_*` signal. Id and dedupe key are deterministic (job, target state, transition time).
+- Evidence: the `market_job_evidence` records of the same job, source and time (ids in
+  `facts.evidenceIds`, snapshot ids in `evidence[]`); confidence `high`. When none is found (a
+  merged copy's evidence lives under its copy key) the signal cites the job's lifecycle history and
+  is `medium`. Transitions without a source (decay) are not signals.
+- Signals are append-only; a re-derivation that drops a transition leaves its signal (documented
+  limitation; signals are events observed, not canonical truth).
+- Not done: aggregate and canonical-change signals of vocabulary v1 (hiring acceleration, role
+  family expansion, new location, remote policy, funding, sponsorship, team/leadership).
