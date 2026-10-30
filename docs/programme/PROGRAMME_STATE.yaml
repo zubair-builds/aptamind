@@ -27,6 +27,10 @@ foundation:
       title: restrict generic run views (outputRef, outputPreview, node-run IO) for private domains
       status: candidate
       note: 'until then Professional node IO carries ids/counts/codes only (R-34, canary-enforced); generic mutations of professional.* runs refused at composition (PR 24); generic reads remain and must be restricted before real personal data'
+    - id: FE-4
+      title: reference-counted ArtifactStore delete (an artifact is deleted only when every snapshot using it is released)
+      status: 'approved by owner 2026-10-30; implementation on a stacked branch (depends on OPS-3 release marks)'
+      record: foundation-exceptions/FE-4-artifact-delete.md (to be written with the implementation)
     - id: FE-T1
       title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
       status: candidate

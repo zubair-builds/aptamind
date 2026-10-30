@@ -271,3 +271,8 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   `market.signals.company_changes`. Rules in DECISION_LOG 2026-10-30. Test:
   `company-change-signals.int.test.ts` (baseline, each signal type, replay, acceleration window,
   no-evidence skip). Not done: `funding_event`, team/leadership (no source yet).
+
+## FE-4 artifact delete (approved 2026-10-30)
+
+- Owner approved FE-4. It lands as a separate PR stacked on PR 2 (needs OPS-3 `expiredAt`).
+  Until then retention stays marks-only.
