@@ -32,22 +32,21 @@ foundation:
       status: candidate
       note: 'count only own-prefix clients; CI unaffected; locally re-run alone once'
 
-owner_decisions_pending:
+owner_decisions_pending: []
+owner_decisions_answered: # Zubair Haider, 2026-10-30 (explicit answer; DECISION_LOG)
   - id: professional-real-personal-data
-    question: May real personal data be processed before artifact erasure (FE-P2) exists?
-    default_until_answered: synthetic fixtures and owner-consented data only
-    blocking: false
+    decision: 'ALLOWED: real personal data may be processed before FE-P2 (artifact erasure) exists'
+    residual_risk: 'no erasure yet; FE-P2, FE-P7 (private run views) and FE-P8 (keyed artifact ids) still recommended before scale'
+    follow_up: 'code/config gates that still enforce the old default must be found and relaxed in a separate change'
   - id: professional-ai-processing
-    question: May professional documents be sent to the AI provider?
-    default_until_answered: 'only with recorded subject consent aiProcessing=allowed; contact details masked'
-    blocking: false
+    decision: 'ALLOWED: professional documents may be sent to the AI provider'
+    residual_risk: 'provider receives personal data; AI stays proposals-only'
+    follow_up: 'consent gate aiProcessing=allowed and contact masking still enforced in code; relax or keep as per-subject setting in a separate change'
 
 owner_actions:
   - id: push-foundation-tag
-    why: cloud session cannot push tags
-    command: >-
-      git fetch origin && git tag -a foundation-v0.1 d9799b6a2ae42a3799b25a1a0f39bb09bd857698
-      -m "Frozen Foundation v0.1 baseline" && git push origin foundation-v0.1
+    status: closed
+    resolution: "won't do in zubair-builds/aptamind: tagged sha d9799b6 exists only in mateeqazam/aptamind history, not this repo (non-blocking; owner 2026-10-30)"
     blocking: false
 
 environment:
@@ -166,8 +165,8 @@ roadmap: # 2026-09-30 lock; market_ops above takes priority (DECISION_LOG 2026-1
       ]
     next:
       - 'P2.4 resolution and assertions, then P3.2, P3.3, P4.x per streams/professional.md'
-      - 'P2.1/P2.2 deterministic document extraction; stop before AI extraction (P2.3) until owner decision professional-ai-processing'
-      - 'FE-P7 and FE-P8 before any real personal data'
+      - 'P2.1/P2.2 deterministic document extraction; P2.3 AI extraction unblocked by owner decision professional-ai-processing=ALLOWED (2026-10-30)'
+      - 'FE-P7 and FE-P8 recommended before scale (real personal data allowed by owner 2026-10-30)'
   admin_ux:
     done:
       [
@@ -312,8 +311,6 @@ branches: # remote branch -> head at handoff; merged topic branches may be delet
     ]
 
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
-  - 'Owner: push tag foundation-v0.1 (owner_actions.push-foundation-tag)'
-  - 'Owner: answer professional-real-personal-data and professional-ai-processing (defaults hold meanwhile)'
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
   - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
   - 'Professional next milestone per roadmap.private_professional.next (P2.4, or P2.1/P2.2)'
