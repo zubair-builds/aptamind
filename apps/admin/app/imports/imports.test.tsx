@@ -1,16 +1,24 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { isValidElement, type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { MappedImportPage } from '@/components/imports/MappedImportPage';
 import { RecordList } from '@/components/records/table/RecordList';
 import { importsObject } from '@/components/records/registry/imports';
 import type { ImportDetail } from '@/lib/types';
 import ImportPage from './[id]/page';
+import ImportJobLinksPage from './new/jobs/page';
 import NewImportPage from './new/page';
 
-const mocks = vi.hoisted(() => ({ getImport: vi.fn(), apiGet: vi.fn(), refresh: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  getImport: vi.fn(),
+  apiGet: vi.fn(),
+  refresh: vi.fn(),
+  startImport: vi.fn(),
+}));
 vi.mock('@/lib/imports', () => ({ getImport: mocks.getImport }));
 vi.mock('@/lib/api', () => ({ apiGet: mocks.apiGet }));
+vi.mock('@/lib/import-actions', () => ({ startMappedImportAction: mocks.startImport }));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ refresh: mocks.refresh, push: vi.fn(), replace: vi.fn() }),
   usePathname: () => '/imports',
@@ -72,6 +80,7 @@ const hrefs = () => [...document.querySelectorAll('a')].map((a) => a.getAttribut
 beforeEach(() => {
   mocks.getImport.mockReset();
   mocks.apiGet.mockReset();
+  mocks.startImport.mockReset();
 });
 afterEach(cleanup);
 
@@ -137,6 +146,18 @@ describe('/imports/[id]', () => {
     expect(text('url_mismatch')).toMatch(/does not match the URL/);
     expect(text('missing_board')).toMatch(/no provider, token or URL/);
     expect(text('invalid_url')).toMatch(/no board token can be read/);
+  });
+
+  it('explains the same board report codes for a job link import', async () => {
+    mocks.getImport.mockResolvedValue({
+      ok: true,
+      status: 200,
+      data: { ...IMP, type: 'jobs', trace: { ...IMP.trace, reportArtifactId: 'art_report' } },
+    });
+    render(await ImportPage({ params: Promise.resolve({ id: 'imp_1' }) }));
+    expect(screen.getAllByText('Job links').length).toBeGreaterThan(0);
+    expect(screen.getByText('Boards registered')).toBeTruthy();
+    expect(screen.getByText('What the row codes in the report mean')).toBeTruthy();
   });
 
   it('shows no ATS code legend for other import types or without a report', async () => {
@@ -206,10 +227,57 @@ describe('/imports/[id]', () => {
 });
 
 describe('/imports/new', () => {
-  it('offers the three import types and Jobs as coming soon', () => {
+  it('offers every import type, including job links', () => {
     render(<NewImportPage />);
-    expect(hrefs()).toEqual(['/imports/new/companies', '/imports/new/ats-boards', '/imports/new/snapshot']);
-    expect(screen.getByText('Coming soon')).toBeTruthy();
+    expect(hrefs()).toEqual([
+      '/imports/new/companies',
+      '/imports/new/ats-boards',
+      '/imports/new/snapshot',
+      '/imports/new/jobs',
+    ]);
+    expect(screen.getByRole('link', { name: /Job links/ })).toBeTruthy();
+    expect(screen.queryByText('Coming soon')).toBeNull();
+  });
+});
+
+describe('/imports/new/jobs', () => {
+  it('renders and requires a url mapping', async () => {
+    mocks.apiGet.mockResolvedValue({ ok: true, status: 200, data: { items: [], nextCursor: null } });
+    mocks.startImport.mockResolvedValue({ ok: true, importId: 'imp_9' });
+    // The page is a server component that renders another. Next resolves that; the test does too.
+    const page = ImportJobLinksPage();
+    if (!isValidElement(page) || page.type !== MappedImportPage) throw new Error('expected MappedImportPage');
+    const props = page.props as { type: string; subtitle: string };
+    expect(props.type).toBe('jobs');
+    if (props.type !== 'jobs') return;
+    render(await MappedImportPage({ type: props.type, subtitle: props.subtitle }));
+    expect(screen.getByRole('heading', { name: 'Import job links' })).toBeTruthy();
+    expect(screen.getByText(/Each row is a job link \(Greenhouse, Ashby or Lever\)/)).toBeTruthy();
+    expect(screen.getByText(/refreshed right away/)).toBeTruthy();
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['Company,Notes\nAcme,x\n'], 'links.csv', { type: 'text/csv' });
+    Object.defineProperty(input, 'files', { value: [file], configurable: true });
+    fireEvent.change(input);
+
+    const company = (await screen.findByLabelText('Import Company as')) as HTMLSelectElement;
+    expect(company.value).toBe('company');
+    const values = [...company.options].map((o) => o.value);
+    expect(values).toEqual(expect.arrayContaining(['url', 'company', 'domain']));
+    expect(values).not.toContain('provider');
+    expect(values).not.toContain('token');
+    expect(screen.getByText('Choose a column for Job link.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Start import' }) as HTMLButtonElement).disabled).toBe(true);
+
+    fireEvent.change(screen.getByLabelText('Import Notes as'), { target: { value: 'url' } });
+    expect(screen.queryByText('Choose a column for Job link.')).toBeNull();
+    const start = screen.getByRole('button', { name: 'Start import' }) as HTMLButtonElement;
+    expect(start.disabled).toBe(false);
+    fireEvent.click(start);
+    await waitFor(() => expect(mocks.startImport).toHaveBeenCalled());
+    const fd = mocks.startImport.mock.calls[0]![0] as FormData;
+    expect(fd.get('type')).toBe('jobs');
+    expect(JSON.parse(fd.get('columns') as string)).toEqual({ company: 'Company', url: 'Notes' });
   });
 });
 

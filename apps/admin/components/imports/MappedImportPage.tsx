@@ -8,9 +8,10 @@ const LIMIT = 200;
 const TITLES: Record<MappedImportType, string> = {
   companies: 'Import companies',
   ats_boards: 'Import known ATS boards',
+  jobs: 'Import job links',
 };
 
-/** Server half of the Companies / Known ATS boards pages: loads the existing lists of the provider. */
+/** Server half of the mapped import pages: loads the existing lists of the provider. */
 export async function MappedImportPage({ type, subtitle }: { type: MappedImportType; subtitle: string }) {
   const kind = IMPORT_KINDS[type];
   const res = await apiGet<{ items: SourceListItem[]; nextCursor: string | null }>('/api/sources', {

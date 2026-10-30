@@ -5,7 +5,7 @@ export const IMPORT_TYPE_LABELS: Record<ImportType, string> = {
   companies: 'Companies',
   ats_boards: 'Known ATS boards',
   snapshot: 'Source snapshot',
-  jobs: 'Jobs',
+  jobs: 'Job links',
 };
 
 export const importTypeLabel = (t: string) => IMPORT_TYPE_LABELS[t as ImportType] ?? t;
@@ -31,9 +31,12 @@ const ATS_COUNT_LABELS: Partial<Record<keyof ImportCounts, readonly [string, str
   created: ['Boards registered', 'boards registered'],
 };
 
+/** A board file: known ATS boards, or job links (the same report, then a refresh). */
+export const isBoardFileImport = (type?: string) => type === 'ats_boards' || type === 'jobs';
+
 /** The count labels for one import type. */
 export function countLabels(type?: string): ReadonlyArray<CountLabel> {
-  if (type !== 'ats_boards') return COUNT_LABELS;
+  if (!isBoardFileImport(type)) return COUNT_LABELS;
   return COUNT_LABELS.map(([key, label, word]) => {
     const own = ATS_COUNT_LABELS[key];
     return own ? ([key, own[0], own[1]] as const) : ([key, label, word] as const);
@@ -42,7 +45,7 @@ export function countLabels(type?: string): ReadonlyArray<CountLabel> {
 
 /** Trace label for the sources an import touched. */
 export const traceSourcesLabel = (type?: string) =>
-  type === 'ats_boards' ? 'Sources linked' : 'Sources registered';
+  isBoardFileImport(type) ? 'Sources linked' : 'Sources registered';
 
 const SUMMARY: ReadonlyArray<keyof ImportCounts> = [
   'rows',

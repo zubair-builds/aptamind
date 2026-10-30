@@ -99,11 +99,9 @@ describe('company change signals (OPS-4)', () => {
   });
 
   it('writes one sponsorship_change, one role_family_expansion and one new_location_hiring', async () => {
-    await infra.db
-      .collection('market_companies')
-      .updateOne({ _id: 'co_1' } as never, {
-        $set: { 'employment.sponsorship.capability.value': 'previously_licensed' },
-      });
+    await infra.db.collection('market_companies').updateOne({ _id: 'co_1' } as never, {
+      $set: { 'employment.sponsorship.capability.value': 'previously_licensed' },
+    });
     await infra.db
       .collection('market_jobs')
       .insertOne(jobDoc('job_2', 'co_1', expansionSeen, 'data_science_ml', 'DE', 'Berlin') as never);
@@ -224,11 +222,9 @@ describe('company change signals (OPS-4)', () => {
     expect(baseline.skippedNoEvidence).toBe(0);
     expect(baseline.written).toEqual({});
 
-    await infra.db
-      .collection('market_companies')
-      .updateOne({ _id: 'co_no_evidence' } as never, {
-        $set: { 'employment.sponsorship.capability.value': 'previously_licensed' },
-      });
+    await infra.db.collection('market_companies').updateOne({ _id: 'co_no_evidence' } as never, {
+      $set: { 'employment.sponsorship.capability.value': 'previously_licensed' },
+    });
     const before = await infra.db.collection('market_signals').countDocuments();
     const changed = await writer.run({ companyIds: ['co_no_evidence'] });
     expect(changed.written).toEqual({});

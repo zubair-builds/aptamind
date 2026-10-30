@@ -7,6 +7,7 @@ import {
   ATS_REPORT_CODES,
   countLabels,
   importTypeLabel,
+  isBoardFileImport,
   traceSourcesLabel,
 } from '@/components/imports/labels';
 import { ArtifactLink, CompanyLink, ReviewLink, RunLink, SnapshotLink, SourceLink } from '@/components/links';
@@ -175,7 +176,7 @@ export default async function ImportPage({ params }: { params: Params }) {
                       <ArtifactLink id={trace.reportArtifactId}>
                         Import report (row warnings and errors)
                       </ArtifactLink>
-                      {imp.type === 'ats_boards' ? <AtsReportCodes /> : null}
+                      {isBoardFileImport(imp.type) ? <AtsReportCodes /> : null}
                     </>
                   ) : (
                     <span className="muted">{processing ? 'Not ready yet' : 'No report'}</span>

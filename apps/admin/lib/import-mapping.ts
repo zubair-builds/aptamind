@@ -1,12 +1,13 @@
 import { type CsvRow, csvField, lineCount } from './csv';
 
 /*
- * Column mapping for the Companies and Known ATS boards imports (market-imports.md, M8.1/M8.2).
- * The browser maps file columns to fields, then uploads a reduced file with only the mapped
- * columns. The server still runs every check; these rules only stop a mapping it would refuse.
+ * Column mapping for the Companies, Known ATS boards and job-link imports
+ * (market-imports.md, M8.1/M8.2/OPS-5). The browser maps file columns to fields, then uploads a
+ * reduced file with only the mapped columns. The server still runs every check; these rules only
+ * stop a mapping it would refuse.
  */
 
-export type MappedImportType = 'companies' | 'ats_boards';
+export type MappedImportType = 'companies' | 'ats_boards' | 'jobs';
 
 export interface ImportField {
   /** Path in `acquisition.config.columns` (`registerIds.lei` is nested). */
@@ -49,10 +50,19 @@ const ATS_FIELDS: ImportField[] = [
   { key: 'url', label: 'Board or job URL' },
 ];
 
+/** Job links (OPS-5): a board file of URLs. Provider and token are read from the link, not mapped. */
+const JOB_FIELDS: ImportField[] = [
+  { key: 'url', label: 'Job link', required: true },
+  { key: 'company', label: 'Company name' },
+  { key: 'domain', label: 'Company domain' },
+];
+
 export interface ImportKind {
   type: MappedImportType;
   label: string;
   provider: string;
+  /** `POST /api/sources` category. Job-link lists are manual imports (market-sources.md). */
+  category: 'company_universe' | 'manual_import';
   workflowKey: string;
   /** `freshness` is required by `POST /api/sources`; an upload-only list never goes stale on a clock. */
   policyClass: string;
@@ -64,6 +74,7 @@ export const IMPORT_KINDS: Record<MappedImportType, ImportKind> = {
     type: 'companies',
     label: 'Companies',
     provider: 'company_directory',
+    category: 'company_universe',
     workflowKey: 'market.company_directory.import',
     policyClass: 'company.firmographics',
     fields: COMPANY_FIELDS,
@@ -72,11 +83,26 @@ export const IMPORT_KINDS: Record<MappedImportType, ImportKind> = {
     type: 'ats_boards',
     label: 'Known ATS boards',
     provider: 'ats_board_directory',
+    category: 'company_universe',
     workflowKey: 'market.ats_boards.import',
     policyClass: 'company.careers',
     fields: ATS_FIELDS,
   },
+  jobs: {
+    type: 'jobs',
+    label: 'Job links',
+    provider: 'ats_board_directory',
+    category: 'manual_import',
+    workflowKey: 'market.ats_boards.import',
+    policyClass: 'company.careers',
+    fields: JOB_FIELDS,
+  },
 };
+
+/** True for the three mapped file types. Snapshot imports are a separate form. */
+export function isMappedImportType(type: string): type is MappedImportType {
+  return Object.hasOwn(IMPORT_KINDS, type);
+}
 
 /** Column index → field key, or null for "Don't import". */
 export type Mapping = Array<string | null>;
@@ -177,6 +203,23 @@ function savedFields(columns: unknown): Map<string, string> {
   return out;
 }
 
+/** Company, domain and URL headers shared by a board file and a job-link file. */
+const BOARD_FILE_ALIASES: Record<string, string> = {
+  company: 'company',
+  companyname: 'company',
+  name: 'company',
+  domain: 'domain',
+  url: 'url',
+  boardurl: 'url',
+  link: 'url',
+  joblink: 'url',
+  joburl: 'url',
+  boardlink: 'url',
+  careersurl: 'url',
+  careerslink: 'url',
+  careerspage: 'url',
+};
+
 /** Header spellings we pre-select a field for. The operator always confirms the mapping. */
 const ALIASES: Record<MappedImportType, Record<string, string>> = {
   companies: {
@@ -204,20 +247,9 @@ const ALIASES: Record<MappedImportType, Record<string, string>> = {
     ats: 'provider',
     token: 'token',
     boardtoken: 'token',
-    company: 'company',
-    companyname: 'company',
-    name: 'company',
-    domain: 'domain',
-    url: 'url',
-    boardurl: 'url',
-    link: 'url',
-    joblink: 'url',
-    joburl: 'url',
-    boardlink: 'url',
-    careersurl: 'url',
-    careerslink: 'url',
-    careerspage: 'url',
+    ...BOARD_FILE_ALIASES,
   },
+  jobs: { ...BOARD_FILE_ALIASES },
 };
 
 const squash = (s: string) =>
@@ -233,7 +265,12 @@ const squash = (s: string) =>
  * spellings, when that field is still free.
  */
 export function suggestMapping(type: MappedImportType, header: string[], savedColumns?: unknown): Mapping {
-  const byHeader = new Map([...savedFields(savedColumns)].map(([field, col]) => [col, field]));
+  const allowed = new Set(IMPORT_KINDS[type].fields.map((f) => f.key));
+  const byHeader = new Map(
+    [...savedFields(savedColumns)].flatMap(([field, col]) =>
+      allowed.has(field) ? [[col, field] as const] : [],
+    ),
+  );
   const taken = new Set<string>();
   const out: Mapping = header.map((h) => {
     const field = byHeader.get(h);
@@ -244,7 +281,7 @@ export function suggestMapping(type: MappedImportType, header: string[], savedCo
   return out.map((field, i) => {
     if (field) return field;
     const alias = ALIASES[type][squash(header[i] ?? '')];
-    if (!alias || taken.has(alias)) return null;
+    if (!alias || !allowed.has(alias) || taken.has(alias)) return null;
     taken.add(alias);
     return alias;
   });

@@ -30,11 +30,6 @@
     text-decoration: none;
   }
 
-  .typeDisabled {
-    background: var(--bg-subtle);
-    color: var(--text-tertiary);
-  }
-
   .typeTitle {
     display: inline-flex;
     align-items: center;
@@ -46,19 +41,6 @@
     color: var(--text-secondary);
     font-size: var(--text-sm);
     line-height: var(--text-sm-lh);
-  }
-
-  .typeDisabled .typeText {
-    color: var(--text-tertiary);
-  }
-
-  .soon {
-    padding: 0 var(--space-6);
-    border-radius: var(--radius-full);
-    background: var(--tone-neutral-bg);
-    color: var(--tone-neutral-fg);
-    font-size: var(--text-xs);
-    font-weight: var(--weight-medium);
   }
 
   /* ------------------------------------------------------------------ wizard */

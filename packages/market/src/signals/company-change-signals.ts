@@ -5,7 +5,6 @@ import { companiesCollection } from '../companies/company.schema';
 import type { MarketContext } from '../context';
 import { jobsCollection } from '../jobs/job.schema';
 import {
-  type CompanySignalStateDoc,
   companySignalStateCollection,
   SIGNAL_SCHEMA_VERSION,
   type SignalDoc,
