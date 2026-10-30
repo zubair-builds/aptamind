@@ -54,6 +54,7 @@ import {
   selectOutdatedJobInterpretations,
   verifyJob,
 } from './jobs';
+import { retentionSweep } from './retention';
 import { locateRegisterDownload, parseRegisterSnapshot, processRegisterRow } from './registers';
 
 export { marketAiTasks } from './ai-tasks';
@@ -105,6 +106,7 @@ export const marketCapabilities: AnyCapability[] = [
   selectJobsDueVerification,
   verifyJob,
   freshnessSweep,
+  retentionSweep,
   selectOutdatedJobInterpretations,
   reportReinterpretBackfill,
   recomputeSourceJobs,

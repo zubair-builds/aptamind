@@ -48,6 +48,8 @@ export * from './verification/verification.service';
 export * from './freshness/policies';
 export * from './freshness/freshness.service';
 export * from './freshness/source-freshness';
+export * from './retention/policy';
+export * from './retention/retention.service';
 export * from './signals/schemas';
 export * from './queries/dashboard';
 export * from './api';

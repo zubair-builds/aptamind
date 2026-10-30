@@ -736,6 +736,21 @@ export const freshnessSweepWorkflow: WorkflowSpec = {
   defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
 };
 
+/** OPS-3 — daily retention sweep over Market snapshots (release marks only). */
+export const retentionSweepWorkflow: WorkflowSpec = {
+  key: 'market.retention.sweep',
+  title: 'Retention sweep',
+  description:
+    'Releases raw snapshots past their retention window that no open review, current observation or latest-of-source read still needs.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'sweep', capability: { type: 'market.retention_sweep', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'sweep' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
+};
+
 /** WF5 — re-run interpretation/reconciliation for a job (e.g. after a logic version bump). */
 export const jobReinterpret: WorkflowSpec = {
   key: 'market.job.reinterpret',
@@ -852,6 +867,7 @@ export const marketWorkflows: WorkflowSpec[] = [
   careersPageCrawl,
   verifyDueJobs,
   freshnessSweepWorkflow,
+  retentionSweepWorkflow,
   jobReinterpret,
   jobsReinterpretOutdated,
   sourceRecomputeJobs,

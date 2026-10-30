@@ -204,3 +204,19 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   show that reason, or the operator sees a run that did nothing.
 - **Discovery.** `register_job_source@2` looks the board up by a lowercased key, ignoring case. A board
   owned by another company raises an owner review and registers nothing.
+
+## OPS-3 retention (implemented 2026-10-30)
+
+- Policy `retention/1` (`packages/market/src/retention/policy.ts`): `web_snapshot` 30 d,
+  `register_snapshot` 365 d (source authority `official_registry`), `import_file` 90 d (uploads,
+  `manual_import` sources), `review_evidence` 180 d. Each fetch of the same bytes extends `expiresAt`.
+- `market.retention.sweep` (daily) backfills legacy snapshots, then for each snapshot past expiry
+  holds it (extending expiry, recording `retentionHold`) when it is the latest snapshot of its
+  source, is cited by an open review item, or produced a current (non-superseded) observation;
+  otherwise sets `expiredAt`. Pinned snapshots never expire. Nothing is deleted: records and
+  observations stay, so evidence references never dangle.
+- Not done: deleting released bytes. `ArtifactStore` has no delete and artifacts are
+  content-addressed across snapshots, so it needs a Foundation Exception (candidate FE-4: a
+  reference-counted delete of an artifact only when every snapshot using it is released).
+- Gap: "current fact" is approximated by current observations; canonical fact evidence that cites a
+  snapshot directly is not checked separately (facts cite observations of that snapshot).

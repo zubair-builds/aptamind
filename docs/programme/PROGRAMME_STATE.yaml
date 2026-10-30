@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-10-01T12:00Z
+updated: 2026-10-30T17:30Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -109,7 +109,9 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
       status: 'merged (PR 48, 8e5aaac); ADM-1b (board URLs and report codes in Admin) merged as PR 49'
       ruling: 'DECISION_LOG 2026-10-01 S "A live ATS board is company identity evidence"'
       input: 'owner job links give 1046 distinct boards (ashby 669, greenhouse 300, lever 77)'
-    OPS-3: { branch: market/ops-3-retention, status: planned, after: MKT-OPS-1 }
+    OPS-3:
+      branch: prog/market-ops-next
+      status: 'implemented 2026-10-30 (PR pending review): retentionClass/expiresAt/pinned/expiredAt on market_snapshots, policy retention/1, market.retention.sweep daily workflow (release marks only; holds latest-of-source, open-review evidence, current observations). Byte deletion needs an ArtifactStore delete = Foundation Exception candidate FE-4.'
     OPS-4: { branch: market/ops-4-signals, status: planned, after: MKT-OPS-1 }
     OPS-5: { branch: market/ops-5-job-urls, status: planned, after: MKT-OPS-1 }
   sources: # wave -> status (done only per the source Definition of Done in streams/market-ops.md)

@@ -3,6 +3,7 @@ import { artifactRefSchema } from '@aptamind/contracts';
 import { defineCollection } from '@aptamind/db';
 import { companyObservationPayloadSchema, jobObservationPayloadSchema } from '../contracts/observations';
 import { copyBoardSchema } from '../jobs/job.schema';
+import { RETENTION_CLASSES } from '../retention/policy';
 
 export const OBSERVATION_SCHEMA_VERSION = 1;
 
@@ -37,6 +38,21 @@ export const snapshotDocSchema = z.object({
    * run processing it is a reprocess, which never changes source health (re-verify #9 Low 4).
    */
   acquisitionRunId: z.string().optional(),
+  /**
+   * Retention (OPS-3, DECISION_LOG 2026-10-01 O "Artifact retention"). Optional for snapshots
+   * stored before it existed: the sweep backfills them. `pinned` snapshots never expire.
+   * `expiredAt` marks the snapshot's raw bytes as released (eligible for deletion); the record
+   * itself stays as history. Byte deletion needs an ArtifactStore delete (Foundation Exception).
+   */
+  retentionClass: z.enum(RETENTION_CLASSES).optional(),
+  expiresAt: z.date().optional(),
+  pinned: z.boolean().optional(),
+  pinnedReason: z.string().optional(),
+  expiredAt: z.date().optional(),
+  /** The last sweep that found the snapshot still referenced, and why. */
+  retentionHold: z
+    .object({ at: z.date(), reason: z.enum(['latest_of_source', 'open_review', 'current_observation']) })
+    .optional(),
   schemaVersion: z.number().int(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -164,6 +180,11 @@ export const companyObservationsCollection = defineCollection<CompanyObservation
       options: { name: 'by_resolution_state' },
       rationale: 'Unresolved/review backlog metrics.',
     },
+    {
+      key: { snapshotId: 1, superseded: 1 },
+      options: { name: 'by_snapshot', sparse: true },
+      rationale: 'Retention sweep (OPS-3): is a snapshot still the evidence of a current observation.',
+    },
   ],
 });
 
@@ -192,6 +213,11 @@ export const jobObservationsCollection = defineCollection<JobObservationDoc>({
       key: { 'resolution.state': 1, createdAt: 1 },
       options: { name: 'by_resolution_state' },
       rationale: 'Unresolved/review backlog metrics.',
+    },
+    {
+      key: { snapshotId: 1, superseded: 1 },
+      options: { name: 'by_snapshot', sparse: true },
+      rationale: 'Retention sweep (OPS-3): is a snapshot still the evidence of a current observation.',
     },
   ],
 });
