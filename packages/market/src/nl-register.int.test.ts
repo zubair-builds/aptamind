@@ -273,6 +273,25 @@ describe('NL IND register (M8.4)', () => {
       },
       t.actor,
     );
+    // Owner 2026-10-31: the UK register attaches to the KNOWN company universe only.
+    await t.seedUniverse([
+      'Acme Ltd',
+      'Beta Co Ltd',
+      'Gamma Health Limited',
+      { name: 'Zenith Robotics Ltd', city: 'Cambridge' },
+      'Acme Analytics Inc',
+      { name: 'Dr J Smith', city: 'Leeds' },
+      'Northwind Freight Ltd',
+      'The Riverside Café Ltd',
+      'Orion Software Solutions Ltd',
+      'Helix Biotech PLC',
+      "St Mary's Care Home Ltd",
+      'Quantum Fintech LLP',
+      'Nimbus Cloud Services Limited',
+      'Lumen Energy Ltd',
+      'Maple & Oak Interiors Ltd',
+      'Vertex Pharma UK Ltd',
+    ]);
     const snap = await t.upload(source._id, await t.fixture('uk-sponsor', 'register-t1.csv'), 'text/csv');
     const run = await t.runSource(source._id, { snapshotId: snap.snapshotId });
     expect(run.state).toBe('COMPLETED');

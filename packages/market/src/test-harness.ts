@@ -55,6 +55,40 @@ export async function createMarketTestRuntime(infra: TestInfra, opts: { leaseMs?
       const { runId } = await market.sources.runNow(sourceId, actor, extra);
       return waitForRun(runtime.engine, runId, undefined, 60_000);
     },
+    /**
+     * Seed the known company universe (owner 2026-10-31: the UK register only attaches to known
+     * companies). Each name becomes an active company from a test directory source, as an owner
+     * company list would; idempotent on the name.
+     */
+    async seedUniverse(companies: Array<string | { name: string; city?: string }>) {
+      const { source } = await market.sources.register(
+        {
+          key: 'test:company-universe',
+          name: 'Test company universe',
+          category: 'manual_import',
+          provider: 'fixture',
+          acquisition: { workflowKey: 'market.noop' },
+          freshness: { policyClass: 'company.firmographics', maxAgeMinutes: 100000 },
+          authority: { tier: 'official_site' },
+        },
+        actor,
+      );
+      for (const c of companies) {
+        const { name, city } = typeof c === 'string' ? { name: c, city: undefined } : c;
+        await market.companyPipeline.process({
+          sourceId: source._id,
+          externalId: `universe:${name.toLowerCase()}`,
+          payload: {
+            name,
+            aliases: [],
+            externalIds: [],
+            locations: city ? [{ city, region: null, country: 'GB', kind: 'hq' }] : [],
+            industries: [],
+          },
+          parser: { name: 'test-universe', version: '1' },
+        });
+      }
+    },
     async upload(sourceId: string, body: Uint8Array | string, mime: string) {
       return uploadSnapshot(market, sourceId, body, mime, actor);
     },

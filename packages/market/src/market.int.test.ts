@@ -69,6 +69,26 @@ describe('Market vertical slices', () => {
     serve('/media/fixture/2026-09-27_-_Worker_and_Temporary_Worker.csv', 'text/csv', () =>
       t.fixture('uk-sponsor', 'register-t1.csv'),
     );
+    // Owner 2026-10-31: the register attaches to the KNOWN company universe only, so the
+    // companies an owner company list would hold are seeded first (they used to be created here).
+    await t.seedUniverse([
+      'Acme Ltd',
+      'Beta Co Ltd',
+      'Gamma Health Limited',
+      { name: 'Zenith Robotics Ltd', city: 'Cambridge' },
+      'Acme Analytics Inc',
+      { name: 'Dr J Smith', city: 'Leeds' },
+      'Northwind Freight Ltd',
+      'The Riverside Café Ltd',
+      'Orion Software Solutions Ltd',
+      'Helix Biotech PLC',
+      "St Mary's Care Home Ltd",
+      'Quantum Fintech LLP',
+      'Nimbus Cloud Services Limited',
+      'Lumen Energy Ltd',
+      'Maple & Oak Interiors Ltd',
+      'Vertex Pharma UK Ltd',
+    ]);
     const source = await sponsorSource();
     const run = await t.runSource(source._id);
     expect(run.state).toBe('COMPLETED');
@@ -113,7 +133,7 @@ describe('Market vertical slices', () => {
     expect(await t.market.observations.companyObservations.countDocuments({ sourceId: source._id })).toBe(22);
   });
 
-  it('M2: re-running the import is idempotent (no duplicate companies, observations, snapshots or reviews)', async () => {
+  it('M2 / wave 7: re-running on an unchanged, applied file skips processing and changes nothing', async () => {
     const source = (await t.market.sources.getByKey('uk-sponsor-register'))!;
     const before = {
       companies: await t.market.companies.col.countDocuments({}),
@@ -129,14 +149,35 @@ describe('Market vertical slices', () => {
     expect(await t.market.observations.snapshots.countDocuments({ sourceId: source._id })).toBe(before.snaps);
     const snap = await t.market.observations.snapshots.findOne({ sourceId: source._id });
     expect(snap?.fetchCount).toBe(2);
+    // Content hash short-circuit (source DoD 3): the fetch is recorded, no row is processed again
+    // and the delisting marker does not move.
     const obs = await t.market.observations.companyObservations.findOne({ sourceId: source._id });
-    expect(obs?.seenCount).toBe(2);
+    expect(obs?.seenCount).toBe(1);
+    const out = (node: string) => t.runtime.engine.stores.nodeRuns.findCompletedOutput(run._id, node);
+    expect((await out('unchanged'))?.output).toMatchObject({ path: 'unchanged' });
+    expect((await out('parse'))?.state).not.toBe('COMPLETED');
+    expect((await out('finalize'))?.state).not.toBe('COMPLETED');
+    // The run output is defined on the unchanged path (PR #6 review).
+    expect(run.output).toEqual({
+      complete: true,
+      anomaly: null,
+      delistedCompanies: 0,
+      reconciled: 0,
+      unchanged: true,
+      itemCount: source.health.lastItemCount,
+    });
+    const after = (await t.market.sources.getByKey('uk-sponsor-register'))!;
+    expect(after.health.status).toBe('healthy');
+    expect(after.health.lastCompleteImportStartedAt).toEqual(source.health.lastCompleteImportStartedAt);
+    expect(after.health.lastItemCount).toBe(source.health.lastItemCount);
   });
 
   it('M2: delisting from a later complete register downgrades capability; new sponsors are added', async () => {
     serve('/media/fixture/2026-09-27_-_Worker_and_Temporary_Worker.csv', 'text/csv', () =>
       t.fixture('uk-sponsor', 'register-t2.csv'),
     );
+    // A new sponsor is attached only once it is a known company (owner 2026-10-31).
+    await t.seedUniverse(['Solstice Games Ltd']);
     const source = (await t.market.sources.getByKey('uk-sponsor-register'))!;
     const run = await t.runSource(source._id);
     expect(run.output).toMatchObject({ complete: true, delistedCompanies: 1 });
@@ -158,6 +199,16 @@ describe('Market vertical slices', () => {
     expect((run.output as { anomaly: string }).anomaly).toMatch(/shrank/);
     const acme = await t.market.companies.col.findOne({ 'identity.normalizedName': 'acme ltd' });
     expect(acme?.employment.sponsorship.capability.value).toBe('licensed');
+    expect(await t.market.reviews.col.countDocuments({ type: 'source_anomaly', status: 'open' })).toBe(1);
+  });
+
+  it('wave 7: a held-back file fetched again unchanged is never skipped (it was not applied)', async () => {
+    const source = (await t.market.sources.getByKey('uk-sponsor-register'))!;
+    const run = await t.runSource(source._id);
+    const node = await t.runtime.engine.stores.nodeRuns.findCompletedOutput(run._id, 'unchanged');
+    expect(node?.output).toMatchObject({ path: 'import' });
+    expect(run.output).toMatchObject({ complete: false, delistedCompanies: 0 });
+    // The anomaly review is deduplicated on (source, snapshot): still exactly one.
     expect(await t.market.reviews.col.countDocuments({ type: 'source_anomaly', status: 'open' })).toBe(1);
   });
 
@@ -188,16 +239,21 @@ describe('Market vertical slices', () => {
       subject: 'Resolve company "Zenith Robotic Ltd"',
       status: 'open',
     });
+    // Owner 2026-10-31: register reviews are attach-only (no create_new); a different company
+    // is rejected, which creates nothing and leaves the known company untouched.
+    expect(zen?.allowedActions).not.toContain('create_new');
+    const companiesBefore = await t.market.companies.col.countDocuments({});
     const resolved = await t.market.reviewService.resolve(
       zen!._id,
-      { action: 'create_new', reason: 'Different company: Coventry, B rating' },
+      { action: 'reject', reason: 'Different company: Coventry, B rating' },
       t.actor,
     );
     expect(resolved.status).toBe('resolved');
-    const created = resolved.resolution?.result?.companyId as string;
-    const company = await t.market.companies.get(created);
-    expect(company.identity.distinctFrom).toHaveLength(1);
-    expect(company.employment.sponsorship.capability.value).toBe('licensed');
+    expect(resolved.resolution?.result).toMatchObject({ rejectedObservations: zen!.observationIds.length });
+    expect(await t.market.companies.col.countDocuments({})).toBe(companiesBefore);
+    expect(
+      await t.market.companies.col.findOne({ 'identity.normalizedName': 'zenith robotic ltd' }),
+    ).toBeNull();
 
     const smith = await t.market.reviews.col.findOne({
       subject: 'Resolve company "Dr J Smith"',

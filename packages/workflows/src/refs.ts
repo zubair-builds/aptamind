@@ -3,6 +3,8 @@
  * values from the resolution scope. Pure data substitution — no code evaluation.
  */
 
+import { NodeSkippedError } from './outputs';
+
 export interface RefScope {
   run: { input: unknown; labels: Record<string, string> };
   trigger: unknown;
@@ -64,7 +66,14 @@ export async function resolveTemplate(template: unknown, scope: RefScope): Promi
   if (template && typeof template === 'object') {
     const obj = template as Record<string, unknown>;
     if (typeof obj.$ref === 'string' && Object.keys(obj).every((k) => k === '$ref' || k === 'default')) {
-      const v = await resolveRef(obj.$ref, scope);
+      let v: unknown;
+      try {
+        v = await resolveRef(obj.$ref, scope);
+      } catch (e) {
+        // A skipped branch's node resolves to the ref's explicit default (join after a branch).
+        if ('default' in obj && e instanceof NodeSkippedError) return obj.default;
+        throw e;
+      }
       return v === undefined ? obj.default : v;
     }
     const out: Record<string, unknown> = {};

@@ -25,11 +25,17 @@ export const ukSponsorImport: WorkflowSpec = {
   title: 'UK sponsor register import',
   description:
     'Downloads the UK register of licensed sponsors, stores the raw CSV, parses and maps rows, and resolves/reconciles each organisation. ' +
-    'Registry presence is company licence evidence, never job-level sponsorship. Pass `snapshotId` to reprocess a stored snapshot without refetching.',
+    'Registry presence is company licence evidence, never job-level sponsorship. Pass `snapshotId` to reprocess a stored snapshot without refetching, or `force: true` to import an unchanged file in full ' +
+    '(e.g. to re-check sponsors that matched no known company before the universe grew).',
   inputSchema: {
     type: 'object',
     required: ['sourceId'],
-    properties: { sourceId: { type: 'string' }, snapshotId: { type: 'string' }, csvUrl: { type: 'string' } },
+    properties: {
+      sourceId: { type: 'string' },
+      snapshotId: { type: 'string' },
+      csvUrl: { type: 'string' },
+      force: { type: 'boolean' },
+    },
   },
   nodes: [
     scheduleTrigger,
@@ -53,6 +59,28 @@ export const ukSponsorImport: WorkflowSpec = {
         snapshotId: ref('nodes.trigger.output.payload.snapshotId', null),
       },
       retry: { maxAttempts: 4, backoffMs: 5_000 },
+    },
+    {
+      // Wave 7: an unchanged file already applied by a complete import ends the run here.
+      id: 'unchanged',
+      title: 'Skip an unchanged, already applied file',
+      capability: { type: 'market.check_dataset_unchanged', version: 1 },
+      input: {
+        sourceId: ref('run.input.sourceId'),
+        snapshotId: ref('nodes.download.output.snapshotId'),
+        unchanged: ref('nodes.download.output.unchanged'),
+        reprocessing: ref('nodes.download.output.reprocessing'),
+        force: ref('nodes.trigger.output.payload.force', false),
+      },
+    },
+    {
+      id: 'route',
+      capability: { type: 'core.switch', version: 1 },
+      config: {
+        cases: [{ branch: 'unchanged', conditions: [{ path: '', op: 'eq', value: 'unchanged' }] }],
+        defaultBranch: 'import',
+      },
+      input: { value: ref('nodes.unchanged.output.path') },
     },
     {
       id: 'parse',
@@ -114,16 +142,31 @@ export const ukSponsorImport: WorkflowSpec = {
         fanout: ref('nodes.companies.output'),
       },
     },
+    {
+      // Both paths end here, so `run.output` is defined for an unchanged file too (PR #6 review).
+      id: 'report',
+      title: 'Import report',
+      capability: { type: 'market.dataset_import_report', version: 1 },
+      input: {
+        finalize: ref('nodes.finalize.output', null),
+        unchanged: ref('nodes.unchanged.output'),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'locate' },
     { from: 'locate', to: 'download' },
-    { from: 'download', to: 'parse' },
+    { from: 'download', to: 'unchanged' },
+    { from: 'unchanged', to: 'route' },
+    { from: 'route', to: 'parse', when: { branch: 'import' } },
     { from: 'parse', to: 'map' },
     { from: 'map', to: 'valid' },
     { from: 'valid', to: 'companies' },
     { from: 'companies', to: 'finalize' },
+    { from: 'finalize', to: 'report' },
+    { from: 'route', to: 'report', when: { branch: 'unchanged' } },
   ],
+  outputNode: 'report',
   labels: { domain: 'market', stream: 'companies' },
 };
 
@@ -511,10 +554,22 @@ export const companyCareersDiscovery: WorkflowSpec = {
       },
       input: { items: ref('nodes.discover.output.ats') },
     },
+    {
+      // Wave 6: no ATS board, but a careers page on the official site → a careers_page source.
+      id: 'careers_page',
+      title: 'Register the careers page when no ATS was found',
+      capability: { type: 'market.register_careers_page_fallback', version: 1 },
+      input: {
+        companyId: ref('nodes.discover.output.companyId'),
+        careersUrl: ref('nodes.discover.output.careersUrl', null),
+        ats: ref('nodes.discover.output.ats', null),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'discover' },
     { from: 'discover', to: 'register' },
+    { from: 'discover', to: 'careers_page' },
   ],
   outputNode: 'discover',
   labels: { domain: 'market', stream: 'jobs' },

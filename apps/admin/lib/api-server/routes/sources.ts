@@ -114,14 +114,15 @@ export async function sourceRoutes(app: FastifyInstance, { platform }: { platfor
     const { id } = idParamsSchema.parse(req.params);
     noQuerySchema.parse(req.query);
     const body = z
-      .object({ snapshotId: z.string().optional() })
+      .object({ snapshotId: z.string().optional(), force: z.boolean().optional() })
       .default({})
       .parse(req.body ?? {});
-    const res = await market.sources.runNow(
-      id,
-      req.ctx.actor,
-      body.snapshotId ? { snapshotId: body.snapshotId } : {},
-    );
+    // `force` (dataset imports): import an unchanged file in full, e.g. to re-check register rows
+    // that matched no known company before the universe grew (PR #6 review).
+    const res = await market.sources.runNow(id, req.ctx.actor, {
+      ...(body.snapshotId ? { snapshotId: body.snapshotId } : {}),
+      ...(body.force ? { force: true } : {}),
+    });
     return reply.status(202).send(res);
   });
 

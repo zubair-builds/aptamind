@@ -52,6 +52,7 @@ export class NodeOutputStore {
   async load(runId: string, nodeId: string, cache?: Map<string, unknown>): Promise<unknown> {
     if (cache?.has(nodeId)) return cache.get(nodeId);
     const nr = await this.nodeRuns.findCompletedOutput(runId, nodeId);
+    if (nr?.state === 'SKIPPED') throw new NodeSkippedError(nodeId);
     if (!nr || nr.state !== 'COMPLETED') {
       throw new InvalidStateError(
         `Output of node ${nodeId} is not available (state ${nr?.state ?? 'missing'})`,
@@ -65,5 +66,15 @@ export class NodeOutputStore {
   /** A run's output (inline or by reference). */
   async runOutput(run: Pick<WorkflowRunDoc, 'output' | 'outputRef'>): Promise<unknown> {
     return run.outputRef ? this.artifacts.readJson(run.outputRef) : run.output;
+  }
+}
+
+/**
+ * The referenced node was skipped (its branch was not taken). A ref with an explicit `default`
+ * resolves to that default (a join after a branch, e.g. an import report); without one, it fails.
+ */
+export class NodeSkippedError extends InvalidStateError {
+  constructor(nodeId: string) {
+    super(`Output of node ${nodeId} is not available (state SKIPPED)`);
   }
 }

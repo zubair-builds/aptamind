@@ -207,7 +207,9 @@ export const processSponsorRow = defineCapability({
       return { outcome: 'skipped_ignored_route' };
     const mapped = sponsorRowToPayload(input.row);
     if (!mapped) return { outcome: 'skipped_invalid_row' };
-    const r = await ctx.services.get(MARKET).companyPipeline.process({
+    // Owner 2026-10-31: the UK register enriches the KNOWN company universe; it never creates a
+    // company (an unmatched sponsor records nothing and is re-evaluated by the next changed import).
+    const r = await ctx.services.get(MARKET).companyPipeline.attachLicence({
       sourceId: input.sourceId,
       snapshotId: input.snapshotId,
       artifactId: input.artifactId,
@@ -217,6 +219,7 @@ export const processSponsorRow = defineCapability({
       parser: UK_SPONSOR_PARSER,
       runId: ctx.runId,
     });
+    if (r.outcome === 'unmatched') return { outcome: 'unmatched' };
     return {
       outcome: r.outcome,
       observationId: r.observationId,
@@ -343,6 +346,105 @@ export const finalizeDatasetImport = defineCapability({
     }
     ctx.log.info('dataset import finalised', { rows: input.rowCount, delisted: stale.length });
     return { complete: true, anomaly: null, delistedCompanies: stale.length, reconciled };
+  },
+});
+
+/**
+ * Wave 7 (MKT-OPS source DoD 3): an unchanged register file stops downstream processing. The
+ * import takes the `unchanged` path only when ALL hold: the run fetched (not a reprocessing of a
+ * stored snapshot, which an operator asks for on purpose), the bytes equal the source's previous
+ * snapshot, and that same snapshot is the one the source's last COMPLETE import applied
+ * (`health.lastSnapshotId`, written only by a clean finalisation). A held-back (anomalous) or
+ * failed import never wrote it, so its file is processed in full again.
+ *
+ * The unchanged path writes no observation and never moves the delisting marker
+ * (`lastCompleteImportStartedAt`): rows of an unprocessed run must not count as "not seen".
+ * It records the run as a healthy success with the last item count; the snapshot's own
+ * `lastFetchedAt` (moved by the fetch) is the evidence that the register still published it.
+ */
+export const checkDatasetUnchanged = defineCapability({
+  type: 'market.check_dataset_unchanged',
+  version: 1,
+  title: 'Check Dataset Unchanged',
+  description:
+    'Routes a dataset import: an unchanged file whose snapshot was already applied by a complete import ends the run; anything else is imported in full.',
+  category: 'domain',
+  inputSchema: z.object({
+    sourceId: z.string(),
+    snapshotId: z.string(),
+    unchanged: z.boolean(),
+    reprocessing: z.boolean(),
+    /**
+     * Operator override (PR #6 review): import in full even when the file is unchanged, e.g. to
+     * re-check sponsors that matched no known company before the universe grew. Additive.
+     */
+    force: z.boolean().optional(),
+  }),
+  outputSchema: z.object({
+    path: z.enum(['unchanged', 'import']),
+    itemCount: z.number().int().nullable(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'A pure decision on the source health and the fetch output; the only write is a health success counted once per run (countOnce on the run id).',
+  },
+  async execute(ctx, input) {
+    const market = ctx.services.get(MARKET);
+    const source = await market.sources.get(input.sourceId);
+    const applied =
+      source.health.lastSnapshotId === input.snapshotId && source.health.lastItemCount !== undefined;
+    if (input.force || input.reprocessing || !input.unchanged || !applied)
+      return { path: 'import' as const, itemCount: null };
+    await market.sources.recordSuccess(source._id, { runId: ctx.runId });
+    ctx.log.info('dataset unchanged; import skipped', {
+      source: source.key,
+      snapshotId: input.snapshotId,
+      rows: source.health.lastItemCount,
+    });
+    return { path: 'unchanged' as const, itemCount: source.health.lastItemCount ?? null };
+  },
+});
+
+/**
+ * The run output of a dataset import that can end early (PR #6 review): the finalize report of
+ * an imported file, or, on the unchanged path, a complete no-op report (`unchanged: true`, no
+ * delisting, no reconciliation) so `run.output` is always defined.
+ */
+export const datasetImportReport = defineCapability({
+  type: 'market.dataset_import_report',
+  version: 1,
+  title: 'Dataset Import Report',
+  description:
+    'The import report: the finalize output of an imported file, or a complete no-op report when an unchanged file ended the run early.',
+  category: 'domain',
+  inputSchema: z.object({
+    finalize: finalizeOutputSchema.nullable(),
+    unchanged: z.object({ path: z.enum(['unchanged', 'import']), itemCount: z.number().int().nullable() }),
+  }),
+  outputSchema: finalizeOutputSchema.extend({
+    unchanged: z.boolean(),
+    itemCount: z.number().int().nullable().optional(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'pure',
+    sideEffects: false,
+  },
+  async execute(_ctx, input) {
+    if (input.finalize) return { ...input.finalize, unchanged: false };
+    return {
+      complete: true,
+      anomaly: null,
+      delistedCompanies: 0,
+      reconciled: 0,
+      unchanged: input.unchanged.path === 'unchanged',
+      itemCount: input.unchanged.itemCount,
+    };
   },
 });
 
@@ -901,6 +1003,112 @@ export const registerJobSource = defineCapability({
     if (identity.region !== 'default')
       await raiseRegionalLegacyReview(market, company, provider, input.boardToken, source, identity, true);
     return { sourceId: source._id, key: source.key, created };
+  },
+});
+
+/**
+ * Shared hosting (PR #6 review): a host under one of these suffixes belongs to whoever claimed the
+ * subdomain, not to the company, so it is never treated as an official host (it reaches review).
+ */
+export const SHARED_HOSTING_SUFFIXES = ['github.io', 'notion.site', 'sites.google.com', 'wixsite.com'];
+
+function isSharedHosting(host: string): boolean {
+  return SHARED_HOSTING_SUFFIXES.some((s) => host === s || host.endsWith(`.${s}`));
+}
+
+/**
+ * True when `url` is on the company's official domain (or a subdomain) or its website host, on a
+ * default port (or the exact port of the company's own website URL), and not on shared hosting.
+ */
+export function isOnCompanyHosts(url: string, domain: string | null, website: string | null): boolean {
+  let host: string;
+  let port: string;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+    host = u.hostname.toLowerCase().replace(/^www\./, '');
+    port = u.port; // '' for the scheme's default port
+  } catch {
+    return false;
+  }
+  if (isSharedHosting(host)) return false;
+  const hosts = new Set<string>();
+  if (domain && !port) hosts.add(domain.toLowerCase().replace(/^www\./, ''));
+  if (website) {
+    try {
+      const w = new URL(website);
+      // A non-default port is accepted only when it is the website's own declared port.
+      if (w.port === port) hosts.add(w.hostname.toLowerCase().replace(/^www\./, ''));
+    } catch {
+      /* no website host */
+    }
+  }
+  for (const h of hosts) {
+    if (isSharedHosting(h)) continue;
+    if (host === h || host.endsWith(`.${h}`)) return true;
+  }
+  return false;
+}
+
+/**
+ * Wave 6 (generic careers pages): after careers discovery, a company whose careers page is not on a
+ * known ATS gets that page registered as a scheduled `careers_page` source (the host-scoped
+ * `market.careers_page.crawl`: JSON-LD JobPosting extraction, never closing jobs by absence).
+ *  - an ATS board was detected: nothing (the ATS source is authoritative and complete);
+ *  - no careers URL: nothing;
+ *  - the careers URL is off the company's official hosts (discovery's unfetched fallback link,
+ *    e.g. a third-party page): not registered; a `careers_discovery` review asks an operator
+ *    (ambiguity reaches review, source DoD 8). Crawling an unverified host is never automatic.
+ */
+export const registerCareersPageFallback = defineCapability({
+  type: 'market.register_careers_page_fallback',
+  version: 1,
+  title: 'Register Careers Page (no ATS)',
+  description:
+    'Registers the discovered careers page as a scheduled careers_page source when no ATS board was found and the page is on the company’s official hosts; otherwise raises a review.',
+  category: 'domain',
+  inputSchema: z.object({
+    companyId: z.string(),
+    careersUrl: z.string().nullable(),
+    /** The ATS boards discovery detected (only their number matters here). */
+    ats: z.array(z.unknown()).nullable().optional(),
+  }),
+  outputSchema: z.object({
+    outcome: z.enum(['registered', 'existing', 'ats_found', 'no_careers_url', 'off_domain_review']),
+    sourceId: z.string().nullable(),
+  }),
+  configSchema: registerJobSourceV1.configSchema,
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'Registration is idempotent on the careers_page:<host><path> key (unique index); the review is raised on a deterministic dedupe key (company + URL).',
+  },
+  async execute(ctx, input, config) {
+    if ((input.ats?.length ?? 0) > 0) return { outcome: 'ats_found' as const, sourceId: null };
+    if (!input.careersUrl) return { outcome: 'no_careers_url' as const, sourceId: null };
+    const market = ctx.services.get(MARKET);
+    const company = await market.companies.resolveActive(input.companyId);
+    const domain = company.identity.domain.value ?? null;
+    const website = company.identity.website.value ?? null;
+    if (!isOnCompanyHosts(input.careersUrl, domain, website)) {
+      await market.reviews.raise({
+        type: 'careers_discovery',
+        severity: 'low',
+        dedupeKey: `careers_discovery:${company._id}:off_domain:${input.careersUrl}`,
+        entity: { kind: 'company', id: company._id },
+        subject: `${company.identity.displayName.value ?? company.identity.normalizedName}: careers link is off the official site`,
+        reason: `Discovery found no ATS board; its careers link ${input.careersUrl} is not on ${domain ?? website ?? 'a known official host'}, so it was not registered for crawling. To crawl it, correct the company's website or register the page as a source; then dismiss.`,
+        context: { careersUrl: input.careersUrl, domain, website },
+        // No decision here registers the page (PR #6 review): `confirm` would read as approval
+        // without any effect, so the item is informational.
+        allowedActions: ['dismiss'],
+      });
+      return { outcome: 'off_domain_review' as const, sourceId: null };
+    }
+    const res = await registerCareersPage(ctx, market, company, input.careersUrl, config);
+    return { outcome: res.created ? ('registered' as const) : ('existing' as const), sourceId: res.sourceId };
   },
 });
 
