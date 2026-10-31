@@ -107,4 +107,19 @@ describe('UsersService', () => {
     const remaining = res[0]!.status === 'fulfilled' ? a2 : a1;
     await expect(s.suspend(remaining._id)).rejects.toMatchObject({ code: 'last_admin' });
   });
+
+  it('a suspension racing a sign-in is never overwritten to active', async () => {
+    const s = svc();
+    const stale = await s.preApprove('race@example.com', 'user', 'usr_admin');
+    await s.suspend(stale._id); // lands between the sign-in's read and its write
+    const linked = await (
+      s as unknown as { linkExisting: (u: typeof stale, p: unknown) => Promise<unknown> }
+    ).linkExisting(stale, { authUserId: 'ba_race', email: stale.email });
+    expect(linked).toBeNull();
+    const doc = await mongo.db.collection(IDENTITY_COLLECTIONS.users).findOne({ _id: stale._id as never });
+    expect(doc).toMatchObject({ status: 'suspended' });
+    expect(doc?.authUserId).toBeUndefined();
+    // the public path re-reads and refuses
+    expect((await s.resolveSignIn({ authUserId: 'ba_race', email: stale.email })).outcome).toBe('suspended');
+  });
 });

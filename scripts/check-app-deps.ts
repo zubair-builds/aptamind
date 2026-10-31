@@ -3,7 +3,7 @@
  * so every third-party runtime dependency of the workspace packages an app uses must be
  * declared by the app itself. Fails with the missing names otherwise.
  */
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
@@ -18,8 +18,6 @@ const packages = new Map(
 
 let failed = false;
 for (const app of ['api', 'worker']) {
-  // apps/api was folded into apps/admin (ADR-0021); skip apps that no longer exist.
-  if (!existsSync(path.join(root, 'apps', app, 'package.json'))) continue;
   const pkg = read(path.join(root, 'apps', app, 'package.json'));
   const declared = new Set(Object.keys(pkg.dependencies ?? {}));
   const needed = new Set<string>();
