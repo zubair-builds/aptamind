@@ -34,6 +34,13 @@ Additive only. Existing kinds (`system`, `internal-operator`, `workflow`), `SYST
 `UNAUTHENTICATED_INTERNAL_OPERATOR` are unchanged. Old audit events and stored actors still parse.
 Exhaustive `switch`es over `actor.kind` must gain a `user` branch.
 
+## Known limitation
+
+`packages/db/src/json-schema.ts` converts non-literal unions to an unconstrained schema, so the
+MongoDB `$jsonSchema` validator does not enforce `actorSchema` (any stored actor shape passes the
+server validator). Zod parsing at the service boundary remains the enforcement point. Tightening
+the converter for discriminated unions is a separate follow-up, not part of FE-5.
+
 ## Migration
 
 None. No records are rewritten or backfilled.
@@ -42,6 +49,7 @@ None. No records are rewritten or backfilled.
 
 - Old actors and historical audit events parse unchanged.
 - A `user` actor with `userId` and `workspaceId` parses; one missing either is rejected.
+- A `user` actor whose `id` differs from `userId` is rejected (refine).
 - Full Foundation regression and architecture gate pass.
 
 ## Alternatives

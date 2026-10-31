@@ -200,7 +200,11 @@ export class UsersService {
     const email = normaliseEmail(profile.email);
     for (let attempt = 0; attempt < 3; attempt++) {
       const existing = await this.users.findOne({ email });
-      if (existing) return this.linkExisting(existing, profile);
+      if (existing) {
+        const linked = await this.linkExisting(existing, profile);
+        if (linked) return linked;
+        continue; // status changed under us (e.g. a concurrent suspend): re-read and retry
+      }
 
       const extra = { authUserId: profile.authUserId, displayName: profile.displayName };
       if (this.adminEmail === email && (await this.noAdminExists())) {
@@ -228,7 +232,7 @@ export class UsersService {
         if (!isDuplicateKeyError(err)) throw err;
       }
     }
-    throw new Error(`Could not resolve sign-in for ${email}`);
+    throw new Error('Could not resolve sign-in after retries');
   }
 
   private async noAdminExists(): Promise<boolean> {
@@ -239,7 +243,12 @@ export class UsersService {
     return n === 0;
   }
 
-  private async linkExisting(user: UserDoc, profile: SignInProfile): Promise<SignInResult> {
+  /**
+   * Links the auth account to an existing identity. The update is conditional on the status we
+   * read, so a concurrent suspend/approve can't be overwritten; on a miss returns null and the
+   * caller re-reads.
+   */
+  private async linkExisting(user: UserDoc, profile: SignInProfile): Promise<SignInResult | null> {
     if (user.status === 'suspended') return { outcome: 'suspended', user };
     if (user.authUserId && user.authUserId !== profile.authUserId)
       throw new IdentityError('already_exists', 'Email is linked to another sign-in account');
@@ -247,10 +256,11 @@ export class UsersService {
     if (user.status === 'pre_approved') set.status = 'active';
     if (!user.displayName && profile.displayName) set.displayName = profile.displayName;
     const updated = (await this.users.findOneAndUpdate(
-      { _id: user._id },
+      { _id: user._id, status: user.status },
       { $set: set },
       { returnDocument: 'after' },
-    )) as UserDoc;
+    )) as UserDoc | null;
+    if (!updated) return null;
     return updated.status === 'active'
       ? { outcome: 'active', user: updated }
       : { outcome: 'pending_approval', user: updated };

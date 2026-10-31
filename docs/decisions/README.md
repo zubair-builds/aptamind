@@ -22,3 +22,5 @@
 | [0018](0018-server-side-schema-validation.md)    | Server-side validators derived from the Zod schemas                         |
 | [0019](0019-source-chronology.md)                | Source chronology is separate from processing chronology                    |
 | [0020](0020-professional-domain-package.md)      | Professional domain package, assertion model and confirmed-truth precedence |
+| [0021](0021-nextjs-api-boundary.md)              | Next.js API boundary with separate workers                                  |
+| [0022](0022-user-authentication.md)              | User authentication: Better Auth, Google sign-in, admin approval            |

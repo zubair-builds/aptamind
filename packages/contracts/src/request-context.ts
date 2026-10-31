@@ -31,15 +31,17 @@ const workflowActorSchema = z.object({
  * A signed-in person (FE-5, ADR-0022). `id` mirrors `userId` so `{ kind, id }` copies stay valid;
  * `tokenId` is set when the request came through an API token (MCP).
  */
-export const userActorSchema = z.object({
-  kind: z.literal('user'),
-  id: z.string(),
-  userId: z.string().min(1),
-  workspaceId: z.string().min(1),
-  displayName: z.string().optional(),
-  roles: z.array(z.string()).optional(),
-  tokenId: z.string().optional(),
-});
+export const userActorSchema = z
+  .object({
+    kind: z.literal('user'),
+    id: z.string(),
+    userId: z.string().min(1),
+    workspaceId: z.string().min(1),
+    displayName: z.string().optional(),
+    roles: z.array(z.string()).optional(),
+    tokenId: z.string().optional(),
+  })
+  .refine((a) => a.id === a.userId, { message: 'user actor id must equal userId', path: ['id'] });
 
 export const actorSchema = z.discriminatedUnion('kind', [
   systemActorSchema,

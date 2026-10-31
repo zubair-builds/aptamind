@@ -344,6 +344,11 @@ proposed_backlog: # all decisions approved (D1, D2, D3, D4, D5, D7, D8, D9, D10;
       - 'D8 professional visibility: admin-only until FE-P7/FE-P8 are done; professional.view off by default for users, admin can grant per user (approved 2026-10-31)'
     owner_decisions_needed: []
     owner_decisions_deferred: [D6 email provider (not needed for v1)]
+    milestones:
+      - id: M-U0
+        title: ADR-0022 user authentication (docs); ADR-0008 superseded in part
+        status: 'PR open on a2/m-u0-adr-0022-user-auth; needs two reviews'
+        record: docs/decisions/0022-user-authentication.md
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
   - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
