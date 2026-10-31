@@ -292,6 +292,9 @@ importers:
 
   packages/identity:
     dependencies:
+      '@aptamind/config':
+        specifier: workspace:*
+        version: link:../config
       '@aptamind/contracts':
         specifier: workspace:*
         version: link:../contracts

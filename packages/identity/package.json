@@ -5,12 +5,14 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./better-auth": "./src/better-auth.ts"
+    "./better-auth": "./src/better-auth.ts",
+    "./auth-config": "./src/auth-config.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@aptamind/config": "workspace:*",
     "@aptamind/contracts": "workspace:*",
     "@aptamind/db": "workspace:*",
     "mongodb": "^7.0.0",

@@ -56,26 +56,28 @@ describe('UsersService', () => {
   it('pre-approved email becomes active on sign-in; unknown is pending', async () => {
     const s = svc();
     await s.preApprove('Alice@Example.com', 'user', 'usr_admin');
-    const a = await s.resolveSignIn({ authUserId: 'ba_1', email: 'alice@example.com' });
+    const a = await s.resolveSignIn({ authUserId: 'ba_1', email: 'alice@example.com', emailVerified: true });
     expect(a.outcome).toBe('active');
-    expect(a.user.authUserId).toBe('ba_1');
-    const b = await s.resolveSignIn({ authUserId: 'ba_2', email: 'bob@example.com' });
+    expect((a as { user: { authUserId?: string } }).user.authUserId).toBe('ba_1');
+    const b = await s.resolveSignIn({ authUserId: 'ba_2', email: 'bob@example.com', emailVerified: true });
     expect(b.outcome).toBe('pending_approval');
-    expect((await s.approve(b.user._id, 'usr_admin')).status).toBe('active');
+    expect((await s.approve((b as { user: { _id: string } }).user._id, 'usr_admin')).status).toBe('active');
   });
 
   it('suspended users are refused', async () => {
     const s = svc();
     const u = await s.preApprove('c@example.com', 'user', 'usr_admin');
     await s.suspend(u._id);
-    expect((await s.resolveSignIn({ authUserId: 'ba_3', email: 'c@example.com' })).outcome).toBe('suspended');
+    expect(
+      (await s.resolveSignIn({ authUserId: 'ba_3', email: 'c@example.com', emailVerified: true })).outcome,
+    ).toBe('suspended');
   });
 
   it('ADMIN_EMAIL bootstraps once, only when no admin exists, even under concurrent sign-ins', async () => {
     const s = svc('owner@example.com');
     const results = await Promise.all(
       Array.from({ length: 5 }, () =>
-        s.resolveSignIn({ authUserId: 'ba_owner', email: 'owner@example.com' }),
+        s.resolveSignIn({ authUserId: 'ba_owner', email: 'owner@example.com', emailVerified: true }),
       ),
     );
     expect(await mongo.db.collection(IDENTITY_COLLECTIONS.users).countDocuments({ role: 'admin' })).toBe(1);
@@ -85,18 +87,18 @@ describe('UsersService', () => {
   it('ADMIN_EMAIL is not promoted when an admin already exists', async () => {
     const s = svc('owner@example.com');
     const existing = await s.preApprove('first@example.com', 'admin', 'seed');
-    await s.resolveSignIn({ authUserId: 'ba_f', email: existing.email });
-    const r = await s.resolveSignIn({ authUserId: 'ba_o', email: 'owner@example.com' });
+    await s.resolveSignIn({ authUserId: 'ba_f', email: existing.email, emailVerified: true });
+    const r = await s.resolveSignIn({ authUserId: 'ba_o', email: 'owner@example.com', emailVerified: true });
     expect(r.outcome).toBe('pending_approval');
-    expect(r.user.role).toBe('user');
+    expect((r as { user: { role: string } }).user.role).toBe('user');
   });
 
   it('the last admin cannot be demoted or suspended, also under concurrent demotions', async () => {
     const s = svc();
     const a1 = await s.preApprove('a1@example.com', 'admin', 'seed');
     const a2 = await s.preApprove('a2@example.com', 'admin', 'seed');
-    await s.resolveSignIn({ authUserId: 'ba_a1', email: a1.email });
-    await s.resolveSignIn({ authUserId: 'ba_a2', email: a2.email });
+    await s.resolveSignIn({ authUserId: 'ba_a1', email: a1.email, emailVerified: true });
+    await s.resolveSignIn({ authUserId: 'ba_a2', email: a2.email, emailVerified: true });
     const res = await Promise.allSettled([s.setRole(a1._id, 'user'), s.setRole(a2._id, 'user')]);
     expect(res.filter((r) => r.status === 'fulfilled').length).toBe(1);
     expect(
@@ -120,6 +122,8 @@ describe('UsersService', () => {
     expect(doc).toMatchObject({ status: 'suspended' });
     expect(doc?.authUserId).toBeUndefined();
     // the public path re-reads and refuses
-    expect((await s.resolveSignIn({ authUserId: 'ba_race', email: stale.email })).outcome).toBe('suspended');
+    expect(
+      (await s.resolveSignIn({ authUserId: 'ba_race', email: stale.email, emailVerified: true })).outcome,
+    ).toBe('suspended');
   });
 });
