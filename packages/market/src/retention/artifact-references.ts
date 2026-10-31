@@ -7,7 +7,7 @@ import { jobsCollection } from '../jobs/job.schema';
 import {
   companyObservationsCollection,
   jobObservationsCollection,
-  RETENTION_HOLD_REASONS,
+  type RETENTION_HOLD_REASONS,
   snapshotsCollection,
 } from '../observations/schemas';
 import { auditEventsCollection, reviewItemsCollection } from '../review/schemas';

@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { Document } from 'mongodb';
+/** A Mongo index key document (admin never imports the driver, lint rule). */
+type Document = Record<string, unknown>;
 import { createTestInfra, type TestInfra } from '@aptamind/testing';
 import {
   ensureMarketRunLabelIndexes,

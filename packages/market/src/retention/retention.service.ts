@@ -1,6 +1,6 @@
 import { getCollection } from '@aptamind/db';
 import type { MarketContext } from '../context';
-import { RETENTION_HOLD_REASONS, snapshotsCollection, type SnapshotDoc } from '../observations/schemas';
+import { type RETENTION_HOLD_REASONS, snapshotsCollection, type SnapshotDoc } from '../observations/schemas';
 import { sourcesCollection } from '../sources/source.schema';
 import { artifactReferenceHold, snapshotHoldReason } from './artifact-references';
 import { expiresAtFor, RETENTION_POLICY_VERSION, RETENTION_TTL_MS, retentionClassFor } from './policy';

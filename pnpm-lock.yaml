@@ -207,6 +207,9 @@ importers:
       '@aws-sdk/client-s3':
         specifier: ^3.1141.0
         version: 3.1141.0
+      '@google/genai':
+        specifier: ^2.32.0
+        version: 2.32.0
       '@opentelemetry/api':
         specifier: ^1.9.1
         version: 1.9.1

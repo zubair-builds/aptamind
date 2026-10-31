@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { Collection } from 'mongodb';
 import { newId, UNAUTHENTICATED_INTERNAL_OPERATOR } from '@aptamind/contracts';
 import { ensureMarketRunLabelIndexes, MARKET_RUN_LABEL_INDEXES, MIGRATIONS } from '@aptamind/platform';
 import {
@@ -533,7 +532,7 @@ describe('merge chains', () => {
 describe('merged-record lookup (run history)', () => {
   it('records merged into a survivor are found through the partial by_merged_into index, not a scan', async () => {
     for (const col of [h.market.companies.col, h.market.jobs.col] as const) {
-      const plan = await (col as unknown as Collection)
+      const plan = await (col as unknown as typeof h.market.jobs.col)
         .find({ mergedInto: acmeId }, { projection: { _id: 1 } })
         .limit(200)
         .explain('queryPlanner');
