@@ -1,5 +1,5 @@
 /**
- * The api/worker bundles inline workspace packages but keep third-party modules external,
+ * The worker bundle (the API now lives in apps/admin) inlines workspace packages but keeps third-party modules external,
  * so every third-party runtime dependency of the workspace packages an app uses must be
  * declared by the app itself. Fails with the missing names otherwise.
  */
@@ -17,7 +17,7 @@ const packages = new Map(
 );
 
 let failed = false;
-for (const app of ['api', 'worker']) {
+for (const app of ['worker']) {
   const pkg = read(path.join(root, 'apps', app, 'package.json'));
   const declared = new Set(Object.keys(pkg.dependencies ?? {}));
   const needed = new Set<string>();
