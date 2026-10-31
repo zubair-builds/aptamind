@@ -340,8 +340,8 @@ async function visit(page: Page, v: Visit): Promise<string[]> {
     if (!(await nav.isVisible())) problems.push(narrow ? 'menu button missing' : 'main navigation missing');
     if (!(await page.getByRole('main').isVisible())) problems.push('main landmark missing');
     // The no-auth marker must stay visible on every page and width (ADR-0008).
-    if (!(await page.getByRole('link', { name: /Internal · no auth/ }).isVisible()))
-      problems.push('"Internal · no auth" chip not visible');
+    if (!(await page.getByRole('link', { name: /Internal · password protected/ }).isVisible()))
+      problems.push('"Internal · password protected" chip not visible');
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     if (overflow > 0) problems.push(`horizontal scroll of ${overflow}px`);
     // Scoped to <main>: Next's route announcer is a (normally empty) role=alert outside it.

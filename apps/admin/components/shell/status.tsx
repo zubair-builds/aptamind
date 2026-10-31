@@ -59,13 +59,11 @@ export function AuthChip() {
     <Link
       href="/settings/system#access"
       className={s.chip}
-      title="Internal operations tool without authentication (ADR-0008). Do not expose publicly."
+      title="Internal operations tool, protected by a shared password (HTTP basic auth)."
     >
-      <Icon name="lock-open" size={14} />
-      <span>Internal · no auth</span>
-      <span className="sr-only">
-        : internal operations tool without authentication, do not expose publicly
-      </span>
+      <Icon name="lock" size={14} />
+      <span>Internal · password protected</span>
+      <span className="sr-only">: internal operations tool protected by a shared password</span>
     </Link>
   );
 }
