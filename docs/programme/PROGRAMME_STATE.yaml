@@ -31,6 +31,10 @@ foundation:
       title: reference-counted ArtifactStore delete (an artifact is deleted only when every snapshot using it is released)
       status: 'implemented on branch foundation/fe-4-artifact-delete'
       record: foundation-exceptions/FE-4-artifact-delete.md
+    - id: FE-6
+      title: a $ref with an explicit default resolves to it when the referenced node was skipped (branch join)
+      status: 'approved by owner 2026-10-31; implemented on feat/market-waves-6-7 (PR #6)'
+      record: foundation-exceptions/FE-6-skipped-ref-default.md
     - id: FE-T1
       title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
       status: candidate
