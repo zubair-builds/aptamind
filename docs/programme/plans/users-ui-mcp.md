@@ -178,7 +178,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | D5  | Tenancy model                                                                            | **APPROVED 2026-10-31:** Single shared workspace in v1; `workspaceId` stored on users, memberships, tokens and user-owned records from day one |
 | D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
 | D7  | FE-5 (user actor kind)                                                                   | **APPROVED 2026-10-31:** additive `user` actor kind (`userId`, `workspaceId`) in `packages/contracts`; existing kinds unchanged; record `foundation-exceptions/FE-5-user-actor-kind.md` |
-| D8  | Who can see Professional data                                                            | Admin only (`professional.view` off by default) until FE-P7/FE-P8                                                           |
+| D8  | Who can see Professional data                                                            | **APPROVED 2026-10-31:** admin only; `professional.view` off by default for users, admin can grant per user; until FE-P7/FE-P8 are done |
 | D9  | RBAC model                                                                               | **APPROVED 2026-10-31**: `admin`/`user`, permission checks, admin-controlled defaults + per-user overrides, last-admin rule |
 | D10 | Login method                                                                             | **APPROVED 2026-10-31**: Google sign-in only; admin pre-approves emails, unknown accounts pending                           |
 
