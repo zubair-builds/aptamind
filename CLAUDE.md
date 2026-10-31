@@ -35,7 +35,8 @@ domain will join the two. This file is the entry point for any Claude session; d
 - Unknown stays unknown; ambiguity is explicit (`unknown`/`conflicting`, review items).
 - Professional: user-confirmed facts outrank model inference; contradictions become conflicts, never silent replacement; history is never destroyed.
 - Professional Fit ≠ Application Viability (visa/location/sponsorship are viability).
-- No auth in v0.1 (ADR-0008): internal/private surface only; `Actor` seam on every mutation.
+- Auth (D1, 2026-10-31, partially supersedes ADR-0008): approved users/auth work only — Better Auth + Google sign-in, admin/user roles with permissions, single workspace; `Actor` seam on every mutation.
+- Users/auth/UI/MCP plan: docs/programme/plans/users-ui-mcp.md.
 
 ## Domain boundaries and stream ownership
 
@@ -93,5 +94,5 @@ family three times means redesign the abstraction. Policy: `DECISION_LOG.md` 202
 
 Opportunity Intelligence / job-fit scoring, application ranking, resume generation, outreach,
 autonomous applications, marketplace, employer ATS, candidate-agent autonomy, LinkedIn automation,
-authentication programme. No prestige infrastructure (Kafka, Temporal, microservices, Neo4j,
+auth beyond the approved users/auth plan (docs/programme/plans/users-ui-mcp.md). No prestige infrastructure (Kafka, Temporal, microservices, Neo4j,
 ClickHouse, OpenSearch, new vector DB, service mesh). No workflow runtime rewrite.
