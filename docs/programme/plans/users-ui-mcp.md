@@ -121,30 +121,38 @@ So all three asks need explicit owner decisions to lift current rules.
 
 ### Goals
 
-- Let a signed-in user connect Claude, Cursor or similar to **their** Aptamind data, read-only, with the same permissions they have in the UI.
-- It is an _interface_, not an agent: Aptamind runs no autonomous model loop; the external client's model only reads. "AI makes proposals only" still holds.
+- Let a signed-in user connect Claude, Cursor or similar to **their** Aptamind data with the same permissions they have in the UI (read tools for all permitted users).
+- Let **admins** use their AI tools to populate leads and sources through **proposal-only** write tools.
+- It is an _interface_ for users' own AI tools, not an in-app agent: Aptamind runs no autonomous model loop. "AI makes proposals only" still holds.
+
+**Decision D4 — APPROVED by owner 2026-10-31.** MCP server inside the single app at `/api/mcp` (Streamable HTTP), per-user scoped API tokens (token scopes never exceed the user's effective permissions), every call audited, size caps/paging, rate limits. The "no MCP agents" rule is narrowed to allow this server only; no in-app agents. Read tools for permitted users; admin-only proposal write tools (`import_leads`, `propose_source`); no edit/delete tools.
 
 ### Proposed design
 
 - **Where**: a route in the existing Next.js app, `apps/admin/app/api/mcp/route.ts`, using the official `@modelcontextprotocol/sdk` (or `mcp-handler`) with **Streamable HTTP** transport (stateless). It calls the same platform services as `/api/*` — no new deployable, no new data store, no vector DB/RAG. A `stdio` wrapper for local dev is optional.
 - **Auth**: `Authorization: Bearer <api token>` from M-U6 (scopes drawn from the user's permissions, e.g. `market.jobs.view`, `professional.view`; never more than the user has). `resolveActor` maps token → user → effective permissions ∩ token scopes, so the same `requirePermission` checks apply. OAuth 2.1 (MCP auth spec) is a later step once a client needs it.
-- **Tools (v1, all read-only)**:
+- **Read tools (all permitted users)**:
   - `search_companies(query, filters)`, `get_company(id)` — incl. sponsorship status with evidence.
   - `search_jobs(query, country, sponsorship, remote, postedSince)`, `get_job(id)`.
   - `list_sources()`, `get_source_health(id)`.
   - `get_dashboard()` — counts and attention items.
   - `list_professional_subjects()`, `get_professional_profile(id)` — only for tokens with `professional.view`, respecting consent/masking.
   - Resources: `aptamind://company/{id}`, `aptamind://job/{id}` for citation.
-- **Guardrails**: result size caps + pagination, per-token rate limit, every call audited (`mcp.tool_called` with tool name, not payload), no write tools in v1, Professional tools disabled by default.
-- **Later (separate decision)**: proposal-only write tools (e.g. `propose_review_decision`) that create a pending review item a human approves — consistent with "AI makes proposals only".
+- **Admin-only write tools (proposal-only, D4)**:
+  - `import_leads(companies[], jobLinks[])` — creates a normal Import through the existing import pipeline (same validation, dedupe, visible under Imports); never writes the DB directly. Per-call row cap.
+  - `propose_source(kind, url, notes)` — creates a source proposal in the review queue; nothing goes live until an admin approves it. Per-call cap.
+  - No edit or delete tools.
+- **Guardrails**: result size caps + pagination, per-token rate limit, every call audited (`mcp.tool_called` with tool name and actor, not payload), per-call size caps on write tools, write tools only for admin tokens, no edit/delete tools, Professional tools disabled by default (`professional.view` scope).
+- **Later (separate decision)**: further proposal-only tools (e.g. `propose_review_decision`).
 
 ### Milestones
 
 | ID   | PR                                                                             | Acceptance criteria                                                            |
 | ---- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| M-M0 | ADR-0023 "MCP server (read-only interface)" + decision lifting "no MCP agents" | Owner approves.                                                                |
+| M-M0 | ADR-0023 "MCP server (interface, not agent)" recording D4 (approved)            | ADR merged; "no MCP agents" narrowed to this server.                          |
 | M-M1 | `/api/mcp` skeleton, token auth, `get_dashboard`                               | MCP Inspector connects locally; 401 without token; audit event written.        |
 | M-M2 | Market tools + resources                                                       | Contract tests per tool; results match `/api` responses; pagination capped.    |
+| M-M2b | Admin write tools: `import_leads`, `propose_source`                           | Admin-only (user tokens 403); import goes through existing pipeline and shows under Imports; source lands as pending proposal; per-call caps; audited. |
 | M-M3 | Professional tools behind scope                                                | Tokens without scope get 403; masking honoured; tests with synthetic subjects. |
 | M-M4 | Docs: connect from Claude Desktop / Cursor; rate limits                        | A design partner can connect end to end on preview.                            |
 
@@ -166,7 +174,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | Approve                                                                                                                     |
 | D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
 | D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                      |
-| D4  | Lift "no MCP agents" to allow a **read-only MCP server** (an interface, not an agent)    | Approve, read-only v1                                                                                                       |
+| D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)          | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`) |
 | D5  | Tenancy model                                                                            | Single workspace in v1, schema ready for many                                                                               |
 | D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
 | D7  | FE-5 (user actor kind)                                                                   | Approve                                                                                                                     |
@@ -180,7 +188,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | ------------------- | --- | ---------------------------------------------------------------- |
 | Users (M-U0–U6)     | 7   | ~5–8 days (no invite emails; adds permission defaults/overrides) |
 | UI revamp (M-V0–V8) | 9   | ~8–12 days (depends on mock sign-off)                            |
-| MCP (M-M0–M4)       | 5   | ~3–5 days                                                        |
-| **Total**           | 21  | **~3–5 weeks** of focused work                                   |
+| MCP (M-M0–M4, M2b)  | 6   | ~4–7 days (adds admin proposal tools)                            |
+| **Total**           | 22  | **~3–5 weeks** of focused work                                   |
 
 Milestone order: M-U0 → M-U1 → M-U2 → M-U3 → M-U4 → (M-V0 in parallel from here) → M-U6 → M-M0..M-M2 → M-V1..V8 → M-U5 → M-M3 → M-M4.
