@@ -873,6 +873,34 @@ export const jobReinterpret: WorkflowSpec = {
 };
 
 /**
+ * Manual AI requirements proposal for one job (live test of the AI gateway). The step only
+ * stores a non-canonical proposal through `market.propose_job_requirements` (AI only proposes,
+ * Law H); canonical requirements stay the deterministic extraction. Runs on the `ai` queue.
+ */
+export const jobProposeRequirements: WorkflowSpec = {
+  key: 'market.job.propose_requirements',
+  title: 'Propose job requirements (AI)',
+  description:
+    'Asks the configured AI provider for a schema-validated requirements proposal for one job (`jobId`), stored as a proposal on the job, never as canonical requirements.',
+  inputSchema: {
+    type: 'object',
+    required: ['jobId'],
+    properties: { jobId: { type: 'string', minLength: 1 } },
+  },
+  nodes: [
+    manualTrigger,
+    {
+      id: 'propose',
+      capability: { type: 'market.propose_job_requirements', version: 1 },
+      input: { jobId: ref('nodes.trigger.output.payload.jobId') },
+    },
+  ],
+  edges: [{ from: 'trigger', to: 'propose' }],
+  outputNode: 'propose',
+  labels: { domain: 'market', stream: 'jobs' },
+};
+
+/**
  * Re-interpretation backfill (DECISION_LOG 8d96663 (3); run by the deploy runbook after a
  * logic/policy bump): one keyset page of jobs whose employment policy version is older than the
  * current one — any lifecycle state (CLOSED, POSSIBLY_STALE) and source (disabled included) —
@@ -975,6 +1003,7 @@ export const marketWorkflows: WorkflowSpec[] = [
   lifecycleSignalsWorkflow,
   companyChangeSignalsWorkflow,
   jobReinterpret,
+  jobProposeRequirements,
   jobsReinterpretOutdated,
   sourceRecomputeJobs,
   noopWorkflow,
