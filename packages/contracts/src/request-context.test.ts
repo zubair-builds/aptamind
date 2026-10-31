@@ -56,4 +56,10 @@ describe('actorSchema (FE-5)', () => {
     expect(parsed).not.toHaveProperty('workspaceId');
     expect(actorSchema.safeParse({ kind: 'unknown', id: 'x' }).success).toBe(false);
   });
+
+  it('rejects a user actor whose id differs from userId', () => {
+    expect(
+      actorSchema.safeParse({ kind: 'user', id: 'usr_other', userId: 'usr_1', workspaceId: 'w' }).success,
+    ).toBe(false);
+  });
 });

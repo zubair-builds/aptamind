@@ -81,6 +81,8 @@ const ALLOWED: Record<string, string[]> = {
     'dev:workflows',
     'dev:testing',
   ],
+  // Composition-level identity (ADR-0022): users, workspaces, permissions. Not a domain.
+  '@aptamind/identity': ['contracts', 'db', 'config', 'observability'],
   // Composition root.
   '@aptamind/platform': [
     'ai',
@@ -97,9 +99,18 @@ const ALLOWED: Record<string, string[]> = {
     'workflow-sdk',
     'workflows',
   ],
-  '@aptamind/worker': ['contracts', 'market', 'observability', 'platform', 'professional', 'workflows'],
+  '@aptamind/worker': [
+    'contracts',
+    'identity',
+    'market',
+    'observability',
+    'platform',
+    'professional',
+    'workflows',
+  ],
   '@aptamind/admin': [
     'contracts',
+    'identity',
     'market',
     'observability',
     'platform',
