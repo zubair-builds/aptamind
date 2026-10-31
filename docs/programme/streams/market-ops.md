@@ -298,3 +298,33 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   object delete, so a release the sweep reverted blocks deletion. Dry-run counts only. The daily
   `market.retention.sweep` workflow runs it after the sweep, at most 500 artifacts. Snapshot
   records stay; a later fetch of the same bytes stores them again.
+
+## Waves 6-7 (implemented 2026-10-31, `feat/market-waves-6-7`)
+
+**Wave 7: UK register of licensed sponsors: workers.**
+
+- Real-file gate on the 2026-10-30 publication (`SP_-_Worker_and_Temporary_Worker_Web_Register_-_2026-10-30.csv`,
+  located from the gov.uk publication page by `findRegisterCsvLink`): 143,198 rows, 0 skipped, 18
+  published routes. `uk-routes/1` ignores Government Authorised Exchange (248), International
+  Agreement (134) and Seasonal Worker (6); every other route stays labour. Every kept row maps to an
+  observation. 804 row keys repeat (the register lists one organisation twice in case/space/county
+  variants; they share the row key). 42 names are mis-encoded in the publication itself and are kept
+  as published. Trimmed fixture: `fixtures/uk-sponsor/real-register-workers-2026-10-30.csv`.
+- Unchanged file (DoD 3): `market.check_dataset_unchanged@1` sits after the download. It ends the run
+  when the fetch was not a reprocessing, the bytes equal the previous snapshot, and that snapshot is
+  the one the last complete import applied (`health.lastSnapshotId`). It writes no observation and
+  never moves the delisting marker. A held-back or failed file, a changed file and an operator
+  reprocessing (`snapshotId`) always import in full.
+- Trade-off: licence `lastSeenAt` advances only when a changed file is imported; the snapshot's
+  `lastFetchedAt` and the source health show that the register was re-checked.
+
+**Wave 6: generic careers pages.**
+
+- `market.company.discover_careers` now ends with `market.register_careers_page_fallback@1`. When no ATS
+  board is detected and the careers URL is on the company's official domain (or a subdomain) or
+  website host, the page is registered as a scheduled (24 h) `careers_page` source
+  (`market.careers_page.crawl`: host-scoped, JSON-LD, never closes jobs by absence). A careers link off
+  the official hosts is never crawled; it raises a `careers_discovery` review.
+- Open: no listing-level unchanged short-circuit for careers crawls yet (every crawl ingests its
+  postings; ingest is idempotent per observation). A careers_page source stays registered if an ATS
+  board is found later.

@@ -55,6 +55,27 @@ export const ukSponsorImport: WorkflowSpec = {
       retry: { maxAttempts: 4, backoffMs: 5_000 },
     },
     {
+      // Wave 7: an unchanged file already applied by a complete import ends the run here.
+      id: 'unchanged',
+      title: 'Skip an unchanged, already applied file',
+      capability: { type: 'market.check_dataset_unchanged', version: 1 },
+      input: {
+        sourceId: ref('run.input.sourceId'),
+        snapshotId: ref('nodes.download.output.snapshotId'),
+        unchanged: ref('nodes.download.output.unchanged'),
+        reprocessing: ref('nodes.download.output.reprocessing'),
+      },
+    },
+    {
+      id: 'route',
+      capability: { type: 'core.switch', version: 1 },
+      config: {
+        cases: [{ branch: 'unchanged', conditions: [{ path: '', op: 'eq', value: 'unchanged' }] }],
+        defaultBranch: 'import',
+      },
+      input: { value: ref('nodes.unchanged.output.path') },
+    },
+    {
       id: 'parse',
       title: 'Parse CSV',
       capability: { type: 'core.parse_csv', version: 1 },
@@ -118,7 +139,9 @@ export const ukSponsorImport: WorkflowSpec = {
   edges: [
     { from: 'trigger', to: 'locate' },
     { from: 'locate', to: 'download' },
-    { from: 'download', to: 'parse' },
+    { from: 'download', to: 'unchanged' },
+    { from: 'unchanged', to: 'route' },
+    { from: 'route', to: 'parse', when: { branch: 'import' } },
     { from: 'parse', to: 'map' },
     { from: 'map', to: 'valid' },
     { from: 'valid', to: 'companies' },
@@ -511,10 +534,22 @@ export const companyCareersDiscovery: WorkflowSpec = {
       },
       input: { items: ref('nodes.discover.output.ats') },
     },
+    {
+      // Wave 6: no ATS board, but a careers page on the official site → a careers_page source.
+      id: 'careers_page',
+      title: 'Register the careers page when no ATS was found',
+      capability: { type: 'market.register_careers_page_fallback', version: 1 },
+      input: {
+        companyId: ref('nodes.discover.output.companyId'),
+        careersUrl: ref('nodes.discover.output.careersUrl', null),
+        ats: ref('nodes.discover.output.ats', null),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'discover' },
     { from: 'discover', to: 'register' },
+    { from: 'discover', to: 'careers_page' },
   ],
   outputNode: 'discover',
   labels: { domain: 'market', stream: 'jobs' },
