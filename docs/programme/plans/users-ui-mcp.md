@@ -95,7 +95,7 @@ So all three asks need explicit owner decisions to lift current rules.
 - **Keep the stack**: CSS tokens + CSS Modules (no Tailwind, no UI kit) — the v1 system is already token-driven, so a revamp is mostly new tokens, components and layout, not a rewrite. Option: adopt Radix primitives for complex widgets (combobox, dialog) — owner/supervisor decision, low risk.
 - **Tokens v2**: refreshed palette, type scale and density modes; brand alignment with www.aptamind.app.
 - **IA / navigation**: Home (what needs attention), Market (Companies, Jobs, Sources, Imports, Review), Professional (Subjects, Documents, Targets), Operations (Runs, Workflows, Capabilities, Health), Settings (Users, Tokens, Preferences). Global command palette (⌘K) and search.
-- **Which apps** (decision D3):
+- **Which apps** (decision D3, APPROVED by owner 2026-10-31):
   - _Option 1 (recommended now)_: one Next.js app, two surfaces — `/admin/*` (admins) and `/app/*` (users), permission-gated. No new deployable, no `packages/ui` yet.
   - _Option 2_: separate `apps/web` user app → triggers `packages/ui` extraction (allowed by the 2026-09-29 rule once a second consumer exists), second deployment.
   - Recommend Option 1 until there is a real end-user product scope; it can be split later because components already live in a fenced folder.
@@ -165,7 +165,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | --- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | Approve                                                                                                                     |
 | D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
-| D3  | Separate user-facing app?                                                                | No for now: one Next.js app with `/admin` and `/app` surfaces                                                               |
+| D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                      |
 | D4  | Lift "no MCP agents" to allow a **read-only MCP server** (an interface, not an agent)    | Approve, read-only v1                                                                                                       |
 | D5  | Tenancy model                                                                            | Single workspace in v1, schema ready for many                                                                               |
 | D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
