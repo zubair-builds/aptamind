@@ -41,7 +41,7 @@ foundation:
       note: 'count only own-prefix clients; CI unaffected; locally re-run alone once'
     - id: FE-5
       title: additive user actor kind (userId, workspaceId) in packages/contracts actorSchema
-      status: 'approved by owner 2026-10-31; not yet implemented (milestone M-U1)'
+      status: 'approved by owner 2026-10-31; implemented on a2/m-u1-fe5-user-actor (milestone M-U1)'
       record: foundation-exceptions/FE-5-user-actor-kind.md
 
 owner_decisions_pending: []
