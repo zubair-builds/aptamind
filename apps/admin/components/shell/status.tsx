@@ -53,19 +53,18 @@ export async function HealthNotice() {
   );
 }
 
-/** Always-visible security marker (ADR-0008): calm, but never hidden at any width. */
+/** Always-visible security marker: reflects whether basic auth (ADMIN_PASSWORD) is enforced. */
 export function AuthChip() {
+  const protectedByPassword = Boolean(process.env.ADMIN_PASSWORD);
+  const label = protectedByPassword ? 'Internal · password protected' : 'Internal · no auth';
+  const detail = protectedByPassword
+    ? 'internal operations tool protected by a shared password (HTTP basic auth)'
+    : 'internal operations tool without authentication (ADMIN_PASSWORD unset), do not expose publicly';
   return (
-    <Link
-      href="/settings/system#access"
-      className={s.chip}
-      title="Internal operations tool without authentication (ADR-0008). Do not expose publicly."
-    >
-      <Icon name="lock-open" size={14} />
-      <span>Internal · no auth</span>
-      <span className="sr-only">
-        : internal operations tool without authentication, do not expose publicly
-      </span>
+    <Link href="/settings/system#access" className={s.chip} title={detail}>
+      <Icon name={protectedByPassword ? 'lock' : 'lock-open'} size={14} />
+      <span>{label}</span>
+      <span className="sr-only">: {detail}</span>
     </Link>
   );
 }

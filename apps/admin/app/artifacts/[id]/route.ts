@@ -1,5 +1,6 @@
-import { API_BASE_URL } from '@/lib/api';
+import { API_BASE_URL, dispatchInternal } from '@/lib/api';
 
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
@@ -21,10 +22,8 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
   };
   let upstream: Response;
   try {
-    upstream = await fetch(`${API_BASE_URL}/api/artifacts/${encodeURIComponent(id)}/content${qs}`, {
-      cache: 'no-store',
-      signal: AbortSignal.timeout(60_000),
-    });
+    const path = `/api/artifacts/${encodeURIComponent(id)}/content${qs}`;
+    upstream = await dispatchInternal(new Request(`http://aptamind.internal${path}`), path, 60_000);
   } catch (err) {
     return new Response(
       `API unavailable at ${API_BASE_URL}: ${err instanceof Error ? err.message : String(err)}\n`,

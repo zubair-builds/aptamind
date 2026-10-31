@@ -38,7 +38,7 @@ const shellUi = (initialCollapsed = false) => (
   <Shell
     initialCollapsed={initialCollapsed}
     actions={null}
-    chip={<a href="/settings/system">Internal · no auth</a>}
+    chip={<a href="/settings/system">Internal · password protected</a>}
     notice={null}
     sidebar={
       <>

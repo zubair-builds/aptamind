@@ -110,6 +110,12 @@ const ICONS = {
     </>
   ),
   moon: <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />,
+  lock: (
+    <>
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </>
+  ),
   'lock-open': (
     <>
       <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />

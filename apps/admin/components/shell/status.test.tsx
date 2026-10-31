@@ -66,3 +66,17 @@ describe('API health', () => {
     expect(screen.getByText('Down')).toBeTruthy();
   });
 });
+
+describe('AuthChip', () => {
+  afterEach(() => vi.unstubAllEnvs());
+  it('says password protected only when ADMIN_PASSWORD is set', async () => {
+    const { AuthChip } = await import('./status');
+    vi.stubEnv('ADMIN_PASSWORD', 'x');
+    render(AuthChip());
+    expect(screen.getByText('Internal · password protected')).toBeTruthy();
+    cleanup();
+    vi.stubEnv('ADMIN_PASSWORD', '');
+    render(AuthChip());
+    expect(screen.getByText('Internal · no auth')).toBeTruthy();
+  });
+});

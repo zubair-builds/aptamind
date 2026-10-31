@@ -49,9 +49,11 @@ export default async function SystemPage() {
       </Section>
       <Section title="Access" id="access">
         <p>
-          Internal operations tool with <strong>no authentication</strong> in v0.1 (ADR-0008). Every visitor
-          acts as the unauthenticated internal operator. Keep the admin and the API on a private interface and
-          never expose them publicly.
+          Internal operations tool. When <code>ADMIN_PASSWORD</code> is set, every page and every{' '}
+          <code>/api</code> route require HTTP basic auth (any username, the shared password); only{' '}
+          <code>/health</code> stays public. There are no per-user accounts: every signed-in visitor acts as
+          the internal operator. Without <code>ADMIN_PASSWORD</code> the admin is open, so keep it on a private
+          interface.
         </p>
       </Section>
     </>

@@ -11,6 +11,33 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_APP_URL ?? 'http://127.0.0.
 
 const TIMEOUT_MS = 20_000;
 
+/** Synthetic origin for in-process requests; never resolved over the network. */
+const INTERNAL_ORIGIN = 'http://aptamind.internal';
+
+/**
+ * Server-side calls are dispatched in-process to the same Fastify app that serves `/api/*`,
+ * instead of fetching our own public origin. A network self-fetch is unauthenticated (it would
+ * now be rejected by the basic-auth middleware), spins up a second serverless invocation on
+ * Vercel and regularly blew the short health-check timeouts, showing a false "API unavailable".
+ */
+export async function dispatchInternal(request: Request, path: string, timeoutMs: number): Promise<Response> {
+  const { handleApiRequest } = await import('./api-server/handler');
+  const pathname = path.split('?')[0] ?? path;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      const err = new Error(`timed out after ${timeoutMs}ms`, { cause: { code: 'TimeoutError' } });
+      err.name = 'TimeoutError';
+      reject(err);
+    }, timeoutMs);
+  });
+  try {
+    return await Promise.race([handleApiRequest(request, pathname), timeout]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export interface ApiFailure {
   /** `unavailable`: the API could not be reached at all. `http`: it answered with an error. */
   kind: 'unavailable' | 'http';
@@ -65,13 +92,7 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   }
   let res: Response;
   try {
-    res = await fetch(`${API_BASE_URL}${full}`, {
-      method,
-      headers,
-      body,
-      cache: 'no-store',
-      signal: AbortSignal.timeout(opts.timeoutMs ?? TIMEOUT_MS),
-    });
+    res = await dispatchInternal(new Request(`${INTERNAL_ORIGIN}${full}`, { method, headers, body }), full, opts.timeoutMs ?? TIMEOUT_MS);
   } catch (err) {
     const cause =
       err instanceof Error ? ((err.cause as { code?: string } | undefined)?.code ?? err.name) : 'error';
@@ -81,7 +102,7 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
         kind: 'unavailable',
         status: null,
         code: 'api_unavailable',
-        message: `Could not reach the internal API at ${API_BASE_URL} (${cause}).`,
+        message: `Internal API failed (${cause}).`,
         method,
         path: full,
       },
