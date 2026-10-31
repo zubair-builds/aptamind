@@ -4,15 +4,29 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./better-auth": "./src/better-auth.ts",
+    "./auth-config": "./src/auth-config.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@aptamind/config": "workspace:*",
     "@aptamind/contracts": "workspace:*",
     "@aptamind/db": "workspace:*",
     "mongodb": "^7.0.0",
     "zod": "^4.6.5"
+  },
+  "peerDependencies": {
+    "better-auth": "1.7.14"
+  },
+  "peerDependenciesMeta": {
+    "better-auth": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "better-auth": "1.7.14"
   }
 }

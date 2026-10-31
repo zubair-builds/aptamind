@@ -26,9 +26,12 @@ export interface SignInProfile {
   authUserId: string;
   email: string;
   displayName?: string;
+  /** Google's `email_verified`. Unverified emails are never linked or bootstrapped. */
+  emailVerified: boolean;
 }
 
 export type SignInResult =
+  | { outcome: 'unverified' }
   | { outcome: 'active'; user: UserDoc }
   | { outcome: 'pending_approval'; user: UserDoc }
   | { outcome: 'suspended'; user: UserDoc };
@@ -69,6 +72,10 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<UserDoc | null> {
     return this.users.findOne({ email: normaliseEmail(email) });
+  }
+
+  async findByAuthUserId(authUserId: string): Promise<UserDoc | null> {
+    return this.users.findOne({ authUserId });
   }
 
   async get(userId: string): Promise<UserDoc> {
@@ -126,7 +133,7 @@ export class UsersService {
       if (!isDuplicateKeyError(err)) throw err;
       const existing = await this.users.findOne({ email: e });
       if (existing?.status === 'pre_approved') return existing;
-      throw new IdentityError('already_exists', `User ${e} already exists`);
+      throw new IdentityError('already_exists', 'A user with this email already exists');
     }
   }
 
@@ -188,11 +195,13 @@ export class UsersService {
   }
 
   /**
-   * Called from Better Auth's user-create hook (M-U2b) after Google sign-in. Pre-approved →
-   * active; unknown → pending_approval; suspended → refused; `ADMIN_EMAIL` → first admin only
+   * Called from Better Auth's user-create hook (M-U2b) after Google sign-in. Unverified email →
+   * refused (nothing written); pre-approved → active; unknown → pending_approval; suspended → refused; `ADMIN_EMAIL` → first admin only
    * when the workspace has no admin yet (unique bootstrap index makes concurrent sign-ins safe).
    */
   async resolveSignIn(profile: SignInProfile): Promise<SignInResult> {
+    // Only a provider-verified email may claim a pre-approved record or the ADMIN_EMAIL bootstrap.
+    if (profile.emailVerified !== true) return { outcome: 'unverified' };
     const email = normaliseEmail(profile.email);
     for (let attempt = 0; attempt < 3; attempt++) {
       const existing = await this.users.findOne({ email });

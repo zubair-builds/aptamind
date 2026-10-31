@@ -85,6 +85,13 @@ export const envSchema = z.object({
   AI_API_KEY_ENV: z.string().default('ANTHROPIC_API_KEY'),
   AI_TIMEOUT_MS: z.coerce.number().int().min(1000).default(60_000),
 
+  // User authentication (ADR-0022). Read by apps/admin; all optional until AUTH_ENABLED is on.
+  AUTH_ENABLED: bool.default(false),
+  GOOGLE_CLIENT_ID: z.preprocess(blankAsUnset, z.string().optional()),
+  GOOGLE_CLIENT_SECRET: z.preprocess(blankAsUnset, z.string().optional()),
+  BETTER_AUTH_SECRET: z.preprocess(blankAsUnset, z.string().min(32).optional()),
+  BETTER_AUTH_URL: z.preprocess(blankAsUnset, z.url({ protocol: /^https?$/ }).optional()),
+  ADMIN_EMAIL: z.preprocess(blankAsUnset, z.email().optional()),
 });
 
 export type Env = z.infer<typeof envSchema>;

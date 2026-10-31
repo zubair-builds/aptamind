@@ -37,3 +37,22 @@ describe('admin middleware', () => {
     expect(re.test('/favicon.ico')).toBe(false);
   });
 });
+
+describe('admin middleware with AUTH_ENABLED (ADR-0022)', () => {
+  const paths = ['/api/auth/sign-in/social', '/api/auth/callback/google', '/api/auth'];
+  it('flag off: /api/auth/* stays behind basic auth (unchanged behaviour)', async () => {
+    vi.stubEnv('ADMIN_PASSWORD', 'pw-123');
+    vi.stubEnv('AUTH_ENABLED', 'false');
+    for (const p of paths) expect((await middleware(req(p))).status).toBe(401);
+    vi.stubEnv('AUTH_ENABLED', '');
+    for (const p of paths) expect((await middleware(req(p))).status).toBe(401);
+  });
+  it('flag on: only /api/auth/* becomes public; everything else still needs basic auth', async () => {
+    vi.stubEnv('ADMIN_PASSWORD', 'pw-123');
+    vi.stubEnv('AUTH_ENABLED', 'true');
+    for (const p of paths) expect(passes(await middleware(req(p)))).toBe(true);
+    for (const p of ['/', '/api/dashboard', '/api/authx', '/api/auth-tokens', '/ready'])
+      expect((await middleware(req(p))).status).toBe(401);
+    expect(passes(await middleware(req('/api/dashboard', ok)))).toBe(true);
+  });
+});

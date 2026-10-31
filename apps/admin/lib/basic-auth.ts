@@ -6,8 +6,18 @@
 /** Paths that stay public: liveness only (no data). Everything else requires auth. */
 export const PUBLIC_PATHS: ReadonlySet<string> = new Set(['/health']);
 
-export function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.has(pathname);
+/** `AUTH_ENABLED` as the env parses it (`1`, `true`, `yes`, `on`). */
+export function authEnabled(value: string | undefined = process.env.AUTH_ENABLED): boolean {
+  return ['1', 'true', 'yes', 'on'].includes((value ?? '').trim().toLowerCase());
+}
+
+/**
+ * `/api/auth/*` (Better Auth, ADR-0022) is public only when user auth is enabled, so the
+ * Google sign-in flow can run before a session exists. With the flag off it stays protected.
+ */
+export function isPublicPath(pathname: string, opts: { authEnabled?: boolean } = {}): boolean {
+  if (PUBLIC_PATHS.has(pathname)) return true;
+  return !!opts.authEnabled && (pathname === '/api/auth' || pathname.startsWith('/api/auth/'));
 }
 
 /** Constant-time comparison: hashes both sides so length and content never short-circuit. */
