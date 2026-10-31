@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { companyCareersDiscovery, ukSponsorImport } from './index';
 
 describe('wave 7: UK register import short-circuits an unchanged, applied file', () => {
-  it('routes after the download; only the import branch reaches parse; finalize stays the sink', () => {
+  it('routes after the download; only the import branch reaches parse; both paths join the report (run output)', () => {
     const edges = ukSponsorImport.edges ?? [];
     expect(edges).toContainEqual({ from: 'download', to: 'unchanged' });
     expect(edges).toContainEqual({ from: 'unchanged', to: 'route' });
@@ -11,7 +11,11 @@ describe('wave 7: UK register import short-circuits an unchanged, applied file',
     const check = ukSponsorImport.nodes.find((n) => n.id === 'unchanged')!;
     expect(JSON.stringify(check.input)).toContain('nodes.download.output.reprocessing');
     const sinks = ukSponsorImport.nodes.filter((n) => !edges.some((e) => e.from === n.id));
-    expect(sinks.map((n) => n.id)).toEqual(['finalize']);
+    expect(sinks.map((n) => n.id)).toEqual(['report']);
+    expect(ukSponsorImport.outputNode).toBe('report');
+    expect(edges).toContainEqual({ from: 'finalize', to: 'report' });
+    expect(edges).toContainEqual({ from: 'route', to: 'report', when: { branch: 'unchanged' } });
+    expect(JSON.stringify(check.input)).toContain('nodes.trigger.output.payload.force');
   });
 });
 

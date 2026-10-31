@@ -25,11 +25,17 @@ export const ukSponsorImport: WorkflowSpec = {
   title: 'UK sponsor register import',
   description:
     'Downloads the UK register of licensed sponsors, stores the raw CSV, parses and maps rows, and resolves/reconciles each organisation. ' +
-    'Registry presence is company licence evidence, never job-level sponsorship. Pass `snapshotId` to reprocess a stored snapshot without refetching.',
+    'Registry presence is company licence evidence, never job-level sponsorship. Pass `snapshotId` to reprocess a stored snapshot without refetching, or `force: true` to import an unchanged file in full ' +
+    '(e.g. to re-check sponsors that matched no known company before the universe grew).',
   inputSchema: {
     type: 'object',
     required: ['sourceId'],
-    properties: { sourceId: { type: 'string' }, snapshotId: { type: 'string' }, csvUrl: { type: 'string' } },
+    properties: {
+      sourceId: { type: 'string' },
+      snapshotId: { type: 'string' },
+      csvUrl: { type: 'string' },
+      force: { type: 'boolean' },
+    },
   },
   nodes: [
     scheduleTrigger,
@@ -64,6 +70,7 @@ export const ukSponsorImport: WorkflowSpec = {
         snapshotId: ref('nodes.download.output.snapshotId'),
         unchanged: ref('nodes.download.output.unchanged'),
         reprocessing: ref('nodes.download.output.reprocessing'),
+        force: ref('nodes.trigger.output.payload.force', false),
       },
     },
     {
@@ -135,6 +142,16 @@ export const ukSponsorImport: WorkflowSpec = {
         fanout: ref('nodes.companies.output'),
       },
     },
+    {
+      // Both paths end here, so `run.output` is defined for an unchanged file too (PR #6 review).
+      id: 'report',
+      title: 'Import report',
+      capability: { type: 'market.dataset_import_report', version: 1 },
+      input: {
+        finalize: ref('nodes.finalize.output', null),
+        unchanged: ref('nodes.unchanged.output'),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'locate' },
@@ -146,7 +163,10 @@ export const ukSponsorImport: WorkflowSpec = {
     { from: 'map', to: 'valid' },
     { from: 'valid', to: 'companies' },
     { from: 'companies', to: 'finalize' },
+    { from: 'finalize', to: 'report' },
+    { from: 'route', to: 'report', when: { branch: 'unchanged' } },
   ],
+  outputNode: 'report',
   labels: { domain: 'market', stream: 'companies' },
 };
 

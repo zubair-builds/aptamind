@@ -314,7 +314,14 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   when the fetch was not a reprocessing, the bytes equal the previous snapshot, and that snapshot is
   the one the last complete import applied (`health.lastSnapshotId`). It writes no observation and
   never moves the delisting marker. A held-back or failed file, a changed file and an operator
-  reprocessing (`snapshotId`) always import in full.
+  reprocessing (`snapshotId`) always import in full. Both paths end in `market.dataset_import_report@1`
+  (the workflow `outputNode`), so `run.output` is always defined; on the unchanged path it is
+  `{complete: true, anomaly: null, delistedCompanies: 0, reconciled: 0, unchanged: true, itemCount}`.
+- Operator re-check (PR #6 review): `POST /api/sources/:id/run` with `{"force": true}` (workflow input
+  `force`) bypasses the unchanged check and imports the current file in full. Without it, a sponsor
+  that matched no known company is re-evaluated only when gov.uk publishes a changed file (in
+  practice daily on working days); after the known universe grows (e.g. an owner company list
+  import), run a forced import to attach the new companies' licences immediately.
 - Trade-off: licence `lastSeenAt` advances only when a changed file is imported; the snapshot's
   `lastFetchedAt` and the source health show that the register was re-checked.
 
@@ -325,7 +332,7 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   keeps refreshing its company; an ambiguous match is an attach-only `company_resolution` review
   (merge / reject / dismiss, no `create_new`); a sponsor matching no known company records no
   observation, creates no company, and counts as row outcome `unmatched` (the raw snapshot keeps
-  it; the next changed import re-evaluates it). Companies created by earlier unrestricted imports
+  it; the next changed import, or a forced import, re-evaluates it). Companies created by earlier unrestricted imports
   are not removed.
 
 **Wave 6: generic careers pages.**
@@ -334,7 +341,10 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   board is detected and the careers URL is on the company's official domain (or a subdomain) or
   website host, the page is registered as a scheduled (24 h) `careers_page` source
   (`market.careers_page.crawl`: host-scoped, JSON-LD, never closes jobs by absence). A careers link off
-  the official hosts is never crawled; it raises a `careers_discovery` review.
+  the official hosts is never crawled; it raises an informational `careers_discovery` review
+  (`dismiss` only: no decision registers the page; fix the company website or register the source).
+  Shared hosting (`github.io`, `notion.site`, `sites.google.com`, `wixsite.com`) is never an official
+  host, and only default ports (or the website's own declared port) count.
 - Open: no listing-level unchanged short-circuit for careers crawls yet (every crawl ingests its
   postings; ingest is idempotent per observation). A careers_page source stays registered if an ATS
   board is found later.

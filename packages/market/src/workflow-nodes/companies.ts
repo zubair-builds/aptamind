@@ -374,6 +374,11 @@ export const checkDatasetUnchanged = defineCapability({
     snapshotId: z.string(),
     unchanged: z.boolean(),
     reprocessing: z.boolean(),
+    /**
+     * Operator override (PR #6 review): import in full even when the file is unchanged, e.g. to
+     * re-check sponsors that matched no known company before the universe grew. Additive.
+     */
+    force: z.boolean().optional(),
   }),
   outputSchema: z.object({
     path: z.enum(['unchanged', 'import']),
@@ -392,7 +397,7 @@ export const checkDatasetUnchanged = defineCapability({
     const source = await market.sources.get(input.sourceId);
     const applied =
       source.health.lastSnapshotId === input.snapshotId && source.health.lastItemCount !== undefined;
-    if (input.reprocessing || !input.unchanged || !applied)
+    if (input.force || input.reprocessing || !input.unchanged || !applied)
       return { path: 'import' as const, itemCount: null };
     await market.sources.recordSuccess(source._id, { runId: ctx.runId });
     ctx.log.info('dataset unchanged; import skipped', {
@@ -401,6 +406,45 @@ export const checkDatasetUnchanged = defineCapability({
       rows: source.health.lastItemCount,
     });
     return { path: 'unchanged' as const, itemCount: source.health.lastItemCount ?? null };
+  },
+});
+
+/**
+ * The run output of a dataset import that can end early (PR #6 review): the finalize report of
+ * an imported file, or, on the unchanged path, a complete no-op report (`unchanged: true`, no
+ * delisting, no reconciliation) so `run.output` is always defined.
+ */
+export const datasetImportReport = defineCapability({
+  type: 'market.dataset_import_report',
+  version: 1,
+  title: 'Dataset Import Report',
+  description:
+    'The import report: the finalize output of an imported file, or a complete no-op report when an unchanged file ended the run early.',
+  category: 'domain',
+  inputSchema: z.object({
+    finalize: finalizeOutputSchema.nullable(),
+    unchanged: z.object({ path: z.enum(['unchanged', 'import']), itemCount: z.number().int().nullable() }),
+  }),
+  outputSchema: finalizeOutputSchema.extend({
+    unchanged: z.boolean(),
+    itemCount: z.number().int().nullable().optional(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'pure',
+    sideEffects: false,
+  },
+  async execute(_ctx, input) {
+    if (input.finalize) return { ...input.finalize, unchanged: false };
+    return {
+      complete: true,
+      anomaly: null,
+      delistedCompanies: 0,
+      reconciled: 0,
+      unchanged: input.unchanged.path === 'unchanged',
+      itemCount: input.unchanged.itemCount,
+    };
   },
 });
 
@@ -962,26 +1006,47 @@ export const registerJobSource = defineCapability({
   },
 });
 
-/** True when `url` is on the company's official domain (or a subdomain) or its website host. */
+/**
+ * Shared hosting (PR #6 review): a host under one of these suffixes belongs to whoever claimed the
+ * subdomain, not to the company, so it is never treated as an official host (it reaches review).
+ */
+export const SHARED_HOSTING_SUFFIXES = ['github.io', 'notion.site', 'sites.google.com', 'wixsite.com'];
+
+function isSharedHosting(host: string): boolean {
+  return SHARED_HOSTING_SUFFIXES.some((s) => host === s || host.endsWith(`.${s}`));
+}
+
+/**
+ * True when `url` is on the company's official domain (or a subdomain) or its website host, on a
+ * default port (or the exact port of the company's own website URL), and not on shared hosting.
+ */
 export function isOnCompanyHosts(url: string, domain: string | null, website: string | null): boolean {
   let host: string;
+  let port: string;
   try {
     const u = new URL(url);
     if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
     host = u.hostname.toLowerCase().replace(/^www\./, '');
+    port = u.port; // '' for the scheme's default port
   } catch {
     return false;
   }
+  if (isSharedHosting(host)) return false;
   const hosts = new Set<string>();
-  if (domain) hosts.add(domain.toLowerCase().replace(/^www\./, ''));
+  if (domain && !port) hosts.add(domain.toLowerCase().replace(/^www\./, ''));
   if (website) {
     try {
-      hosts.add(new URL(website).hostname.toLowerCase().replace(/^www\./, ''));
+      const w = new URL(website);
+      // A non-default port is accepted only when it is the website's own declared port.
+      if (w.port === port) hosts.add(w.hostname.toLowerCase().replace(/^www\./, ''));
     } catch {
       /* no website host */
     }
   }
-  for (const h of hosts) if (host === h || host.endsWith(`.${h}`)) return true;
+  for (const h of hosts) {
+    if (isSharedHosting(h)) continue;
+    if (host === h || host.endsWith(`.${h}`)) return true;
+  }
   return false;
 }
 
@@ -1034,9 +1099,11 @@ export const registerCareersPageFallback = defineCapability({
         dedupeKey: `careers_discovery:${company._id}:off_domain:${input.careersUrl}`,
         entity: { kind: 'company', id: company._id },
         subject: `${company.identity.displayName.value ?? company.identity.normalizedName}: careers link is off the official site`,
-        reason: `Discovery found no ATS board; its careers link ${input.careersUrl} is not on ${domain ?? website ?? 'a known official host'}, so it was not registered for crawling.`,
+        reason: `Discovery found no ATS board; its careers link ${input.careersUrl} is not on ${domain ?? website ?? 'a known official host'}, so it was not registered for crawling. To crawl it, correct the company's website or register the page as a source; then dismiss.`,
         context: { careersUrl: input.careersUrl, domain, website },
-        allowedActions: ['confirm', 'dismiss'],
+        // No decision here registers the page (PR #6 review): `confirm` would read as approval
+        // without any effect, so the item is informational.
+        allowedActions: ['dismiss'],
       });
       return { outcome: 'off_domain_review' as const, sourceId: null };
     }

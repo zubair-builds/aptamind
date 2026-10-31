@@ -20,4 +20,16 @@ describe('isOnCompanyHosts (wave 6: only official hosts are crawled automaticall
     expect(isOnCompanyHosts('not a url', 'acme.com', null)).toBe(false);
     expect(isOnCompanyHosts('https://acme.com/careers', null, null)).toBe(false);
   });
+  it('refuses shared hosting and non-default ports (PR #6 review)', () => {
+    expect(isOnCompanyHosts('https://acme.github.io/careers', 'acme.github.io', null)).toBe(false);
+    expect(isOnCompanyHosts('https://acme.github.io/careers', null, 'https://acme.github.io/')).toBe(false);
+    expect(isOnCompanyHosts('https://acme.notion.site/jobs', null, 'https://acme.notion.site')).toBe(false);
+    expect(
+      isOnCompanyHosts('https://sites.google.com/view/acme', null, 'https://sites.google.com/view/acme'),
+    ).toBe(false);
+    expect(isOnCompanyHosts('https://acme.wixsite.com/acme/careers', 'acme.wixsite.com', null)).toBe(false);
+    expect(isOnCompanyHosts('https://acme.com:8443/careers', 'acme.com', 'https://acme.com/')).toBe(false);
+    expect(isOnCompanyHosts('https://acme.com:443/careers', 'acme.com', null)).toBe(true);
+    expect(isOnCompanyHosts('http://127.0.0.1:4001/careers', null, 'http://127.0.0.1:4000/')).toBe(false);
+  });
 });

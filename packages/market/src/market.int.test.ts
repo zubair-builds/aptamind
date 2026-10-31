@@ -157,6 +157,15 @@ describe('Market vertical slices', () => {
     expect((await out('unchanged'))?.output).toMatchObject({ path: 'unchanged' });
     expect((await out('parse'))?.state).not.toBe('COMPLETED');
     expect((await out('finalize'))?.state).not.toBe('COMPLETED');
+    // The run output is defined on the unchanged path (PR #6 review).
+    expect(run.output).toEqual({
+      complete: true,
+      anomaly: null,
+      delistedCompanies: 0,
+      reconciled: 0,
+      unchanged: true,
+      itemCount: source.health.lastItemCount,
+    });
     const after = (await t.market.sources.getByKey('uk-sponsor-register'))!;
     expect(after.health.status).toBe('healthy');
     expect(after.health.lastCompleteImportStartedAt).toEqual(source.health.lastCompleteImportStartedAt);
@@ -230,16 +239,21 @@ describe('Market vertical slices', () => {
       subject: 'Resolve company "Zenith Robotic Ltd"',
       status: 'open',
     });
+    // Owner 2026-10-31: register reviews are attach-only (no create_new); a different company
+    // is rejected, which creates nothing and leaves the known company untouched.
+    expect(zen?.allowedActions).not.toContain('create_new');
+    const companiesBefore = await t.market.companies.col.countDocuments({});
     const resolved = await t.market.reviewService.resolve(
       zen!._id,
-      { action: 'create_new', reason: 'Different company: Coventry, B rating' },
+      { action: 'reject', reason: 'Different company: Coventry, B rating' },
       t.actor,
     );
     expect(resolved.status).toBe('resolved');
-    const created = resolved.resolution?.result?.companyId as string;
-    const company = await t.market.companies.get(created);
-    expect(company.identity.distinctFrom).toHaveLength(1);
-    expect(company.employment.sponsorship.capability.value).toBe('licensed');
+    expect(resolved.resolution?.result).toMatchObject({ rejectedObservations: zen!.observationIds.length });
+    expect(await t.market.companies.col.countDocuments({})).toBe(companiesBefore);
+    expect(
+      await t.market.companies.col.findOne({ 'identity.normalizedName': 'zenith robotic ltd' }),
+    ).toBeNull();
 
     const smith = await t.market.reviews.col.findOne({
       subject: 'Resolve company "Dr J Smith"',

@@ -88,4 +88,27 @@ describe('UK register attaches to the known company universe only (owner 2026-10
       .toArray();
     for (const r of reviews) expect(r.allowedActions).not.toContain('create_new');
   });
+
+  it('an unchanged file is skipped until an operator forces a re-check; then later-known sponsors attach', async () => {
+    const source = (await t.market.sources.getByKey('uk-sponsor-register'))!;
+    // Northwind becomes known after the import that skipped it.
+    await t.seedUniverse(['Northwind Freight Ltd']);
+    const northwind = () =>
+      t.market.companies.col.findOne({ 'identity.normalizedName': 'northwind freight ltd' });
+
+    const skipped = await t.runSource(source._id);
+    expect(skipped.state).toBe('COMPLETED');
+    expect(skipped.output).toMatchObject({
+      complete: true,
+      unchanged: true,
+      delistedCompanies: 0,
+      reconciled: 0,
+    });
+    expect((await northwind())?.employment.sponsorship.capability.value).not.toBe('licensed');
+
+    const forced = await t.runSource(source._id, { force: true });
+    expect(forced.state).toBe('COMPLETED');
+    expect(forced.output).toMatchObject({ complete: true, anomaly: null, unchanged: false });
+    expect((await northwind())?.employment.sponsorship.capability.value).toBe('licensed');
+  });
 });

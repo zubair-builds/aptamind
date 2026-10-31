@@ -123,6 +123,8 @@ async function scenario(label: string, inject: boolean) {
       t.actor,
     )
   ).source;
+  // Owner 2026-10-31: the UK register attaches to the KNOWN company universe only.
+  await t.seedUniverse(['Acme Ltd']);
   await run(sponsor._id);
 
   // M3: ATS listing t1, then t2 twice (second complete absence closes 4012345005 — corroborated

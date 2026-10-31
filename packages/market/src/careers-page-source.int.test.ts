@@ -128,6 +128,8 @@ describe('wave 6: generic careers pages', () => {
     );
     const review = await t.market.reviews.col.findOne({ type: 'careers_discovery', 'entity.id': zeta._id });
     expect(review?.subject).toMatch(/off the official site/);
+    // Informational only: no decision registers the page, so `confirm` is not offered.
+    expect(review?.allowedActions).toEqual(['dismiss']);
   });
 
   it('a company with an ATS board gets no careers_page source', async () => {
