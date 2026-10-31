@@ -1,7 +1,9 @@
 # FE-5 — additive `user` actor kind
 
-Status: **Approved by owner 2026-10-31 (plan decision D7).** Not yet implemented (milestone M-U1,
-plan `../plans/users-ui-mcp.md`).
+Status: **Approved by owner 2026-10-31 (plan decision D7). Implemented in milestone M-U1** on branch
+`a2/m-u1-fe5-user-actor` (plan `../plans/users-ui-mcp.md`, ADR-0022). `actorSchema` is a
+`z.discriminatedUnion('kind', …)`; existing variants unchanged; tests in
+`packages/contracts/src/request-context.test.ts`.
 
 ## Problem
 
