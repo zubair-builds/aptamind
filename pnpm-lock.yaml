@@ -183,6 +183,9 @@ importers:
       '@aptamind/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@aptamind/identity':
+        specifier: workspace:*
+        version: link:../../packages/identity
       '@aptamind/market':
         specifier: workspace:*
         version: link:../../packages/market
@@ -274,6 +277,21 @@ importers:
       '@aptamind/contracts':
         specifier: workspace:*
         version: link:../contracts
+      mongodb:
+        specifier: ^7.0.0
+        version: 7.6.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+
+  packages/identity:
+    dependencies:
+      '@aptamind/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@aptamind/db':
+        specifier: workspace:*
+        version: link:../db
       mongodb:
         specifier: ^7.0.0
         version: 7.6.0

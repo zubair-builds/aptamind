@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { UNAUTHENTICATED_INTERNAL_OPERATOR } from '@aptamind/contracts';
+import { ensureDefaultWorkspace, ensureIdentityCollections } from '@aptamind/identity';
 import { MARKET_FIXTURES_DIR, uploadSnapshot, UK_SPONSOR_PUBLICATION_URL } from '@aptamind/market';
 import { createPlatform } from '@aptamind/platform';
 
@@ -19,6 +20,11 @@ const platform = await createPlatform('script');
 await platform.init();
 const { market } = platform;
 const actor = UNAUTHENTICATED_INTERNAL_OPERATOR;
+
+// Identity (ADR-0022): collections and the single shared workspace (plan D5). Idempotent.
+await ensureIdentityCollections(platform.mongo.db);
+await ensureDefaultWorkspace(platform.mongo.db);
+platform.logger.info('default workspace ready');
 
 const { source: sponsor } = await market.sources.register(
   {
