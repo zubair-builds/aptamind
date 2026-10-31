@@ -21,6 +21,11 @@ const TYPES = [
     title: 'Source snapshot',
     text: 'Any file a source accepts, sent as it is. The source’s own workflow processes it.',
   },
+  {
+    href: '/imports/new/jobs',
+    title: 'Job links',
+    text: 'A CSV of job links (Greenhouse, Ashby or Lever). Each board is refreshed right away, so the jobs appear without waiting for the schedule.',
+  },
 ];
 
 export default function NewImportPage() {
@@ -38,14 +43,6 @@ export default function NewImportPage() {
             </Link>
           </li>
         ))}
-        <li>
-          <div className={`${s.type} ${s.typeDisabled}`} aria-disabled="true">
-            <span className={s.typeTitle}>
-              Jobs / job URLs <span className={s.soon}>Coming soon</span>
-            </span>
-            <span className={s.typeText}>A list of job links or a jobs CSV. Not available yet.</span>
-          </div>
-        </li>
       </ul>
     </>
   );

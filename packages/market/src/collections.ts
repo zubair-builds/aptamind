@@ -20,7 +20,11 @@ import {
   reviewOperationsCollection,
   reviewRetryIntentsCollection,
 } from './review/schemas';
-import { signalsCollection } from './signals/schemas';
+import {
+  companySignalStateCollection,
+  signalWriterCursorsCollection,
+  signalsCollection,
+} from './signals/schemas';
 import { sourceRunOutcomesCollection, sourcesCollection } from './sources/source.schema';
 import { importsCollection } from './imports/import.schema';
 import { jobVerificationsCollection } from './verification/schemas';
@@ -43,6 +47,8 @@ export const marketCollections = [
   auditEventsCollection,
   jobVerificationsCollection,
   signalsCollection,
+  companySignalStateCollection,
+  signalWriterCursorsCollection,
   aiOperationsCollection,
   importsCollection,
 ] as unknown as CollectionSpec<Document>[];

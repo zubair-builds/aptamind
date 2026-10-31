@@ -400,6 +400,7 @@ async function smoke(browser: Browser) {
   await visit(page, { path: '/imports/new', heading: 'New import' });
   await visit(page, { path: '/imports/new/companies', heading: 'Import companies' });
   await visit(page, { path: '/imports/new/ats-boards', heading: 'Import known ATS boards' });
+  await visit(page, { path: '/imports/new/jobs', heading: 'Import job links' });
   await visit(page, { path: '/imports/new/snapshot', heading: 'Import a source snapshot' });
   const source = await detailLinkingTo(sources, /^\/sources\/src_[^/?#]+$/, /^\/snapshots\//, 'source');
   const snapshot = await detail(source, /^\/snapshots\/[^/?#]+$/, 'a snapshot');

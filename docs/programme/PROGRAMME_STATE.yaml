@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-10-01T12:00Z
+updated: 2026-10-30T17:30Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -27,27 +27,30 @@ foundation:
       title: restrict generic run views (outputRef, outputPreview, node-run IO) for private domains
       status: candidate
       note: 'until then Professional node IO carries ids/counts/codes only (R-34, canary-enforced); generic mutations of professional.* runs refused at composition (PR 24); generic reads remain and must be restricted before real personal data'
+    - id: FE-4
+      title: reference-counted ArtifactStore delete (an artifact is deleted only when every snapshot using it is released)
+      status: 'approved by owner 2026-10-30; implementation on a stacked branch (depends on OPS-3 release marks)'
+      record: foundation-exceptions/FE-4-artifact-delete.md (to be written with the implementation)
     - id: FE-T1
       title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
       status: candidate
       note: 'count only own-prefix clients; CI unaffected; locally re-run alone once'
 
-owner_decisions_pending:
+owner_decisions_pending: []
+owner_decisions_answered: # Zubair Haider, 2026-10-30 (explicit answer; DECISION_LOG)
   - id: professional-real-personal-data
-    question: May real personal data be processed before artifact erasure (FE-P2) exists?
-    default_until_answered: synthetic fixtures and owner-consented data only
-    blocking: false
+    decision: 'ALLOWED: real personal data may be processed before FE-P2 (artifact erasure) exists'
+    residual_risk: 'no erasure yet; FE-P2, FE-P7 (private run views) and FE-P8 (keyed artifact ids) still recommended before scale'
+    follow_up: 'code/config gates that still enforce the old default must be found and relaxed in a separate change'
   - id: professional-ai-processing
-    question: May professional documents be sent to the AI provider?
-    default_until_answered: 'only with recorded subject consent aiProcessing=allowed; contact details masked'
-    blocking: false
+    decision: 'ALLOWED: professional documents may be sent to the AI provider'
+    residual_risk: 'provider receives personal data; AI stays proposals-only'
+    follow_up: 'consent gate aiProcessing=allowed and contact masking still enforced in code; relax or keep as per-subject setting in a separate change'
 
 owner_actions:
   - id: push-foundation-tag
-    why: cloud session cannot push tags
-    command: >-
-      git fetch origin && git tag -a foundation-v0.1 d9799b6a2ae42a3799b25a1a0f39bb09bd857698
-      -m "Frozen Foundation v0.1 baseline" && git push origin foundation-v0.1
+    status: closed
+    resolution: "won't do in zubair-builds/aptamind: tagged sha d9799b6 exists only in mateeqazam/aptamind history, not this repo (non-blocking; owner 2026-10-30)"
     blocking: false
 
 environment:
@@ -109,19 +112,25 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
       status: 'merged (PR 48, 8e5aaac); ADM-1b (board URLs and report codes in Admin) merged as PR 49'
       ruling: 'DECISION_LOG 2026-10-01 S "A live ATS board is company identity evidence"'
       input: 'owner job links give 1046 distinct boards (ashby 669, greenhouse 300, lever 77)'
-    OPS-3: { branch: market/ops-3-retention, status: planned, after: MKT-OPS-1 }
-    OPS-4: { branch: market/ops-4-signals, status: planned, after: MKT-OPS-1 }
-    OPS-5: { branch: market/ops-5-job-urls, status: planned, after: MKT-OPS-1 }
+    OPS-3:
+      branch: prog/market-ops-next
+      status: 'implemented 2026-10-30 (PR pending review): retentionClass/expiresAt/pinned/expiredAt on market_snapshots, policy retention/1, market.retention.sweep daily workflow (release marks only; holds latest-of-source, open-review evidence, current observations). Byte deletion needs an ArtifactStore delete = Foundation Exception candidate FE-4.'
+    OPS-4:
+      branch: prog/market-ops-next
+      status: 'lifecycle part implemented 2026-10-30 (PR pending review): market.signals.lifecycle hourly writer, vocabulary v1 job_discovered/changed/closed/reopened/reposted with job-evidence ids and snapshot ids, deterministic dedupe. Canonical-change writer company-change/1 (2026-10-30, daily market.signals.company_changes): sponsorship_change, remote_policy_change, role_family_expansion, new_location_hiring, hiring_acceleration. FUNDING_EVENT and TEAM_OR_LEADERSHIP_CHANGE need sources that do not exist yet: blocked on waves 16/17 and Team Intelligence.'
+    OPS-5:
+      branch: prog/market-ops-next
+      status: 'implemented 2026-10-30 (PR pending review): POST /api/imports type=jobs on an ats_board_directory source with a url column; board rows as M8.2/OPS-1b, then one listing refresh per resolved board (market.refresh_imported_boards) -> canonical jobs. Fixed: ATS job links with 10-digit Greenhouse ids or UUIDs were refused as contact_value in board files (set aside on ATS hosts only). Admin /imports/new/jobs UI not built (Admin stream ask).'
   sources: # wave -> status (done only per the source Definition of Done in streams/market-ops.md)
     1-company-lists: 'operational (live company import 2026-10-02; careers discovery found all 3 boards)'
-    2-job-lists: 'operational (owner board file: 1031 boards created, 13 not live, 2 unreachable)'
+    2-job-lists: 'operational for board files; job URL import (OPS-5) implemented, not yet verified on real owner job links'
     3-greenhouse: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     4-ashby: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     5-lever: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     6-generic-careers: planned
     7-uk-sponsor-register: planned
-    8-nl-ind: 'planned (real-file gate first)'
-    9-uscis-h1b: 'planned (real-file gate first)'
+    8-nl-ind: 'real-file gate PASSED 2026-10-30 after a parser fix (DECISION_LOG); not yet enabled on the MVP database (owner/supervisor step)'
+    9-uscis-h1b: 'real-file gate passed for the legacy archive export (FY2009-2023) 2026-10-30; current FY2024+ export not statically downloadable, gate open for it'
     10-dol-lca: planned
     11-yc: planned
     12-a16z: planned
@@ -160,8 +169,8 @@ roadmap: # 2026-09-30 lock; market_ops above takes priority (DECISION_LOG 2026-1
       ]
     next:
       - 'P2.4 resolution and assertions, then P3.2, P3.3, P4.x per streams/professional.md'
-      - 'P2.1/P2.2 deterministic document extraction; stop before AI extraction (P2.3) until owner decision professional-ai-processing'
-      - 'FE-P7 and FE-P8 before any real personal data'
+      - 'P2.1/P2.2 deterministic document extraction; P2.3 AI extraction unblocked by owner decision professional-ai-processing=ALLOWED (2026-10-30)'
+      - 'FE-P7 and FE-P8 recommended before scale (real personal data allowed by owner 2026-10-30)'
   admin_ux:
     done:
       [
@@ -181,7 +190,7 @@ streams:
     status: 'idle — M8.1 merged (PR 27); next per roadmap.public_market'
     follow_ups:
       - 'Test fixtures: verification-races ashbyBoard job() descriptions collide (race-tp-fresh merges into race-tp at 0.89 similarity); give each board a non-colliding description'
-      - 'M8.4b UK route taxonomy: ignore Government Authorised Exchange, Seasonal Worker, International Agreement (policy bump + reconcile that never delists)'
+      - 'M8.4b UK route taxonomy: DONE 2026-10-30 on prog/market-ops-next (uk-routes/1, company-policy/3, never-delist reconcile; PR 2)'
       - 'Generic sponsorship history shape before DOL LCA (M11.5 remainder); historyCountries recency window; NL no-KvK collision key; historyCountries in the company list API'
       - 'Exact-name lookups never find qualified keys (name:x#gb), so later rows for a qualified company re-review (PR 27 note)'
       - 'Header guard over-refuses headers starting/ending with a person token (Telecoms, Hotel) (PR 27, Low)'
@@ -259,6 +268,7 @@ integration:
     - '#27 M8.1 merged 2026-09-30 as 354f677 (head 5835b91) on the local gate: check 8950 unit + 1107 golden, integration 781/793 (12 accepted browser), perf worst row 27.8 ms. rv19 Highs fixed by one focused repair (ed7b71a) + targeted verification; identity-namespaces.ts folded into external-ids.ts; migration 2026-09-30-005 last'
     - '#36 supervisor docs (claude/aptamind-programme-setup-34y4ze): carries this handoff; merged as the last action of the session on a local format:check'
   gates:
+    - 'NL IND: passed 2026-10-30 (fixture nl-ind/real-register-work-2026-10.html). USCIS H-1B: legacy export passed 2026-10-30; current export still gated.'
     - 'Before the first production import of NL IND or USCIS H-1B data: verify parser, route/category mapping and encoding against a real downloaded file on a non-production database; commit a trimmed recorded fixture; log in DECISION_LOG; only then enable the source (DECISION_LOG 14d07ad (9))'
   supervisor_follow_ups:
     - 'append-only collection fingerprint history CI check'
@@ -305,8 +315,6 @@ branches: # remote branch -> head at handoff; merged topic branches may be delet
     ]
 
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
-  - 'Owner: push tag foundation-v0.1 (owner_actions.push-foundation-tag)'
-  - 'Owner: answer professional-real-personal-data and professional-ai-processing (defaults hold meanwhile)'
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
   - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
   - 'Professional next milestone per roadmap.private_professional.next (P2.4, or P2.1/P2.2)'

@@ -17,6 +17,8 @@ import { companiesCollection } from '../companies/company.schema';
 import { externalIdsOf } from '../companies/company.service';
 import { idsContradict, normalizeObservationExternalIds } from '../companies/external-ids';
 import type { MarketContext } from '../context';
+import { expiresAtFor, retentionClassFor } from '../retention/policy';
+import { sourcesCollection } from '../sources/source.schema';
 import {
   type CompanyObservationDoc,
   companyObservationsCollection,
@@ -118,9 +120,22 @@ export class ObservationService {
       .limit(1)
       .next();
     const id = deterministicId('snap', input.sourceId, input.artifact.sha256);
+    const src = await getCollection(this.ctx.db, sourcesCollection).findOne(
+      { _id: input.sourceId },
+      { projection: { category: 1, 'authority.tier': 1 } },
+    );
+    const retentionClass = retentionClassFor({
+      via: input.via,
+      category: src?.category,
+      authorityTier: src?.authority?.tier,
+    });
     await this.snapshots.updateOne(
       { _id: id },
       {
+        // Each fetch of the same bytes extends expiry ($max keeps a later hold); a snapshot whose
+        // bytes were released is fetched again as new evidence, so the release mark is cleared.
+        $max: { expiresAt: expiresAtFor(retentionClass, now) },
+        $unset: { expiredAt: '' },
         $set: {
           lastFetchedAt: now,
           updatedAt: now,
@@ -137,6 +152,7 @@ export class ObservationService {
           contentType: input.contentType,
           firstFetchedAt: now,
           via: input.via,
+          retentionClass,
           schemaVersion: OBSERVATION_SCHEMA_VERSION,
           createdAt: now,
         },

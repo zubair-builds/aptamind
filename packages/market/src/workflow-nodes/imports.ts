@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { artifactRefSchema, SYSTEM_ACTOR } from '@aptamind/contracts';
+import { AppError, artifactRefSchema, SYSTEM_ACTOR } from '@aptamind/contracts';
 import { defineCapability, recordSetSchema, TerminalError } from '@aptamind/workflow-sdk';
 import { importReportSchema, reviewsOpenedSince, TraceCollector } from '../imports/import-report';
 import { NET_CLIENT } from '@aptamind/workflow-nodes';
@@ -731,5 +731,74 @@ export const finalizeAtsBoardImportV2 = defineCapability({
         trace: { ...trace.result(), reportArtifactId: report?.artifactId ?? null },
       },
     };
+  },
+});
+
+/**
+ * OPS-5 job URL import: after the board rows, start a listing refresh of every board a row
+ * resolved to a company, so the posted jobs become canonical jobs now rather than at the next
+ * scheduled refresh. Only when the run was started by a `jobs` import (`enabled`); a plain board
+ * import keeps its schedule-only behaviour. Boards with no company (a claim given back, a review)
+ * are not refreshed.
+ */
+export const refreshImportedBoards = defineCapability({
+  type: 'market.refresh_imported_boards',
+  version: 1,
+  title: 'Refresh Imported Boards',
+  description:
+    'For a job URL import: starts one listing refresh per distinct board source that the import resolved to a company (keyed per run and source).',
+  category: 'domain',
+  inputSchema: z.object({
+    enabled: z.boolean().default(false),
+    fanout: z.object({ total: z.number().int(), outputs: z.array(z.unknown()) }).passthrough(),
+  }),
+  outputSchema: z.object({
+    enabled: z.boolean(),
+    boards: z.number().int(),
+    started: z.number().int(),
+    skipped: z.number().int(),
+    runIds: z.array(z.string()),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'Each refresh run carries the idempotency key job_urls:<runId>:<sourceId>; a retry returns the same runs.',
+  },
+  async execute(ctx, input) {
+    if (!input.enabled) return { enabled: false, boards: 0, started: 0, skipped: 0, runIds: [] };
+    const market = ctx.services.get(MARKET);
+    const ids = new Set<string>();
+    for (const o of input.fanout.outputs) {
+      const r = o as { outcome?: string; sourceId?: string; companyId?: string } | null;
+      if (r?.sourceId && r.companyId && (r.outcome === 'registered' || r.outcome === 'unchanged'))
+        ids.add(r.sourceId);
+    }
+    const runIds: string[] = [];
+    let skipped = 0;
+    for (const id of ids) {
+      try {
+        const { runId } = await market.sources.runNow(
+          id,
+          SYSTEM_ACTOR,
+          {},
+          { idempotencyKey: `job_urls:${ctx.runId}:${id}` },
+        );
+        runIds.push(runId);
+      } catch (err) {
+        // A disabled source throws invalid_state and is not refreshed; the import stays successful.
+        // Upload-only sources throw validation_failed, and a missing launcher throws unavailable:
+        // those are rethrown so this retryable node runs again with job_urls:<runId>:<sourceId>.
+        if (err instanceof AppError && err.code === 'invalid_state') {
+          skipped++;
+          market.ctx.logger.warn({ sourceId: id, err }, 'job url import: board refresh not started');
+          continue;
+        }
+        throw err;
+      }
+    }
+    return { enabled: true, boards: ids.size, started: runIds.length, skipped, runIds };
   },
 });

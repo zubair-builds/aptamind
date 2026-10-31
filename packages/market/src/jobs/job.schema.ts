@@ -300,6 +300,11 @@ export const jobsCollection = defineCollection<JobDoc>({
         'Resolve syndicated copies by company + requisition id. Not unique: one requisition may cover several locations.',
     },
     {
+      key: { updatedAt: 1, _id: 1 },
+      options: { name: 'by_updated' },
+      rationale: 'OPS-4 lifecycle signal writer: jobs written since its cursor (keyset).',
+    },
+    {
       key: { urlFingerprints: 1 },
       options: { name: 'by_url_fingerprint' },
       rationale: 'Resolve copies that link to the same canonical/apply URL.',

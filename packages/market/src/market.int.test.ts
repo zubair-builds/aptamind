@@ -109,7 +109,8 @@ describe('Market vertical slices', () => {
       'Resolve company "Dr J Smith"',
       'Resolve company "Zenith Robotic Ltd"',
     ]);
-    expect(await t.market.observations.companyObservations.countDocuments({ sourceId: source._id })).toBe(23);
+    // M8.4b: the Government Authorised Exchange row is not evidence (23 rows, 22 observations).
+    expect(await t.market.observations.companyObservations.countDocuments({ sourceId: source._id })).toBe(22);
   });
 
   it('M2: re-running the import is idempotent (no duplicate companies, observations, snapshots or reviews)', async () => {

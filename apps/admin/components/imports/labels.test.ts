@@ -29,6 +29,7 @@ describe('countsSummary', () => {
       '5 rows · 4 created · 2 with warnings',
     );
     expect(countsSummary(counts({ rows: 5, created: 4 }), 'ats_boards')).toBe('5 rows · 4 boards registered');
+    expect(countsSummary(counts({ rows: 5, created: 4 }), 'jobs')).toBe('5 rows · 4 boards registered');
   });
 
   it('is empty when nothing is known', () => {
@@ -40,6 +41,7 @@ describe('countsSummary', () => {
 describe('importTypeLabel', () => {
   it('falls back to the raw type', () => {
     expect(importTypeLabel('companies')).toBe('Companies');
+    expect(importTypeLabel('jobs')).toBe('Job links');
     expect(importTypeLabel('later_type')).toBe('later_type');
   });
 });
@@ -49,7 +51,9 @@ describe('countLabels', () => {
     const label = (type: string) => countLabels(type).find(([k]) => k === 'created')![1];
     expect(label('companies')).toBe('Created');
     expect(label('ats_boards')).toBe('Boards registered');
+    expect(label('jobs')).toBe('Boards registered');
     expect(traceSourcesLabel('ats_boards')).toBe('Sources linked');
+    expect(traceSourcesLabel('jobs')).toBe('Sources linked');
     expect(traceSourcesLabel('companies')).toBe('Sources registered');
   });
 });

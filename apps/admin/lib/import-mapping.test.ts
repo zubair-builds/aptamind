@@ -3,6 +3,7 @@ import { readCsv } from './csv';
 import {
   columnsConfig,
   hasIdentityColumn,
+  IMPORT_KINDS,
   listNameFromFile,
   reduceCsv,
   sameColumns,
@@ -65,6 +66,18 @@ describe('validateMapping', () => {
       'Choose a column for Company name or Company domain (at least one).',
     ]);
   });
+
+  it('requires a url column for job links and does not offer provider or token', () => {
+    expect(IMPORT_KINDS.jobs.fields.map((f) => f.key)).toEqual(['url', 'company', 'domain']);
+    expect(validateMapping('jobs', ['Job link'], ['url'])).toEqual([]);
+    expect(validateMapping('jobs', ['URL', 'Company', 'Domain'], ['url', 'company', 'domain'])).toEqual([]);
+    expect(validateMapping('jobs', ['Company'], ['company']).map((i) => i.message)).toEqual([
+      'Choose a column for Job link.',
+    ]);
+    expect(validateMapping('jobs', ['Domain'], ['domain']).map((i) => i.message)).toEqual([
+      'Choose a column for Job link.',
+    ]);
+  });
 });
 
 describe('columnsConfig', () => {
@@ -110,6 +123,13 @@ describe('suggestMapping', () => {
       expect(suggestMapping('ats_boards', ['Company', h])).toEqual(['company', 'url']);
     // On a companies file a careers URL is still the careers page field.
     expect(suggestMapping('companies', ['Careers URL'])).toEqual(['careersUrl']);
+  });
+
+  it('suggests a job link from the URL header and ignores a saved provider or token', () => {
+    expect(suggestMapping('jobs', ['Company', 'Job Link'])).toEqual(['company', 'url']);
+    expect(
+      suggestMapping('jobs', ['ATS', 'Token', 'Link'], { provider: 'ATS', token: 'Token', url: 'Link' }),
+    ).toEqual([null, null, 'url']);
   });
 
   it('uses a saved mapping by exact header when one is given', () => {

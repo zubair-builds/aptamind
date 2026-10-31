@@ -32,16 +32,24 @@ import {
 import { idsContradict } from '../companies/external-ids';
 import type { ReviewRepository } from '../review/review.repository';
 import { ATS_BOARD_DIRECTORY_PROVIDER } from '../sources/providers/ats-board-directory';
+import { classifyRoute, registerAdapterById } from '../sources/providers/registers';
 import { type SourceDoc, sourcesCollection } from '../sources/source.schema';
 import { isConflictField } from './overrides';
 
 export const COMPANY_RECONCILIATION_LOGIC_VERSION = 'company-reconcile/2';
 /**
- * company-policy/2: two different ids in one single-valued register namespace are a recorded
+ * company-policy/3 (M8.4b): licences on a route the register taxonomy ignores are left out (never
+ * no_longer_listed). company-policy/2: two different ids in one single-valued register namespace are a recorded
  * conflict (quality.conflictFields `identity.externalIds`, a field_conflict review, no identity key
  * for the second id), never a silent union.
  */
-export const COMPANY_RECONCILIATION_POLICY_VERSION = 'company-policy/2';
+export const COMPANY_RECONCILIATION_POLICY_VERSION = 'company-policy/3';
+
+/** A licence route its register's taxonomy classifies `ignored` (M8.4b). */
+export function isIgnoredLicenceRoute(register: string, route: string): boolean {
+  const adapter = registerAdapterById(register);
+  return !!adapter && classifyRoute(adapter, route).meaning === 'ignored';
+}
 
 /**
  * Register namespaces in which a company holds contradicting ids (`idsContradict`: one company
@@ -774,6 +782,10 @@ export function buildCanonicalCompany(
   for (const o of obs) {
     const l = o.payload.sponsorLicence;
     if (!l) continue;
+    // M8.4b never-delist: a licence on a route its register's taxonomy now ignores is not
+    // capability evidence. It is left out, never marked no_longer_listed (the route changed
+    // meaning; the register did not delist it). Its observations stay as history.
+    if (isIgnoredLicenceRoute(l.register, l.route)) continue;
     const src = sources.get(o.sourceId);
     const cutoff = src?.health.lastCompleteImportStartedAt;
     const listed = !cutoff || sourceTimeOf(o) >= cutoff;

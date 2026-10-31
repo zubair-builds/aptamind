@@ -2,7 +2,10 @@ import type { Collection } from 'mongodb';
 import { type Actor, AppError, newId, NotFoundError } from '@aptamind/contracts';
 import { getCollection, validateDocument } from '@aptamind/db';
 import type { MarketDomain } from '../market-domain';
-import { ATS_BOARD_DIRECTORY_PROVIDER } from '../sources/providers/ats-board-directory';
+import {
+  ATS_BOARD_DIRECTORY_PROVIDER,
+  boardDirectoryConfigOf,
+} from '../sources/providers/ats-board-directory';
 import { COMPANY_DIRECTORY_PROVIDER } from '../sources/providers/company-directory';
 import type { SourceDoc } from '../sources/source.schema';
 import { uploadSnapshot } from '../sources/snapshot-upload';
@@ -13,6 +16,9 @@ import { type ImportDoc, importsCollection, type ImportStatus, type ImportType }
 const TYPE_PROVIDER: Partial<Record<ImportType, string>> = {
   companies: COMPANY_DIRECTORY_PROVIDER,
   ats_boards: ATS_BOARD_DIRECTORY_PROVIDER,
+  // OPS-5: a job URL file is a board file whose `url` column holds job links; the board import
+  // detects the provider, resolves the company, registers the board, then refreshes it.
+  jobs: ATS_BOARD_DIRECTORY_PROVIDER,
 };
 
 /** Most UTF-16 units a stored file name may have (the record schema's limit). */
@@ -36,17 +42,13 @@ export function cleanFileName(raw: string | undefined): string {
 /**
  * Refuse a wrong target before anything is stored: `jobs` is not available yet, the source must
  * exist and be enabled, and its provider must match the type.
- * @throws AppError validation_failed (`not_supported`, `wrong_source_type`), not_found, invalid_state
+ * @throws AppError validation_failed (`wrong_source_type`, `missing_url_column`), not_found, invalid_state
  */
 export async function checkImportTarget(
   market: MarketDomain,
   type: ImportType,
   sourceId: string,
 ): Promise<SourceDoc> {
-  if (type === 'jobs')
-    throw new AppError('validation_failed', 'Job imports are not supported yet', {
-      problems: [{ code: 'not_supported' }],
-    });
   const source = await market.sources.get(sourceId);
   const provider = TYPE_PROVIDER[type];
   if (provider && source.provider !== provider)
@@ -55,6 +57,10 @@ export async function checkImportTarget(
       `Import type ${type} needs a source with provider ${provider}; source ${source._id} has provider ${source.provider}`,
       { problems: [{ code: 'wrong_source_type', expected: provider, actual: source.provider }] },
     );
+  if (type === 'jobs' && !boardDirectoryConfigOf(source).columns?.url)
+    throw new AppError('validation_failed', 'A job URL import needs the source to map a url column', {
+      problems: [{ code: 'missing_url_column' }],
+    });
   if (!source.enabled) throw new AppError('invalid_state', `Source ${source.key} is disabled`);
   return source;
 }
@@ -81,7 +87,12 @@ export async function createImport(
   let runId: string | null = null;
   let error: ImportDoc['error'];
   try {
-    runId = (await market.sources.runNow(source._id, actor, { snapshotId: snap.snapshotId })).runId;
+    runId = (
+      await market.sources.runNow(source._id, actor, {
+        snapshotId: snap.snapshotId,
+        ...(input.type === 'jobs' ? { refreshBoards: true } : {}),
+      })
+    ).runId;
   } catch (err) {
     // The snapshot is stored either way; the record says why nothing runs (the operator retries).
     error = {

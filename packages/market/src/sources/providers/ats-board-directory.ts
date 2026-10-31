@@ -16,6 +16,7 @@ import {
 } from './company-directory';
 import { beginRow, endRow } from './contact-grammar';
 import {
+  ATS_BOARD_HOST,
   canonicalText,
   contactValueVerdict,
   directoryDomain,
@@ -63,10 +64,6 @@ export function boardDirectoryColumns(config: AtsBoardDirectoryConfig): string[]
   const c = config.columns;
   return [c.provider, c.token, c.company, c.domain, c.url].filter((x): x is string => !!x);
 }
-
-/** Board hosts of Greenhouse, Lever and Ashby (pages, embeds and public APIs; EU hosts too). */
-const ATS_BOARD_HOST =
-  /^((job-)?boards(\.eu)?\.greenhouse\.io|boards-api(\.eu)?\.greenhouse\.io|(jobs|api)(\.eu)?\.lever\.co|(jobs|api)\.ashbyhq\.com)$/;
 
 /**
  * The board named by a board or job URL (OPS-1b). `invalid`: a board host, but no readable
@@ -285,7 +282,8 @@ function mapBoardRow(
   let warning: BoardRowWarning | null = null;
   const url = cell(row, c.url);
   if (url) {
-    if (urlHasContactValue(url)) return fail('contact_value', 'the URL holds a contact value', c.url);
+    if (urlHasContactValue(url, { atsJobIds: true }))
+      return fail('contact_value', 'the URL holds a contact value', c.url);
     const r = boardRefFromUrl(url);
     if ('ref' in r) fromUrl = r.ref;
     else if (r.error === 'invalid')
@@ -409,7 +407,8 @@ function mapBoardRowV1(
   let apiBase: string | null = null;
   const url = cell(row, c.url);
   if (url) {
-    if (urlHasContactValue(url)) return fail('contact_value', 'the URL holds a contact value', c.url);
+    if (urlHasContactValue(url, { atsJobIds: true }))
+      return fail('contact_value', 'the URL holds a contact value', c.url);
     const ref = detectAtsFromUrl(url);
     if (!ref) return fail('invalid_url', 'the URL is not a Greenhouse, Ashby or Lever board URL', c.url);
     if (ref.provider !== ats || ref.boardToken.toLowerCase() !== token.toLowerCase())

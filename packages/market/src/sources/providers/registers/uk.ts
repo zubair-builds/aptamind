@@ -5,7 +5,13 @@ import {
   UK_SPONSOR_PUBLICATION_URL,
   UK_SPONSOR_REGISTER,
 } from '../uk-sponsor-register';
-import { type ParsedRegister, RegisterFormatError, type RegisterAdapter, type RegisterRow } from './adapter';
+import {
+  type ParsedRegister,
+  RegisterFormatError,
+  type RegisterAdapter,
+  type RegisterRow,
+  type RouteDefinition,
+} from './adapter';
 import { decodeText, findColumn, looksLikeHtml, readDelimited } from './tabular';
 
 /**
@@ -14,10 +20,41 @@ import { decodeText, findColumn, looksLikeHtml, readDelimited } from './tabular'
  * `market.uk_sponsor_register.import` workflow's `market.process_sponsor_row` uses), identity is
  * the register's own row key (name + town, namespace `uk_sponsor_register`), and EVERY route of
  * the workers register is capability (`unlistedRouteMeaning: 'labour'`, no taxonomy entries): the
- * register lists only Worker and Temporary Worker routes. Classifying individual UK routes (e.g.
- * the Temporary Worker exchange routes) would change UK behaviour and is a separate decision.
+ * register lists only Worker and Temporary Worker routes. M8.4b: `UK_ROUTES` ignores three
+ * Temporary Worker routes (both UK workflows).
  */
 export const UK_REGISTER_PROVIDER = 'uk_home_office_sponsor_register';
+
+/**
+ * M8.4b UK route taxonomy (policy `uk-routes/1`). Every route stays labour (capability) except the
+ * Temporary Worker routes below, which are not employment sponsorship for the roles Aptamind
+ * tracks: exchange schemes, seasonal agricultural work and international-agreement postings.
+ * Exact aliases only, no keywords: a route the taxonomy does not list keeps the labour meaning
+ * (the M2 behaviour), so a renamed route never silently loses capability.
+ * Licences already stored for these routes are never marked delisted: the reconciler drops a
+ * licence whose route its register now ignores (DECISION_LOG 2026-10-30 "M8.4b").
+ */
+export const UK_ROUTES_POLICY_VERSION = 'uk-routes/1';
+export const UK_ROUTES: readonly RouteDefinition[] = [
+  {
+    id: 'government_authorised_exchange',
+    label: 'Government Authorised Exchange',
+    meaning: 'ignored',
+    aliases: ['Temporary Worker - Government Authorised Exchange', 'GAE'],
+  },
+  {
+    id: 'seasonal_worker',
+    label: 'Seasonal Worker',
+    meaning: 'ignored',
+    aliases: ['Temporary Worker - Seasonal Worker', 'Seasonal Workers'],
+  },
+  {
+    id: 'international_agreement',
+    label: 'International Agreement',
+    meaning: 'ignored',
+    aliases: ['Temporary Worker - International Agreement'],
+  },
+];
 
 /** CSV columns of the published register (also the Map Fields mapping of the M2 workflow). */
 const COLUMNS = {
@@ -74,7 +111,7 @@ export const ukSponsorRegisterAdapter: RegisterAdapter = {
   evidenceTier: 'capability',
   identityNamespace: 'uk_sponsor_register',
   parser: UK_SPONSOR_PARSER,
-  routes: [],
+  routes: UK_ROUTES,
   unlistedRouteMeaning: 'labour',
   locateDownload: findRegisterCsvLink,
   parse: parseUkRegister,

@@ -31,6 +31,7 @@ const PAGES: Record<string, Crumb | Crumb[]> = {
   'imports/new': { label: 'New import' },
   'imports/new/companies': [NEW_IMPORT, { label: 'Companies' }],
   'imports/new/ats-boards': [NEW_IMPORT, { label: 'Known ATS boards' }],
+  'imports/new/jobs': [NEW_IMPORT, { label: 'Job links' }],
   'imports/new/snapshot': [NEW_IMPORT, { label: 'Source snapshot' }],
   'settings/system': { label: 'System status' },
   'settings/ui': { label: 'UI catalogue' },

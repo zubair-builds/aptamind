@@ -7,6 +7,9 @@ import { CompanyService } from './companies/company.service';
 import { AiProposalService } from './ai/ai-operations';
 import { marketCollections } from './collections';
 import type { MarketContext, RunLauncher, ScheduleSync } from './context';
+import { CompanyChangeSignalWriter } from './signals/company-change-signals';
+import { LifecycleSignalWriter } from './signals/lifecycle-signals';
+import { RetentionService } from './retention/retention.service';
 import { FreshnessService } from './freshness/freshness.service';
 import { INTERPRETATION_POLICY_VERSION } from './enrichment/interpret';
 import { JobEvidenceService } from './jobs/evidence.service';
@@ -56,6 +59,9 @@ export class MarketDomain {
   readonly jobPipeline: JobPipeline;
   readonly verification: VerificationService;
   readonly freshness: FreshnessService;
+  readonly retention: RetentionService;
+  readonly lifecycleSignals: LifecycleSignalWriter;
+  readonly companyChangeSignals: CompanyChangeSignalWriter;
   readonly reviewService: ReviewService;
   readonly reviewTriage: ReviewTriage;
   readonly dashboard: MarketDashboard;
@@ -95,6 +101,9 @@ export class MarketDomain {
     );
     this.verification = new VerificationService(ctx, this.jobs, this.evidence);
     this.freshness = new FreshnessService(ctx, this.evidence);
+    this.retention = new RetentionService(ctx);
+    this.lifecycleSignals = new LifecycleSignalWriter(ctx);
+    this.companyChangeSignals = new CompanyChangeSignalWriter(ctx);
     this.reviewService = new ReviewService(
       ctx,
       this.reviews,

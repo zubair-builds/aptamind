@@ -35,6 +35,11 @@ describe('crumbsFor', () => {
       { label: 'New import', href: '/imports/new' },
       { label: 'Companies' },
     ]);
+    expect(crumbsFor('/imports/new/jobs')).toEqual([
+      { label: 'Imports', href: '/imports' },
+      { label: 'New import', href: '/imports/new' },
+      { label: 'Job links' },
+    ]);
     expect(crumbsFor('/imports/imp_1').map((c) => c.label)).toEqual(['Imports', 'imp_1']);
   });
 

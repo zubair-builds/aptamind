@@ -187,6 +187,11 @@ export const reviewItemsCollection = defineCollection<ReviewItemDoc>({
       rationale: 'Open reviews referencing an entity as a candidate.',
     },
     {
+      key: { 'evidence.snapshotId': 1, status: 1 },
+      options: { name: 'by_evidence_snapshot', sparse: true },
+      rationale: 'Retention sweep (OPS-3): evidence referenced by an open review never expires.',
+    },
+    {
       key: { type: 1, status: 1 },
       options: { name: 'by_type_status' },
       rationale: 'Backlog metrics by type.',

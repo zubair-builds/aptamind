@@ -51,7 +51,7 @@ export const importsObject: ObjectDef<ImportSummary> = {
   searchHint: '',
   filterNote: 'One value per filter. Imports are listed newest first.',
   emptyAll:
-    'No imports yet. Use New import to bring in a file of companies, ATS boards or a source snapshot.',
+    'No imports yet. Use New import to bring in a file of companies, ATS boards, job links or a source snapshot.',
   defaultSort: '',
   sorts: [],
   filters: IMPORT_FILTERS,

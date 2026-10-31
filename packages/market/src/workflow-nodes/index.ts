@@ -36,6 +36,7 @@ import {
   processAtsBoardRow,
   processAtsBoardRowV2,
   queueCareersDiscovery,
+  refreshImportedBoards,
 } from './imports';
 import {
   determineEmploymentIntelligence,
@@ -54,6 +55,7 @@ import {
   selectOutdatedJobInterpretations,
   verifyJob,
 } from './jobs';
+import { retentionSweep, writeCompanyChangeSignals, writeLifecycleSignals } from './ops';
 import { locateRegisterDownload, parseRegisterSnapshot, processRegisterRow } from './registers';
 
 export { marketAiTasks } from './ai-tasks';
@@ -105,6 +107,10 @@ export const marketCapabilities: AnyCapability[] = [
   selectJobsDueVerification,
   verifyJob,
   freshnessSweep,
+  retentionSweep,
+  refreshImportedBoards,
+  writeLifecycleSignals,
+  writeCompanyChangeSignals,
   selectOutdatedJobInterpretations,
   reportReinterpretBackfill,
   recomputeSourceJobs,

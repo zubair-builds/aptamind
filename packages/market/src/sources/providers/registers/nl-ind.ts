@@ -28,8 +28,9 @@ import { decodeText, findColumn, looksLikeHtml, readDelimited, readHtmlTables } 
 export const NL_IND_REGISTER = 'nl_ind_recognised_sponsors';
 export const NL_IND_PROVIDER = 'nl_ind_recognised_sponsors';
 export const NL_IND_PUBLICATION_URL = 'https://ind.nl/en/public-register-recognised-sponsors';
+/** The live labour register page (the old `…/public-register-regular-labour-and-highly-skilled-migrants` URL redirects here). */
 export const NL_IND_LABOUR_REGISTER_URL =
-  'https://ind.nl/en/public-register-recognised-sponsors/public-register-regular-labour-and-highly-skilled-migrants';
+  'https://ind.nl/en/public-register-recognised-sponsors/public-register-work';
 export const NL_IND_RESEARCH_REGISTER_URL =
   'https://ind.nl/en/public-register-recognised-sponsors/public-register-research-directive-eu-2016-801';
 
@@ -55,6 +56,11 @@ export const NL_IND_ROUTES: readonly RouteDefinition[] = [
       'Kennismigranten en Europese blauwe kaart',
       'Regular labour and highly skilled migrants (including EU Blue Card)',
       'Highly skilled migrants and EU Blue Card',
+      // The live page since 2026 (real-file gate 2026-10-30): h1 "Public register Work", for the
+      // residence purposes work and highly skilled migrant.
+      'Public register Work',
+      'Openbaar register Arbeid',
+      'Openbaar register Werk',
     ],
     keywords: ['labour', 'labor', 'arbeid', 'highly skilled', 'kennismigrant', 'kennismigranten'],
   },
@@ -178,9 +184,17 @@ const ROUTE_COLUMN = [
 
 /** Headings that name the register family, not a route (delta review A-M2). */
 const GENERIC_HEADINGS = new Set(
-  ['Recognised sponsors', 'Erkende referenten', 'Public register', 'Openbaar register', 'Register'].map(
-    routeKey,
-  ),
+  [
+    'Recognised sponsors',
+    'Erkende referenten',
+    'Public register',
+    'Openbaar register',
+    'Register',
+    // Explanatory section headings above the table on the live page (real-file gate 2026-10-30).
+    'What is this register used for?',
+    'Waarvoor is dit register?',
+    'Waarvoor wordt dit register gebruikt?',
+  ].map(routeKey),
 );
 function isGenericHeading(heading: string): boolean {
   return GENERIC_HEADINGS.has(routeKey(heading));

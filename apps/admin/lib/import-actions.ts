@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { type ApiFailure, apiGet, apiPatch, apiPost, seg } from './api';
-import { IMPORT_KINDS, type MappedImportType, sameColumns } from './import-mapping';
+import { IMPORT_KINDS, isMappedImportType, type MappedImportType, sameColumns } from './import-mapping';
 import { type ImportProblem, problemsOf } from './import-problems';
 import { createImport } from './imports';
 import type { JsonObject, SourceDetail } from './types';
@@ -92,7 +92,7 @@ function newSourceBody(type: MappedImportType, name: string, config: JsonObject)
   return {
     key: sourceKey(kind.provider, name),
     name,
-    category: 'company_universe',
+    category: kind.category,
     provider: kind.provider,
     acquisition: { workflowKey: kind.workflowKey, config },
     freshness: { policyClass: kind.policyClass, maxAgeMinutes: 100_000 },
@@ -129,12 +129,12 @@ async function syncMapping(
   return patched.ok ? null : patched.error;
 }
 
-/** Companies / Known ATS boards: target list, then the reduced CSV upload. */
+/** Companies, known ATS boards or job links: target list, then the reduced CSV upload. */
 export async function startMappedImportAction(fd: FormData): Promise<ImportActionResult> {
   let createdSourceId: string | undefined;
   try {
     const type = text(fd, 'type');
-    if (type !== 'companies' && type !== 'ats_boards') throw new InputError('Unknown import type.');
+    if (!isMappedImportType(type)) throw new InputError('Unknown import type.');
     const fileName = text(fd, 'fileName');
     if (!fileName) throw new InputError('The file has no name.');
     const file = fd.get('file');

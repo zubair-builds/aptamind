@@ -244,7 +244,12 @@ export const atsBoardsImport: WorkflowSpec = {
   inputSchema: {
     type: 'object',
     required: ['sourceId', 'snapshotId'],
-    properties: { sourceId: { type: 'string' }, snapshotId: { type: 'string' } },
+    properties: {
+      sourceId: { type: 'string' },
+      snapshotId: { type: 'string' },
+      /** OPS-5: set by a `jobs` (job URL) import: refresh the resolved boards after the rows. */
+      refreshBoards: { type: 'boolean' },
+    },
   },
   nodes: [
     manualTrigger,
@@ -311,13 +316,24 @@ export const atsBoardsImport: WorkflowSpec = {
         fanout: ref('nodes.rows.output'),
       },
     },
+    {
+      id: 'refresh',
+      title: 'Job URL import: refresh resolved boards → canonical jobs',
+      capability: { type: 'market.refresh_imported_boards', version: 1 },
+      input: {
+        enabled: ref('run.input.refreshBoards', false),
+        fanout: ref('nodes.rows.output'),
+      },
+    },
   ],
   edges: [
     { from: 'trigger', to: 'download' },
     { from: 'download', to: 'map' },
     { from: 'map', to: 'rows' },
     { from: 'rows', to: 'finalize' },
+    { from: 'rows', to: 'refresh' },
   ],
+  outputNode: 'finalize',
   labels: { domain: 'market', stream: 'jobs' },
 };
 
@@ -736,6 +752,50 @@ export const freshnessSweepWorkflow: WorkflowSpec = {
   defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
 };
 
+/** OPS-3 — daily retention sweep over Market snapshots (release marks only). */
+export const retentionSweepWorkflow: WorkflowSpec = {
+  key: 'market.retention.sweep',
+  title: 'Retention sweep',
+  description:
+    'Releases raw snapshots past their retention window that no open review, current observation, job or signal evidence, canonical fact, or latest-of-source read still needs.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'sweep', capability: { type: 'market.retention_sweep', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'sweep' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
+};
+
+/** OPS-4 — hourly lifecycle signal writer (vocabulary v1). */
+export const lifecycleSignalsWorkflow: WorkflowSpec = {
+  key: 'market.signals.lifecycle',
+  title: 'Lifecycle signals',
+  description: 'Records a market signal, with evidence, for each new job lifecycle transition.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'signals', capability: { type: 'market.write_lifecycle_signals', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'signals' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 60, enabled: true, input: {} },
+};
+
+/** OPS-4 — daily canonical-change signal writer (vocabulary v1). */
+export const companyChangeSignalsWorkflow: WorkflowSpec = {
+  key: 'market.signals.company_changes',
+  title: 'Company change signals',
+  description:
+    'Records sponsorship, remote policy, role family, location and hiring acceleration signals from canonical changes.',
+  nodes: [
+    scheduleTrigger,
+    { id: 'signals', capability: { type: 'market.write_company_change_signals', version: 1 }, input: {} },
+  ],
+  edges: [{ from: 'trigger', to: 'signals' }],
+  labels: { domain: 'market' },
+  defaultSchedule: { intervalMinutes: 24 * 60, enabled: true, input: {} },
+};
+
 /** WF5 — re-run interpretation/reconciliation for a job (e.g. after a logic version bump). */
 export const jobReinterpret: WorkflowSpec = {
   key: 'market.job.reinterpret',
@@ -852,6 +912,9 @@ export const marketWorkflows: WorkflowSpec[] = [
   careersPageCrawl,
   verifyDueJobs,
   freshnessSweepWorkflow,
+  retentionSweepWorkflow,
+  lifecycleSignalsWorkflow,
+  companyChangeSignalsWorkflow,
   jobReinterpret,
   jobsReinterpretOutdated,
   sourceRecomputeJobs,
