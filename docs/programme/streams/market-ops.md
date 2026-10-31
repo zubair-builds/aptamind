@@ -216,14 +216,15 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   cited by `market_job_evidence.snapshotId` or signal evidence, or is named on canonical company
   or job fact evidence (including a legacy job `listingMarks` entry); otherwise sets `expiredAt`.
   After that write the sweep reads the hold again and clears `expiredAt` if a citation appeared
-  in between. A citation that lands after that re-check, or a byte delete that sees `expiredAt`
-  before the revert, can still drop bytes (residual race). Pinned snapshots never expire.
-  Nothing is deleted: records and observations stay, so evidence references never dangle.
+  in between. Pinned snapshots never expire. Records and observations stay, so evidence
+  references never dangle. Released bytes are deleted by the FE-4 purge node on the same
+  workflow (see below). The purge re-checks `holdReason` for every snapshot sharing the artifact
+  immediately before delete, so a reverted release blocks deletion, as does any current hold
+  (including job evidence, signal evidence and canonical fact). A citation that lands after
+  that immediate check can still drop bytes (residual race).
   `market_snapshots.by_expires` is a plain `{expiresAt:1}` index (`$exists: false` is not a legal
   partial filter). Observation `by_snapshot` indexes are partial on `snapshotId` existing.
-- Not done: deleting released bytes. `ArtifactStore` has no delete and artifacts are
-  content-addressed across snapshots, so it needs a Foundation Exception (candidate FE-4: a
-  reference-counted delete of an artifact only when every snapshot using it is released).
+  `by_artifact` and partial `by_released` serve the purge.
 
 ## OPS-4 signals — lifecycle part (implemented 2026-10-30)
 
@@ -287,7 +288,13 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
   start when the id space is exhausted. Test: `company-change-signals.int.test.ts`. Not done:
   `funding_event`, team/leadership (no source yet).
 
-## FE-4 artifact delete (approved 2026-10-30)
+## FE-4 artifact delete (implemented 2026-10-30)
 
-- Owner approved FE-4. It lands as a separate PR stacked on PR 2 (needs OPS-3 `expiredAt`).
-  Until then retention stays marks-only.
+- Implemented on `foundation/fe-4-artifact-delete` (owner approved 2026-10-30). Record:
+  `foundation-exceptions/FE-4-artifact-delete.md`.
+- `purgeReleased` deletes raw bytes only when every market snapshot of that artifact is released
+  and unpinned, none of those snapshots is currently held for any hold reason, and no open review
+  or other market record cites the artifact id. The hold is read again immediately before the
+  object delete, so a release the sweep reverted blocks deletion. Dry-run counts only. The daily
+  `market.retention.sweep` workflow runs it after the sweep, at most 500 artifacts. Snapshot
+  records stay; a later fetch of the same bytes stores them again.

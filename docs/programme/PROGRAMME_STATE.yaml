@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-10-30T17:30Z
+updated: 2026-10-30T22:00Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -29,8 +29,8 @@ foundation:
       note: 'until then Professional node IO carries ids/counts/codes only (R-34, canary-enforced); generic mutations of professional.* runs refused at composition (PR 24); generic reads remain and must be restricted before real personal data'
     - id: FE-4
       title: reference-counted ArtifactStore delete (an artifact is deleted only when every snapshot using it is released)
-      status: 'approved by owner 2026-10-30; implementation on a stacked branch (depends on OPS-3 release marks)'
-      record: foundation-exceptions/FE-4-artifact-delete.md (to be written with the implementation)
+      status: 'implemented on branch foundation/fe-4-artifact-delete'
+      record: foundation-exceptions/FE-4-artifact-delete.md
     - id: FE-T1
       title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
       status: candidate
@@ -114,7 +114,7 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
       input: 'owner job links give 1046 distinct boards (ashby 669, greenhouse 300, lever 77)'
     OPS-3:
       branch: prog/market-ops-next
-      status: 'implemented 2026-10-30 (PR pending review): retentionClass/expiresAt/pinned/expiredAt on market_snapshots, policy retention/1, market.retention.sweep daily workflow (release marks only; holds latest-of-source, open-review evidence, current observations). Byte deletion needs an ArtifactStore delete = Foundation Exception candidate FE-4.'
+      status: 'implemented 2026-10-30 (PR pending review): retentionClass/expiresAt/pinned/expiredAt on market_snapshots, policy retention/1, market.retention.sweep daily workflow (release marks; holds latest-of-source, open-review evidence, current observations). Byte deletion is FE-4 (purge node on the same workflow).'
     OPS-4:
       branch: prog/market-ops-next
       status: 'lifecycle part implemented 2026-10-30 (PR pending review): market.signals.lifecycle hourly writer, vocabulary v1 job_discovered/changed/closed/reopened/reposted with job-evidence ids and snapshot ids, deterministic dedupe. Canonical-change writer company-change/1 (2026-10-30, daily market.signals.company_changes): sponsorship_change, remote_policy_change, role_family_expansion, new_location_hiring, hiring_acceleration. FUNDING_EVENT and TEAM_OR_LEADERSHIP_CHANGE need sources that do not exist yet: blocked on waves 16/17 and Team Intelligence.'

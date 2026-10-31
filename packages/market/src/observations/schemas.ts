@@ -52,13 +52,15 @@ export const snapshotDocSchema = z.object({
    * Retention (OPS-3, DECISION_LOG 2026-10-01 O "Artifact retention"). Optional for snapshots
    * stored before it existed: the sweep backfills them. `pinned` snapshots never expire.
    * `expiredAt` marks the snapshot's raw bytes as released (eligible for deletion); the record
-   * itself stays as history. Byte deletion needs an ArtifactStore delete (Foundation Exception).
+   * itself stays as history. `bytesDeletedAt` is set when FE-4 purge removed the bytes. A later
+   * fetch of the same bytes clears both.
    */
   retentionClass: z.enum(RETENTION_CLASSES).optional(),
   expiresAt: z.date().optional(),
   pinned: z.boolean().optional(),
   pinnedReason: z.string().optional(),
   expiredAt: z.date().optional(),
+  bytesDeletedAt: z.date().optional(),
   /** The last sweep that found the snapshot still referenced, and why. */
   retentionHold: z.object({ at: z.date(), reason: z.enum(RETENTION_HOLD_REASONS) }).optional(),
   schemaVersion: z.number().int(),
@@ -92,6 +94,20 @@ export const snapshotsCollection = defineCollection<SnapshotDoc>({
       options: { name: 'by_expires' },
       rationale:
         'OPS-3 retention sweep: snapshots due by expiresAt. Not partial — MongoDB partial indexes do not allow `$exists: false` for "expiredAt absent".',
+    },
+    {
+      key: { 'artifact.artifactId': 1 },
+      options: { name: 'by_artifact' },
+      rationale:
+        'FE-4 purge: every snapshot that shares an artifact id, checked before its bytes are deleted.',
+    },
+    {
+      key: { expiredAt: 1, _id: 1 },
+      options: {
+        name: 'by_released',
+        partialFilterExpression: { expiredAt: { $exists: true } },
+      },
+      rationale: 'FE-4 purge: released snapshots, oldest release first, skipping those never released.',
     },
   ],
 });

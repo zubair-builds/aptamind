@@ -43,6 +43,36 @@ export const retentionSweep = defineCapability({
   },
 });
 
+/** FE-4: delete raw bytes of artifacts whose snapshots are all released and otherwise uncited. */
+export const retentionPurge = defineCapability({
+  type: 'market.retention_purge',
+  version: 1,
+  title: 'Retention Purge',
+  description:
+    'Deletes object bytes for artifacts whose snapshots are all released and unpinned, when no hold reason (including job evidence, signal evidence and canonical facts) and no other market record still cites them. The hold is re-checked immediately before the object delete, so a reverted release blocks deletion. At most `limit` artifacts per run (default 500). Records stay.',
+  category: 'domain',
+  inputSchema: z.object({ limit: z.number().int().positive().max(5000).optional() }),
+  outputSchema: z.object({
+    scanned: z.number().int(),
+    deletable: z.number().int(),
+    deleted: z.number().int(),
+    keptReferenced: z.number().int(),
+    dryRun: z.boolean(),
+  }),
+  configSchema: z.object({}),
+  execution: {
+    retryable: true,
+    idempotency: 'natural',
+    sideEffects: true,
+    idempotencyProof:
+      'Deletes bytes only after a reference check, including every hold reason, that runs again immediately before the object delete, then sets bytesDeletedAt so a replay does not select those snapshots. Deleting an artifact twice is a no-op. Records are never removed.',
+    defaultTimeoutMs: 10 * 60_000,
+  },
+  async execute(ctx, input) {
+    return ctx.services.get(MARKET).retention.purgeReleased({ limit: input.limit });
+  },
+});
+
 /** OPS-4: lifecycle signals (vocabulary v1) from recorded job lifecycle transitions. */
 export const writeLifecycleSignals = defineCapability({
   type: 'market.write_lifecycle_signals',

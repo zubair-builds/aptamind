@@ -55,7 +55,7 @@ import {
   selectOutdatedJobInterpretations,
   verifyJob,
 } from './jobs';
-import { retentionSweep, writeCompanyChangeSignals, writeLifecycleSignals } from './ops';
+import { retentionPurge, retentionSweep, writeCompanyChangeSignals, writeLifecycleSignals } from './ops';
 import { locateRegisterDownload, parseRegisterSnapshot, processRegisterRow } from './registers';
 
 export { marketAiTasks } from './ai-tasks';
@@ -108,6 +108,7 @@ export const marketCapabilities: AnyCapability[] = [
   verifyJob,
   freshnessSweep,
   retentionSweep,
+  retentionPurge,
   refreshImportedBoards,
   writeLifecycleSignals,
   writeCompanyChangeSignals,
