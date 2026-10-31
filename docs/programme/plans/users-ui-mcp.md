@@ -164,7 +164,7 @@ So all three asks need explicit owner decisions to lift current rules.
 
 ## 4. Foundation Exceptions needed
 
-- **FE-5** — `packages/contracts`: add `user` actor kind (and optional role/token claims) to `actorSchema`. Additive; must keep old events valid.
+- **FE-5** — **APPROVED by owner 2026-10-31 (D7).** `packages/contracts`: add `user` actor kind carrying `userId` and `workspaceId` (and optional role/token claims) to `actorSchema`. Additive only; existing actor kinds unchanged; old events stay valid. Record: `../foundation-exceptions/FE-5-user-actor-kind.md`.
 - Probably **none** else: identity, MCP and UI live in `apps/admin` and a new composition-level `packages/identity`. If Professional records later need `ownerUserId` on Foundation-owned run/artifact views, that ties into FE-P7/FE-P8.
 
 ## 5. Decisions the owner must approve
@@ -177,7 +177,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)          | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`) |
 | D5  | Tenancy model                                                                            | **APPROVED 2026-10-31:** Single shared workspace in v1; `workspaceId` stored on users, memberships, tokens and user-owned records from day one |
 | D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
-| D7  | FE-5 (user actor kind)                                                                   | Approve                                                                                                                     |
+| D7  | FE-5 (user actor kind)                                                                   | **APPROVED 2026-10-31:** additive `user` actor kind (`userId`, `workspaceId`) in `packages/contracts`; existing kinds unchanged; record `foundation-exceptions/FE-5-user-actor-kind.md` |
 | D8  | Who can see Professional data                                                            | Admin only (`professional.view` off by default) until FE-P7/FE-P8                                                           |
 | D9  | RBAC model                                                                               | **APPROVED 2026-10-31**: `admin`/`user`, permission checks, admin-controlled defaults + per-user overrides, last-admin rule |
 | D10 | Login method                                                                             | **APPROVED 2026-10-31**: Google sign-in only; admin pre-approves emails, unknown accounts pending                           |
