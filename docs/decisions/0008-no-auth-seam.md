@@ -1,6 +1,7 @@
 # ADR-0008: No authentication in v0.1, with a request-context seam
 
 - Status: Accepted
+- Status: partially superseded by D1 (2026-10-31), see docs/programme/plans/users-ui-mcp.md
 - Date: 2026-09-27
 
 ## Context

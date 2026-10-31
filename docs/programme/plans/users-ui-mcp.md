@@ -1,6 +1,6 @@
 # Plan: user accounts, UI revamp and MCP server
 
-- Status: **PROPOSED — partly approved.** Owner approved RBAC (D9) and Google-only login (D10) on 2026-10-31; everything else in §5 is still pending. Nothing is built until the remaining decisions are answered.
+- Status: **PROPOSED — partly approved.** Owner approved D1 (auth scope), RBAC (D9) and Google-only login (D10) on 2026-10-31; everything else in §5 is still pending. Nothing is built until the remaining decisions are answered.
 - Date: 2026-10-31 · Author: Aptamind bot for Zubair Haider
 - Scope: three owner asks — (1) user accounts managed from Admin, (2) UI revamp, (3) an MCP server.
 - Order: **Users → UI → MCP.** MCP needs per-user tokens, and the UI revamp needs to know which app(s) and roles exist.
@@ -171,7 +171,7 @@ So all three asks need explicit owner decisions to lift current rules.
 
 | ID  | Decision                                                                                 | Recommendation                                                                                                              |
 | --- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | Approve                                                                                                                     |
+| D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | **APPROVED 2026-10-31:** ban lifted for this plan; ADR-0008 partially superseded |
 | D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
 | D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                      |
 | D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)          | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`) |
