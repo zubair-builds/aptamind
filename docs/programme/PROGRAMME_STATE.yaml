@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-10-30T22:00Z
+updated: 2026-10-31T11:45Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -72,6 +72,7 @@ environment:
   mvp_database: 'MONGODB_DB=aptamind_mvp QUEUE_PREFIX=aptamind_mvp (MVP data). The default DB "aptamind" holds only seed:dev --demo fixtures; never mix them.'
   running_stack: 'restarted 2026-10-02 from the main checkout (b58104a) on aptamind_mvp and R2; one API, one worker, one Admin, started by nohup; stop by pid only'
   shared_processes: 'never pkill/killall; stop only processes by pid that a session started'
+  worker_hosting: 'Render free web service srv-dbisuk942hec73be0hag (dashboard-only, no render.yaml); PORT -> static /healthz on 0.0.0.0, UptimeRobot keep-awake; Render owns the scheduler, local worker to stop once live; heavy io jobs (UK import) stay local for now (512 MB) - conflict open, candidate WORKER_QUEUES split (apps/worker/README.md; DECISION_LOG 2026-10-31)'
   github: 'full CI is workflow_dispatch only (gh workflow run ci.yml --ref <branch>); never push empty commits to kick CI'
 
 supervisor:
@@ -341,6 +342,7 @@ proposed_backlog: # all decisions approved (D1, D2, D3, D4, D5, D7, D8, D9, D10;
     owner_decisions_needed: []
     owner_decisions_deferred: [D6 email provider (not needed for v1)]
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
+  - 'Supervisor: resolve worker hosting conflict (Render owns scheduler vs heavy io jobs local); verify UK-import nodes all run on io before a WORKER_QUEUES split (environment.worker_hosting)'
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
   - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
   - 'Professional next milestone per roadmap.private_professional.next (P2.4, or P2.1/P2.2)'
