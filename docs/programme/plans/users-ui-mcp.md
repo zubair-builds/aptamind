@@ -36,7 +36,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | C. Own sessions in Mongo                           | Full control, tiny surface.                                                                                                                             | We own password hashing, reset, OAuth, rate limiting, CSRF — security risk and effort.                                 |
 | D. Hosted (Clerk/Auth0)                            | Fastest, polished UI.                                                                                                                                   | Paid third-party commitment, personal data leaves our stack, vendor lock-in.                                           |
 
-**Recommendation: A** (D2 still pending), configured with the **Google provider only** — owner-approved D10: Google sign-in only in v1, no magic links, no passwords. Env vars the owner sets (names only): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `ADMIN_EMAIL`. Sessions are opaque, httpOnly, `SameSite=Lax` cookies backed by a Mongo `sessions` collection (revocable).
+**Decision: A** (D2 APPROVED by owner 2026-10-31), configured with the **Google provider only** — owner-approved D10: Google sign-in only in v1, no magic links, no passwords. Env vars the owner sets (names only): `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `ADMIN_EMAIL`. Sessions are opaque, httpOnly, `SameSite=Lax` cookies backed by a Mongo `sessions` collection (revocable).
 
 ### Data model (new, in a new `packages/identity` composition-level package, not Foundation)
 
@@ -164,7 +164,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | ID  | Decision                                                                                 | Recommendation                                                                                                              |
 | --- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | Approve                                                                                                                     |
-| D2  | Auth library                                                                             | Better Auth + Mongo, Google provider only (per D10)                                                                         |
+| D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
 | D3  | Separate user-facing app?                                                                | No for now: one Next.js app with `/admin` and `/app` surfaces                                                               |
 | D4  | Lift "no MCP agents" to allow a **read-only MCP server** (an interface, not an agent)    | Approve, read-only v1                                                                                                       |
 | D5  | Tenancy model                                                                            | Single workspace in v1, schema ready for many                                                                               |
