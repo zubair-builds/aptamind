@@ -35,6 +35,10 @@ foundation:
       title: a $ref with an explicit default resolves to it when the referenced node was skipped (branch join)
       status: 'approved by owner 2026-10-31; implemented on feat/market-waves-6-7 (PR #6)'
       record: foundation-exceptions/FE-6-skipped-ref-default.md
+    - id: FE-7
+      title: six optional user-authentication env names (AUTH_ENABLED default false) in packages/config envSchema; AppConfig unchanged
+      status: 'approved by owner 2026-10-31; implemented on a2/m-u2b-better-auth (PR #10)'
+      record: foundation-exceptions/FE-7-auth-env-names.md
     - id: FE-T1
       title: Foundation shared-infra test flakes (runtime-transport counts server-wide Redis clients; runtime-gate under load)
       status: candidate
