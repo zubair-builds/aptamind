@@ -71,6 +71,10 @@ export class UsersService {
     return this.users.findOne({ email: normaliseEmail(email) });
   }
 
+  async findByAuthUserId(authUserId: string): Promise<UserDoc | null> {
+    return this.users.findOne({ authUserId });
+  }
+
   async get(userId: string): Promise<UserDoc> {
     const u = await this.users.findOne({ _id: userId });
     if (!u) throw new IdentityError('not_found', `User ${userId} not found`);

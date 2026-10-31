@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { isAuthorized, isPublicPath } from '@/lib/basic-auth';
+import { authEnabled, isAuthorized, isPublicPath } from '@/lib/basic-auth';
 
 /**
  * Basic auth over every route, including `/api/*`, `/ready`, `/metrics` and `/artifacts/*`.
@@ -9,12 +9,14 @@ import { isAuthorized, isPublicPath } from '@/lib/basic-auth';
 export async function middleware(request: NextRequest) {
   const password = process.env.ADMIN_PASSWORD;
   if (!password) return NextResponse.next();
-  if (isPublicPath(request.nextUrl.pathname)) return NextResponse.next();
+  if (isPublicPath(request.nextUrl.pathname, { authEnabled: authEnabled() })) return NextResponse.next();
   if (await isAuthorized(request.headers.get('authorization'), password)) return NextResponse.next();
 
   const isApi = request.nextUrl.pathname.startsWith('/api/');
   return new NextResponse(
-    isApi ? JSON.stringify({ error: { code: 'unauthorized', message: 'Authentication required.' } }) : 'Unauthorized',
+    isApi
+      ? JSON.stringify({ error: { code: 'unauthorized', message: 'Authentication required.' } })
+      : 'Unauthorized',
     {
       status: 401,
       headers: {
