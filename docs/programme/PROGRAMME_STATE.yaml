@@ -314,7 +314,7 @@ branches: # remote branch -> head at handoff; merged topic branches may be delet
       claude/market-foundation-hardening,
     ]
 
-proposed_backlog: # partly approved (D2, D3, D4, D9, D10); see docs/programme/plans/users-ui-mcp.md
+proposed_backlog: # partly approved (D2, D3, D4, D5, D9, D10); see docs/programme/plans/users-ui-mcp.md
   - id: users-ui-mcp
     status: proposed
     plan: docs/programme/plans/users-ui-mcp.md
@@ -326,7 +326,8 @@ proposed_backlog: # partly approved (D2, D3, D4, D9, D10); see docs/programme/pl
       - 'D2 auth library: Better Auth + Mongo, Google provider only (approved 2026-10-31)'
       - 'D3 single app: one Next.js app with /admin and /app surfaces, no separate user app (approved 2026-10-31)'
       - 'D4 MCP server: /api/mcp in the single app (Streamable HTTP), per-user scoped tokens <= user permissions, audited, size caps/paging, rate limits; interface not in-app agent (no MCP agents narrowed); read tools for permitted users (Professional gated by professional.view); admin-only proposal tools import_leads (normal Import via existing pipeline) and propose_source (review queue); no edit/delete (approved 2026-10-31)'
-    owner_decisions_needed: [D1 auth scope, D5 tenancy, D7 FE-5, D8 professional visibility]
+      - 'D5 tenancy: single shared workspace in v1; workspaceId stored on users, memberships, tokens and user-owned records from day one so multi-workspace can be added later without migration (approved 2026-10-31)'
+    owner_decisions_needed: [D1 auth scope, D7 FE-5, D8 professional visibility]
     owner_decisions_deferred: [D6 email provider (not needed for v1)]
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'

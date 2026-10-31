@@ -42,7 +42,7 @@ So all three asks need explicit owner decisions to lift current rules.
 
 - `users` — `_id`, email (unique, lower-cased), name, status `pre_approved|pending_approval|active|suspended`, `role` string enum `admin|user` (more values such as `owner`/`operator` can be added later without migration), `permissionOverrides` `{grant[], revoke[]}`, createdAt, lastLoginAt.
 - `sessions`, `accounts` (OAuth links), `verifications` — owned by Better Auth.
-- `workspaces` (incl. `userDefaultPermissions[]`) + `memberships` (`userId`, `workspaceId`, `role` `admin|user`) — **single default workspace in v1**; the table exists so tenancy can come later without migration. Market data stays global; Professional data gets `workspaceId`/`ownerUserId` later.
+- `workspaces` (incl. `userDefaultPermissions[]`) + `memberships` (`userId`, `workspaceId`, `role` `admin|user`) — **single default workspace in v1** (D5 APPROVED by owner 2026-10-31; `workspaceId` on users, memberships, tokens and user-owned records from day one); the table exists so tenancy can come later without migration. Market data stays global; Professional data gets `workspaceId`/`ownerUserId` later.
 - No `invites` collection in v1: a pre-approved user is just a `users` row with status `pre_approved`.
 - `api_tokens` — userId, name, prefix, `sha256(token)`, scopes, lastUsedAt, expiresAt, revokedAt (used by MCP).
 - Audit: reuse existing audit events with the new `user` actor; add `auth.*` events (login, user.pre_approved, user.approved, role.changed, permissions.changed, user.suspended, token.created/revoked).
@@ -175,7 +175,7 @@ So all three asks need explicit owner decisions to lift current rules.
 | D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
 | D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                      |
 | D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)          | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`) |
-| D5  | Tenancy model                                                                            | Single workspace in v1, schema ready for many                                                                               |
+| D5  | Tenancy model                                                                            | **APPROVED 2026-10-31:** Single shared workspace in v1; `workspaceId` stored on users, memberships, tokens and user-owned records from day one |
 | D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
 | D7  | FE-5 (user actor kind)                                                                   | Approve                                                                                                                     |
 | D8  | Who can see Professional data                                                            | Admin only (`professional.view` off by default) until FE-P7/FE-P8                                                           |
