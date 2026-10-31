@@ -69,6 +69,26 @@ describe('Market vertical slices', () => {
     serve('/media/fixture/2026-09-27_-_Worker_and_Temporary_Worker.csv', 'text/csv', () =>
       t.fixture('uk-sponsor', 'register-t1.csv'),
     );
+    // Owner 2026-10-31: the register attaches to the KNOWN company universe only, so the
+    // companies an owner company list would hold are seeded first (they used to be created here).
+    await t.seedUniverse([
+      'Acme Ltd',
+      'Beta Co Ltd',
+      'Gamma Health Limited',
+      { name: 'Zenith Robotics Ltd', city: 'Cambridge' },
+      'Acme Analytics Inc',
+      { name: 'Dr J Smith', city: 'Leeds' },
+      'Northwind Freight Ltd',
+      'The Riverside Café Ltd',
+      'Orion Software Solutions Ltd',
+      'Helix Biotech PLC',
+      "St Mary's Care Home Ltd",
+      'Quantum Fintech LLP',
+      'Nimbus Cloud Services Limited',
+      'Lumen Energy Ltd',
+      'Maple & Oak Interiors Ltd',
+      'Vertex Pharma UK Ltd',
+    ]);
     const source = await sponsorSource();
     const run = await t.runSource(source._id);
     expect(run.state).toBe('COMPLETED');
@@ -147,6 +167,8 @@ describe('Market vertical slices', () => {
     serve('/media/fixture/2026-09-27_-_Worker_and_Temporary_Worker.csv', 'text/csv', () =>
       t.fixture('uk-sponsor', 'register-t2.csv'),
     );
+    // A new sponsor is attached only once it is a known company (owner 2026-10-31).
+    await t.seedUniverse(['Solstice Games Ltd']);
     const source = (await t.market.sources.getByKey('uk-sponsor-register'))!;
     const run = await t.runSource(source._id);
     expect(run.output).toMatchObject({ complete: true, delistedCompanies: 1 });

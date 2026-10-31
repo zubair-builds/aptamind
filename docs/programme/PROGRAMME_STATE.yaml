@@ -128,7 +128,7 @@ market_ops: # P0 programme (DECISION_LOG 2026-10-01; brief streams/market-ops.md
     4-ashby: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     5-lever: 'operational (live refresh, scheduled fires, confirm path on an unchanged listing)'
     6-generic-careers: 'implemented on feat/market-waves-6-7 (careers discovery registers an on-site careers page as a scheduled careers_page source when no ATS is found; off-site link -> review); not done: no listing-level unchanged short-circuit yet, not verified on real company sites, scheduled fire + Admin health pending owner check'
-    7-uk-sponsor-register: 'real-file gate PASSED 2026-10-31 on the 2026-10-30 publication (143,198 rows, 18 routes, 0 skipped; uk-routes/1 ignores 388); unchanged-file short-circuit implemented on feat/market-waves-6-7; not done until a live import + scheduled fire on the MVP database are verified (owner/supervisor step)'
+    7-uk-sponsor-register: 'real-file gate PASSED 2026-10-31 on the 2026-10-30 publication (143,198 rows, 18 routes, 0 skipped); unchanged-file short-circuit; RESTRICTED to the known company universe (owner 2026-10-31: unmatched sponsors create no company; unrestricted it would have created ~142k); on feat/market-waves-6-7 (PR 6); integration tests for the restriction written but NOT run locally (owner instruction); not done until tests run + live import + scheduled fire verified'
     8-nl-ind: 'real-file gate PASSED 2026-10-30 after a parser fix (DECISION_LOG); not yet enabled on the MVP database (owner/supervisor step)'
     9-uscis-h1b: 'real-file gate passed for the legacy archive export (FY2009-2023) 2026-10-30; current FY2024+ export not statically downloadable, gate open for it'
     10-dol-lca: planned

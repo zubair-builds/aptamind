@@ -207,7 +207,9 @@ export const processSponsorRow = defineCapability({
       return { outcome: 'skipped_ignored_route' };
     const mapped = sponsorRowToPayload(input.row);
     if (!mapped) return { outcome: 'skipped_invalid_row' };
-    const r = await ctx.services.get(MARKET).companyPipeline.process({
+    // Owner 2026-10-31: the UK register enriches the KNOWN company universe; it never creates a
+    // company (an unmatched sponsor records nothing and is re-evaluated by the next changed import).
+    const r = await ctx.services.get(MARKET).companyPipeline.attachLicence({
       sourceId: input.sourceId,
       snapshotId: input.snapshotId,
       artifactId: input.artifactId,
@@ -217,6 +219,7 @@ export const processSponsorRow = defineCapability({
       parser: UK_SPONSOR_PARSER,
       runId: ctx.runId,
     });
+    if (r.outcome === 'unmatched') return { outcome: 'unmatched' };
     return {
       outcome: r.outcome,
       observationId: r.observationId,

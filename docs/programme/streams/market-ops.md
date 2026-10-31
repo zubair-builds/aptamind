@@ -318,6 +318,16 @@ health visible; the owner has the manual test guide (`docs/runbooks/market-ops-m
 - Trade-off: licence `lastSeenAt` advances only when a changed file is imported; the snapshot's
   `lastFetchedAt` and the source health show that the register was re-checked.
 
+- **Known company universe only (owner 2026-10-31).** The register is reference/enrichment, never a
+  company source. Unrestricted, the 2026-10-30 file would have created ~142,000 companies (142,105
+  distinct row keys). Each row is now matched read-only first (`CompanyPipeline.attachLicence`, both
+  UK workflows): a match attaches the licence; an observation already resolved by an earlier import
+  keeps refreshing its company; an ambiguous match is an attach-only `company_resolution` review
+  (merge / reject / dismiss, no `create_new`); a sponsor matching no known company records no
+  observation, creates no company, and counts as row outcome `unmatched` (the raw snapshot keeps
+  it; the next changed import re-evaluates it). Companies created by earlier unrestricted imports
+  are not removed.
+
 **Wave 6: generic careers pages.**
 
 - `market.company.discover_careers` now ends with `market.register_careers_page_fallback@1`. When no ATS

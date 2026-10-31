@@ -35,7 +35,16 @@ export type CompanyProcessOutcome =
 export interface ResolveOptions {
   /** Resolve to a high-severity review with this reason (see `CompanyCandidate.forceReview`). */
   forceReview?: string;
+  /**
+   * Attach-only (owner 2026-10-31, UK register): never create a company. A review offers no
+   * `create_new`; an unmatched decision leaves the observation unresolved (`unmatched`).
+   */
+  attachOnly?: boolean;
 }
+
+/** Outcome of an attach-only licence row (UK register, owner 2026-10-31): never `created`. */
+export type LicenceAttachOutcome =
+  Exclude<CompanyProcessOutcome, { outcome: 'created' }> | { outcome: 'unmatched'; reason: string };
 
 /** Outcome of attaching a history row (M11.5): never `created`. */
 export type HistoryAttachOutcome =
@@ -178,8 +187,14 @@ export class CompanyPipeline {
             details: { method: c.method },
           })),
           observationIds: [observation._id],
-          context: { candidate: JSON.parse(JSON.stringify(candidate)) },
-          allowedActions: ['merge', 'create_new', 'reject', 'dismiss'],
+          context: {
+            candidate: JSON.parse(JSON.stringify(candidate)),
+            ...(opts.attachOnly ? { attachOnly: true } : {}),
+          },
+          // Attach-only rows (UK register): no `create_new`.
+          allowedActions: opts.attachOnly
+            ? ['merge', 'reject', 'dismiss']
+            : ['merge', 'create_new', 'reject', 'dismiss'],
         });
         await this.observations.setCompanyResolution([observation._id], {
           state: 'review',
@@ -195,6 +210,38 @@ export class CompanyPipeline {
         companyId = decision.companyId;
         method = decision.method;
         confidence = decision.confidence;
+      } else if (opts.attachOnly) {
+        // Attach-only never creates: the match `attachLicence` saw went away (a concurrent merge or
+        // archive). Resolve to an attach-only review instead of creating.
+        const { item } = await this.reviews.raise({
+          type: 'company_resolution',
+          severity: 'low',
+          dedupeKey: `company_resolution:attach_only:${observation._id}`,
+          entity: { kind: 'observation', id: observation._id },
+          subject: `Attach licence of "${observation.payload.name}" to a company?`,
+          reason:
+            'No matching company (attach-only register row: it never creates a company). Merge into the right company, or reject.',
+          evidence: [
+            {
+              sourceId: observation.sourceId,
+              observationId: observation._id,
+              snapshotId: observation.snapshotId,
+              artifactId: observation.artifactId,
+              locator: observation.locator,
+              observedAt: sourceTimeOf(observation),
+            },
+          ],
+          candidates: [],
+          observationIds: [observation._id],
+          context: { candidate: JSON.parse(JSON.stringify(candidate)), attachOnly: true },
+          allowedActions: ['merge', 'reject', 'dismiss'],
+        });
+        await this.observations.setCompanyResolution([observation._id], {
+          state: 'review',
+          reviewItemId: item._id,
+          resolverVersion: COMPANY_RESOLVER_VERSION,
+        });
+        return { outcome: 'review', observationId: observation._id, reviewItemId: item._id };
       } else {
         const createdCompany = await this.companies.createFromCandidate(candidate);
         if (!createdCompany) continue; // lost a creation race; re-resolve and match the winner
@@ -238,6 +285,33 @@ export class CompanyPipeline {
       };
     }
     throw new Error(`Company resolution for ${observation._id} did not converge`);
+  }
+
+  /**
+   * Attach one UK sponsor register row to the KNOWN company universe (owner decision 2026-10-31,
+   * wave note 2026-10-01 "match the known company universe first"): the register is reference /
+   * enrichment, never a company source. The match is decided first, read-only; an unmatched row
+   * records no observation and creates no company (the raw snapshot keeps it, and the next changed
+   * import re-evaluates it). A row whose observation is already resolved (earlier imports) keeps
+   * refreshing its company's licence. A match attaches; an ambiguous match goes to an attach-only
+   * review (merge / reject / dismiss, never create_new).
+   */
+  async attachLicence(
+    input: RecordObservationInput<CompanyObservationPayload>,
+  ): Promise<LicenceAttachOutcome> {
+    const known = await this.observations.companyObservations.findOne(
+      {
+        sourceId: input.sourceId,
+        externalId: input.externalId,
+        'resolution.state': { $in: ['resolved', 'review', 'rejected'] },
+      },
+      { projection: { _id: 1 } },
+    );
+    if (!known) {
+      const decision = await resolveCompanyCandidate(candidateFromPayload(input.payload), this.companies);
+      if (decision.kind === 'create') return { outcome: 'unmatched', reason: 'no_matching_company' };
+    }
+    return (await this.process(input, { attachOnly: true })) as LicenceAttachOutcome;
   }
 
   /**

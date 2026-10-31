@@ -1,3 +1,4 @@
+import { UK_SPONSOR_REGISTER } from '../sources/providers/uk-sponsor-register';
 import { z } from 'zod';
 import { artifactRefSchema } from '@aptamind/contracts';
 import { HttpError } from '@aptamind/net';
@@ -296,7 +297,10 @@ export const processRegisterRow = defineCapability({
     const r =
       adapter.evidenceTier === 'history'
         ? await pipeline.attachHistory(record, adapter.id)
-        : await pipeline.process(record);
+        : // The UK register enriches the known company universe only (owner 2026-10-31).
+          adapter.id === UK_SPONSOR_REGISTER
+          ? await pipeline.attachLicence(record)
+          : await pipeline.process(record);
     metrics.inc('market_register_rows_total', {
       register: adapter.id,
       outcome: r.outcome === 'unmatched' ? `skipped_${r.reason}` : r.outcome,
