@@ -314,13 +314,17 @@ branches: # remote branch -> head at handoff; merged topic branches may be delet
       claude/market-foundation-hardening,
     ]
 
-proposed_backlog: # NOT approved; see docs/programme/plans/users-ui-mcp.md
+proposed_backlog: # partly approved (D9, D10); see docs/programme/plans/users-ui-mcp.md
   - id: users-ui-mcp
     status: proposed
     plan: docs/programme/plans/users-ui-mcp.md
     order: [M-U0, M-U1, M-U2, M-U3, M-U4, M-V0, M-U6, M-M0, M-M1, M-M2, M-V1..V8, M-U5, M-M3, M-M4]
     foundation_exceptions: [FE-5 user actor kind (candidate)]
-    owner_decisions_needed: [D1 auth scope, D2 auth library, D3 separate user app, D4 MCP server, D5 tenancy, D6 email provider, D7 FE-5, D8 professional visibility]
+    owner_decisions_approved: # 2026-10-31
+      - 'D9 RBAC: admin/user roles (string enum), permission checks, admin user-defaults + per-user overrides, server-enforced incl. MCP scopes, last-admin rule, ADMIN_EMAIL bootstrap'
+      - 'D10 login: Google sign-in only; admin pre-approves emails; unknown accounts pending approval; no invite emails'
+    owner_decisions_needed: [D1 auth scope, D2 auth library (Better Auth, Google only), D3 separate user app, D4 MCP server, D5 tenancy, D7 FE-5, D8 professional visibility]
+    owner_decisions_deferred: [D6 email provider (not needed for v1)]
 open_tasks: # nothing is running at handoff; no agent, review or milestone in flight
   - 'Market: real-file gate for NL IND and USCIS H-1B before any production import (integration.gates)'
   - 'Market next milestone per roadmap.public_market.next (M8.4b UK route taxonomy first)'
