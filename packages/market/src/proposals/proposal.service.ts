@@ -60,8 +60,8 @@ export function sourceProposalDedupeKey(key: string): string {
   return `proposal:source:${key}`;
 }
 
-export function importProposalDedupeKey(sha256: string, sourceId: string): string {
-  return `proposal:import:${sha256}:${sourceId}`;
+export function importProposalDedupeKey(sha256: string, sourceId: string, type: string): string {
+  return `proposal:import:${type}:${sha256}:${sourceId}`;
 }
 
 export function boundProposalText(text: string, max = PROPOSAL_REASON_MAX): string {
@@ -241,7 +241,7 @@ export class ProposalService implements ProposalEffectPort {
     const bytes = bodyBytes(input.body);
     assertProposalBodySize(bytes.byteLength);
     const sha256 = createHash('sha256').update(bytes).digest('hex');
-    const dedupeKey = importProposalDedupeKey(sha256, input.sourceId);
+    const dedupeKey = importProposalDedupeKey(sha256, input.sourceId, input.type);
     const entity = { kind: 'source' as const, id: input.sourceId };
     const replay = await this.replay(idempotencyKey, dedupeKey);
     if (replay) return replay;

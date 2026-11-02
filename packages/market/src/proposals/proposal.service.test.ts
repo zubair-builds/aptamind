@@ -15,7 +15,9 @@ import {
 describe('proposal helpers', () => {
   it('builds stable dedupe keys', () => {
     expect(sourceProposalDedupeKey('boards:acme')).toBe('proposal:source:boards:acme');
-    expect(importProposalDedupeKey('a'.repeat(64), 'src_1')).toBe(`proposal:import:${'a'.repeat(64)}:src_1`);
+    expect(importProposalDedupeKey('a'.repeat(64), 'src_1', 'snapshot')).toBe(
+      `proposal:import:snapshot:${'a'.repeat(64)}:src_1`,
+    );
   });
 
   it('bounds reason text and keeps a short string', () => {

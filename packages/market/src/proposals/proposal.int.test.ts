@@ -275,7 +275,9 @@ describe('import proposals', () => {
     expect(replay.item._id).toBe(first.item._id);
     expect(replay.item.occurrences).toBe(1);
     const sha = String(first.item.context.sha256);
-    expect(first.item.dedupeKey).toBe(importProposalDedupeKey(sha, source._id));
+    expect(first.item.dedupeKey).toBe(
+      importProposalDedupeKey(sha, source._id, first.item.context.type as string),
+    );
     const second = await t.market.proposals.proposeImport(
       { type: 'snapshot', sourceId: source._id, body, contentType: 'text/csv' },
       t.actor,
