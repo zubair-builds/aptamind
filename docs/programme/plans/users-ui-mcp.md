@@ -127,6 +127,8 @@ So all three asks need explicit owner decisions to lift current rules.
 
 **Decision D4 — APPROVED by owner 2026-10-31.** MCP server inside the single app at `/api/mcp` (Streamable HTTP), per-user scoped API tokens (token scopes never exceed the user's effective permissions), every call audited, size caps/paging, rate limits. The "no MCP agents" rule is narrowed to allow this server only; no in-app agents. Read tools for permitted users; admin-only proposal write tools (`import_leads`, `propose_source`); no edit/delete tools.
 
+**D4 revised 2026-11-02 (owner):** the first MCP server runs inside the local worker, not `/api/mcp`, with a single `MCP_TOKEN`, bound to `127.0.0.1` and exposed through a Cloudflare Tunnel. See [ADR-0023](../../decisions/0023-mcp-server-worker.md). `import_leads` and `propose_source` are deferred pending an owner decision. The design below remains the target once per-user tokens (M-U6) exist.
+
 ### Proposed design
 
 - **Where**: a route in the existing Next.js app, `apps/admin/app/api/mcp/route.ts`, using the official `@modelcontextprotocol/sdk` (or `mcp-handler`) with **Streamable HTTP** transport (stateless). It calls the same platform services as `/api/*` — no new deployable, no new data store, no vector DB/RAG. A `stdio` wrapper for local dev is optional.
@@ -147,14 +149,14 @@ So all three asks need explicit owner decisions to lift current rules.
 
 ### Milestones
 
-| ID   | PR                                                                             | Acceptance criteria                                                            |
-| ---- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| M-M0 | ADR-0023 "MCP server (interface, not agent)" recording D4 (approved)            | ADR merged; "no MCP agents" narrowed to this server.                          |
-| M-M1 | `/api/mcp` skeleton, token auth, `get_dashboard`                               | MCP Inspector connects locally; 401 without token; audit event written.        |
-| M-M2 | Market tools + resources                                                       | Contract tests per tool; results match `/api` responses; pagination capped.    |
-| M-M2b | Admin write tools: `import_leads`, `propose_source`                           | Admin-only (user tokens 403); import goes through existing pipeline and shows under Imports; source lands as pending proposal; per-call caps; audited. |
-| M-M3 | Professional tools behind scope                                                | Tokens without scope get 403; masking honoured; tests with synthetic subjects. |
-| M-M4 | Docs: connect from Claude Desktop / Cursor; rate limits                        | A design partner can connect end to end on preview.                            |
+| ID    | PR                                                                   | Acceptance criteria                                                                                                                                    |
+| ----- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| M-M0  | ADR-0023 "MCP server (interface, not agent)" recording D4 (approved) | ADR merged; "no MCP agents" narrowed to this server.                                                                                                   |
+| M-M1  | `/api/mcp` skeleton, token auth, `get_dashboard`                     | MCP Inspector connects locally; 401 without token; audit event written.                                                                                |
+| M-M2  | Market tools + resources                                             | Contract tests per tool; results match `/api` responses; pagination capped.                                                                            |
+| M-M2b | Admin write tools: `import_leads`, `propose_source`                  | Admin-only (user tokens 403); import goes through existing pipeline and shows under Imports; source lands as pending proposal; per-call caps; audited. |
+| M-M3  | Professional tools behind scope                                      | Tokens without scope get 403; masking honoured; tests with synthetic subjects.                                                                         |
+| M-M4  | Docs: connect from Claude Desktop / Cursor; rate limits              | A design partner can connect end to end on preview.                                                                                                    |
 
 ### Risks
 
@@ -169,18 +171,18 @@ So all three asks need explicit owner decisions to lift current rules.
 
 ## 5. Decisions the owner must approve
 
-| ID  | Decision                                                                                 | Recommendation                                                                                                              |
-| --- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | **APPROVED 2026-10-31:** ban lifted for this plan; ADR-0008 partially superseded |
-| D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                 |
-| D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                      |
-| D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)          | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`) |
-| D5  | Tenancy model                                                                            | **APPROVED 2026-10-31:** Single shared workspace in v1; `workspaceId` stored on users, memberships, tokens and user-owned records from day one |
-| D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                       |
+| ID  | Decision                                                                                 | Recommendation                                                                                                                                                                          |
+| --- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Lift the "authentication programme" prohibited-scope rule and supersede ADR-0008 in part | **APPROVED 2026-10-31:** ban lifted for this plan; ADR-0008 partially superseded                                                                                                        |
+| D2  | Auth library                                                                             | **APPROVED 2026-10-31:** Better Auth + Mongo, Google provider only (per D10)                                                                                                            |
+| D3  | Separate user-facing app?                                                                | **APPROVED 2026-10-31:** No for now: one Next.js app with `/admin` and `/app` surfaces                                                                                                  |
+| D4  | Narrow "no MCP agents" to allow an **MCP server** (an interface, not an agent)           | **APPROVED 2026-10-31:** `/api/mcp`, scoped tokens, audited, capped; read tools + admin-only proposal tools (`import_leads`, `propose_source`)                                          |
+| D5  | Tenancy model                                                                            | **APPROVED 2026-10-31:** Single shared workspace in v1; `workspaceId` stored on users, memberships, tokens and user-owned records from day one                                          |
+| D6  | Email provider for invites (paid)                                                        | **Deferred — not needed in v1** (Google-only login, no invite emails)                                                                                                                   |
 | D7  | FE-5 (user actor kind)                                                                   | **APPROVED 2026-10-31:** additive `user` actor kind (`userId`, `workspaceId`) in `packages/contracts`; existing kinds unchanged; record `foundation-exceptions/FE-5-user-actor-kind.md` |
-| D8  | Who can see Professional data                                                            | **APPROVED 2026-10-31:** admin only; `professional.view` off by default for users, admin can grant per user; until FE-P7/FE-P8 are done |
-| D9  | RBAC model                                                                               | **APPROVED 2026-10-31**: `admin`/`user`, permission checks, admin-controlled defaults + per-user overrides, last-admin rule |
-| D10 | Login method                                                                             | **APPROVED 2026-10-31**: Google sign-in only; admin pre-approves emails, unknown accounts pending                           |
+| D8  | Who can see Professional data                                                            | **APPROVED 2026-10-31:** admin only; `professional.view` off by default for users, admin can grant per user; until FE-P7/FE-P8 are done                                                 |
+| D9  | RBAC model                                                                               | **APPROVED 2026-10-31**: `admin`/`user`, permission checks, admin-controlled defaults + per-user overrides, last-admin rule                                                             |
+| D10 | Login method                                                                             | **APPROVED 2026-10-31**: Google sign-in only; admin pre-approves emails, unknown accounts pending                                                                                       |
 
 ## 6. Effort (rough, incl. tests and two reviews)
 

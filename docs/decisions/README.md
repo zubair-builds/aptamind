@@ -24,3 +24,4 @@
 | [0020](0020-professional-domain-package.md)      | Professional domain package, assertion model and confirmed-truth precedence |
 | [0021](0021-nextjs-api-boundary.md)              | Next.js API boundary with separate workers                                  |
 | [0022](0022-user-authentication.md)              | User authentication: Better Auth, Google sign-in, admin approval            |
+| [0023](0023-mcp-server-worker.md)                | MCP server in the local worker, bearer token, Cloudflare Tunnel             |
