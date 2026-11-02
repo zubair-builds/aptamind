@@ -196,14 +196,14 @@ async function readCall(
   }
 }
 
-function publicCode(err: unknown): string {
+export function publicCode(err: unknown): string {
   if (err instanceof McpCallError) return err.errorCode;
   if (err instanceof AppError) return err.code;
   if (err instanceof ZodError) return 'validation_failed';
   return 'internal';
 }
 
-function okResult(result: unknown): CallToolResult {
+export function okResult(result: unknown): CallToolResult {
   const text = JSON.stringify(result ?? null);
   if (result !== null && typeof result === 'object' && !Array.isArray(result)) {
     return {
@@ -214,7 +214,7 @@ function okResult(result: unknown): CallToolResult {
   return { content: [{ type: 'text', text }] };
 }
 
-function errorResult(code: string): CallToolResult {
+export function errorResult(code: string): CallToolResult {
   return { isError: true, content: [{ type: 'text', text: code }] };
 }
 

@@ -8,6 +8,7 @@ import { McpCallError, withAudit, type McpLogger } from './audit';
 import type { McpConfig } from './config';
 import type { McpLimiters } from './rate-limit';
 import { registerReadTools } from './tools/read';
+import { registerRunTools } from './tools/run';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -155,6 +156,11 @@ async function handleMcpRequest(
   res.on('close', closeSession);
   try {
     const schemas = registerReadTools(mcp, { ...deps, platform: opts.platform, limiters: opts.limiters });
+    registerRunTools(
+      mcp,
+      { ...deps, platform: opts.platform, limiters: opts.limiters, runAllowlist: opts.config.runAllowlist },
+      schemas,
+    );
     // The SDK rejects bad arguments before the tool runs; audit those calls here.
     for (const call of toolCalls) {
       const schema = schemas.get(call.params.name);
@@ -164,15 +170,21 @@ async function handleMcpRequest(
           await auditOutcome(deps, call.params.name.slice(0, 64), new McpCallError('denied', 'unknown_tool'));
         }
       } else if (!schema.safeParse(call.params.arguments ?? {}).success) {
-        const decision = opts.limiters.read.take();
-        if (decision.ok) {
-          await auditOutcome(
-            deps,
-            call.params.name,
-            new McpCallError('error', 'validation_failed'),
-            call.params.arguments,
-          );
+        const bucket = call.params.name === 'start_workflow_run' ? opts.limiters.write : opts.limiters.read;
+        const decision = bucket.take();
+        if (!decision.ok) {
+          await auditOutcome(deps, call.params.name, new McpCallError('rate_limited', 'rate_limited'));
+          res.setHeader('retry-after', String(Math.ceil(decision.retryAfterMs / 1000)));
+          reject(req, res, 429, 'rate_limited');
+          closeSession();
+          return;
         }
+        await auditOutcome(
+          deps,
+          call.params.name,
+          new McpCallError('error', 'validation_failed'),
+          call.params.arguments,
+        );
       }
     }
     await mcp.connect(transport);
