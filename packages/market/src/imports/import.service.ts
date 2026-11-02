@@ -1,6 +1,6 @@
 import type { Collection } from 'mongodb';
 import { type Actor, AppError, newId, NotFoundError } from '@aptamind/contracts';
-import { getCollection, validateDocument } from '@aptamind/db';
+import { getCollection, isDuplicateKeyError, validateDocument } from '@aptamind/db';
 import type { MarketDomain } from '../market-domain';
 import {
   ATS_BOARD_DIRECTORY_PROVIDER,
@@ -40,16 +40,11 @@ export function cleanFileName(raw: string | undefined): string {
 }
 
 /**
- * Refuse a wrong target before anything is stored: `jobs` is not available yet, the source must
- * exist and be enabled, and its provider must match the type.
- * @throws AppError validation_failed (`wrong_source_type`, `missing_url_column`), not_found, invalid_state
+ * Refuse a wrong target before anything is stored. The source must exist (`checkImportTarget`)
+ * and be enabled, and its provider must match the type (`jobs` also needs a mapped `url` column).
+ * @throws AppError validation_failed (`wrong_source_type`, `missing_url_column`), invalid_state
  */
-export async function checkImportTarget(
-  market: MarketDomain,
-  type: ImportType,
-  sourceId: string,
-): Promise<SourceDoc> {
-  const source = await market.sources.get(sourceId);
+export function assertImportSource(source: SourceDoc, type: ImportType): void {
   const provider = TYPE_PROVIDER[type];
   if (provider && source.provider !== provider)
     throw new AppError(
@@ -62,6 +57,19 @@ export async function checkImportTarget(
       problems: [{ code: 'missing_url_column' }],
     });
   if (!source.enabled) throw new AppError('invalid_state', `Source ${source.key} is disabled`);
+}
+
+/**
+ * Refuse a wrong target before anything is stored.
+ * @throws AppError validation_failed (`wrong_source_type`, `missing_url_column`), not_found, invalid_state
+ */
+export async function checkImportTarget(
+  market: MarketDomain,
+  type: ImportType,
+  sourceId: string,
+): Promise<SourceDoc> {
+  const source = await market.sources.get(sourceId);
+  assertImportSource(source, type);
   return source;
 }
 
@@ -79,19 +87,37 @@ export async function createImport(
     fileName?: string;
     body: Uint8Array | string;
     contentType: string;
+    /**
+     * Stable id. A call with an id that already exists returns that import and does not upload
+     * or start another run. Review import approvals pass a deterministic id so a resumed
+     * approval cannot import twice.
+     */
+    id?: string;
+    /** Passed to `runNow` so a crash between the run starting and this insert resumes one run. */
+    runIdempotencyKey?: string;
   },
   actor: Actor,
 ): Promise<ImportDoc> {
+  const imports = getCollection(market.ctx.db, importsCollection);
+  if (input.id) {
+    const existing = await imports.findOne({ _id: input.id });
+    if (existing) return existing;
+  }
   const source = await checkImportTarget(market, input.type, input.sourceId);
   const snap = await uploadSnapshot(market, source._id, input.body, input.contentType, actor);
   let runId: string | null = null;
   let error: ImportDoc['error'];
   try {
     runId = (
-      await market.sources.runNow(source._id, actor, {
-        snapshotId: snap.snapshotId,
-        ...(input.type === 'jobs' ? { refreshBoards: true } : {}),
-      })
+      await market.sources.runNow(
+        source._id,
+        actor,
+        {
+          snapshotId: snap.snapshotId,
+          ...(input.type === 'jobs' ? { refreshBoards: true } : {}),
+        },
+        input.runIdempotencyKey ? { idempotencyKey: input.runIdempotencyKey } : {},
+      )
     ).runId;
   } catch (err) {
     // The snapshot is stored either way; the record says why nothing runs (the operator retries).
@@ -105,7 +131,7 @@ export async function createImport(
     );
   }
   const doc = validateDocument(importsCollection, {
-    _id: newId('imp'),
+    _id: input.id ?? newId('imp'),
     type: input.type,
     fileName: cleanFileName(input.fileName),
     contentType: input.contentType,
@@ -121,7 +147,15 @@ export async function createImport(
     ...(error ? { error } : {}),
     schemaVersion: 1,
   });
-  await getCollection(market.ctx.db, importsCollection).insertOne(doc);
+  try {
+    await imports.insertOne(doc);
+  } catch (err) {
+    if (input.id && isDuplicateKeyError(err)) {
+      const winner = await imports.findOne({ _id: input.id });
+      if (winner) return winner;
+    }
+    throw err;
+  }
   return doc;
 }
 

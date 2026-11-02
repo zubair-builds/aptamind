@@ -43,6 +43,7 @@ export * from './review/review.repository';
 export * from './review/review.service';
 export * from './review/triage';
 export * from './review/audit';
+export * from './proposals/proposal.service';
 export * from './verification/schemas';
 export * from './verification/verification.service';
 export * from './freshness/policies';

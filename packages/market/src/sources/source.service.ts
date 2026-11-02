@@ -97,6 +97,53 @@ export const createSourceInputSchema = z
       });
   });
 export type CreateSourceInput = z.input<typeof createSourceInputSchema>;
+type CreateSourceParsed = z.output<typeof createSourceInputSchema>;
+
+/**
+ * The checks `register` runs before it looks for an existing key or writes anything: schema,
+ * directory/board workflow and authority, upload-only rules, tier vs provider. Throws the same
+ * errors `register` throws. Does not read or write the database. Safe to call again on its own
+ * output (directory config parsing is idempotent).
+ */
+export function normalizeCreateSource(input: CreateSourceInput): {
+  parsed: CreateSourceParsed;
+  authority: NonNullable<CreateSourceParsed['authority']>;
+} {
+  const parsed = createSourceInputSchema.parse(input);
+  let authority = parsed.authority;
+  if (parsed.provider === COMPANY_DIRECTORY_PROVIDER) {
+    // Store the parsed (strict, defaults applied) column map, never the raw input.
+    parsed.acquisition.config = parseDirectoryConfig(parsed.acquisition.config) as never;
+    if (parsed.acquisition.workflowKey !== COMPANY_DIRECTORY_WORKFLOW)
+      throw new AppError(
+        'validation_failed',
+        `A company directory source runs ${COMPANY_DIRECTORY_WORKFLOW} only (not ${parsed.acquisition.workflowKey})`,
+        { param: 'acquisition.workflowKey' },
+      );
+    authority ??= { tier: DIRECTORY_DEFAULT_AUTHORITY, authoritativeFor: [], listingIsComplete: false };
+    assertDirectoryAuthority(authority.tier);
+    assertUploadOnly(parsed);
+  }
+  if (parsed.provider === ATS_BOARD_DIRECTORY_PROVIDER) {
+    parsed.acquisition.config = parseBoardDirectoryConfig(parsed.acquisition.config) as never;
+    if (parsed.acquisition.workflowKey !== ATS_BOARD_DIRECTORY_WORKFLOW)
+      throw new AppError(
+        'validation_failed',
+        `An ATS board file source runs ${ATS_BOARD_DIRECTORY_WORKFLOW} only (not ${parsed.acquisition.workflowKey})`,
+        { param: 'acquisition.workflowKey' },
+      );
+    // A board list names companies and boards; it is never official evidence (OPS-1b repair).
+    authority ??= { tier: BOARD_FILE_AUTHORITY, authoritativeFor: [], listingIsComplete: false };
+    assertBoardFileAuthority(authority.tier);
+    assertUploadOnly(parsed, 'ATS board file');
+  }
+  if (!authority)
+    throw new AppError('validation_failed', 'authority.tier is required for this provider', {
+      param: 'authority',
+    });
+  assertTierFitsProvider(parsed.provider, authority.tier);
+  return { parsed, authority };
+}
 
 export const updateSourceInputSchema = z.object({
   name: z.string().min(1).optional(),
@@ -183,39 +230,7 @@ export class SourceService {
 
   /** Idempotent on `key`: returns the existing source when already registered. */
   async register(input: CreateSourceInput, actor: Actor): Promise<{ source: SourceDoc; created: boolean }> {
-    const parsed = createSourceInputSchema.parse(input);
-    let authority = parsed.authority;
-    if (parsed.provider === COMPANY_DIRECTORY_PROVIDER) {
-      // Store the parsed (strict, defaults applied) column map, never the raw input.
-      parsed.acquisition.config = parseDirectoryConfig(parsed.acquisition.config) as never;
-      if (parsed.acquisition.workflowKey !== COMPANY_DIRECTORY_WORKFLOW)
-        throw new AppError(
-          'validation_failed',
-          `A company directory source runs ${COMPANY_DIRECTORY_WORKFLOW} only (not ${parsed.acquisition.workflowKey})`,
-          { param: 'acquisition.workflowKey' },
-        );
-      authority ??= { tier: DIRECTORY_DEFAULT_AUTHORITY, authoritativeFor: [], listingIsComplete: false };
-      assertDirectoryAuthority(authority.tier);
-      assertUploadOnly(parsed);
-    }
-    if (parsed.provider === ATS_BOARD_DIRECTORY_PROVIDER) {
-      parsed.acquisition.config = parseBoardDirectoryConfig(parsed.acquisition.config) as never;
-      if (parsed.acquisition.workflowKey !== ATS_BOARD_DIRECTORY_WORKFLOW)
-        throw new AppError(
-          'validation_failed',
-          `An ATS board file source runs ${ATS_BOARD_DIRECTORY_WORKFLOW} only (not ${parsed.acquisition.workflowKey})`,
-          { param: 'acquisition.workflowKey' },
-        );
-      // A board list names companies and boards; it is never official evidence (OPS-1b repair).
-      authority ??= { tier: BOARD_FILE_AUTHORITY, authoritativeFor: [], listingIsComplete: false };
-      assertBoardFileAuthority(authority.tier);
-      assertUploadOnly(parsed, 'ATS board file');
-    }
-    if (!authority)
-      throw new AppError('validation_failed', 'authority.tier is required for this provider', {
-        param: 'authority',
-      });
-    assertTierFitsProvider(parsed.provider, authority.tier);
+    const { parsed, authority } = normalizeCreateSource(input);
     // Keys that differ only in case are one source (a board key from before keys were lowercased).
     const existing = await this.getByKeyIgnoringCase(parsed.key);
     if (existing) return { source: existing, created: false };

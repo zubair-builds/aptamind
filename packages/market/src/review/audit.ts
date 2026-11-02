@@ -5,6 +5,11 @@ import { getCollection } from '@aptamind/db';
 import type { MarketContext } from '../context';
 import { type AuditEventDoc, auditEventsCollection, REVIEW_SCHEMA_VERSION } from './schemas';
 
+/** Id of an audit event recorded once per key, action and entity (see `AuditLog.record` `onceKey`). */
+export function auditOnceId(onceKey: string, action: string, entity: { kind: string; id: string }): string {
+  return deterministicId('aud', 'once', onceKey, action, entity.kind, entity.id);
+}
+
 export class AuditLog {
   constructor(private readonly ctx: MarketContext) {}
 
@@ -37,7 +42,7 @@ export class AuditLog {
     // once (same review item, action, entity and details → same id).
     const key = e.idempotencyKey ?? e.reviewItemId;
     const id = e.onceKey
-      ? deterministicId('aud', 'once', e.onceKey, e.action, e.entity.kind, e.entity.id)
+      ? auditOnceId(e.onceKey, e.action, e.entity)
       : key
         ? deterministicId('aud', key, e.action, e.entity.kind, e.entity.id, JSON.stringify(details))
         : newId('aud');
@@ -60,6 +65,15 @@ export class AuditLog {
       opts.session ? { upsert: true, session: opts.session } : { upsert: true },
     );
     return doc;
+  }
+
+  /** The event `record` wrote with this `onceKey`, or null. */
+  findOnce(
+    onceKey: string,
+    action: string,
+    entity: { kind: string; id: string },
+  ): Promise<AuditEventDoc | null> {
+    return this.col.findOne({ _id: auditOnceId(onceKey, action, entity) });
   }
 
   list(filter: { entityKind?: string; entityId?: string; reviewItemId?: string }, limit = 100) {

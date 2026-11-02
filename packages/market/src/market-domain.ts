@@ -20,6 +20,7 @@ import { ObservationService } from './observations/observation.service';
 import { MarketDashboard } from './queries/dashboard';
 import { CompanyReconciler } from './reconciliation/company-reconciler';
 import { JobReconciler } from './reconciliation/job-reconciler';
+import { ProposalService } from './proposals/proposal.service';
 import { AuditLog } from './review/audit';
 import { retireLegacyListingReviews } from './review/legacy-reviews';
 import { ReviewRepository } from './review/review.repository';
@@ -63,6 +64,8 @@ export class MarketDomain {
   readonly lifecycleSignals: LifecycleSignalWriter;
   readonly companyChangeSignals: CompanyChangeSignalWriter;
   readonly reviewService: ReviewService;
+  /** Agent proposals: raise-only. A human approves through `reviewService.resolve`. */
+  readonly proposals: ProposalService;
   readonly reviewTriage: ReviewTriage;
   readonly dashboard: MarketDashboard;
   readonly aiProposals: AiProposalService;
@@ -118,6 +121,10 @@ export class MarketDomain {
       opts.onReviewResolved,
       this.evidence,
     );
+    // Proposals need the domain (register / createImport); the review service needs them for the
+    // post-commit effect. Assigned together so an approval never runs without a port.
+    this.proposals = new ProposalService(this.reviews, this.audit, this);
+    this.reviewService.proposalEffects = this.proposals;
     // Stale employment_conflict items are dismissed by the system (DECISION_LOG 8d96663 (4)):
     // deterministic operation id per item, so a re-run resumes or skips.
     this.jobReconciler.closeStaleReviews = async (items) => {

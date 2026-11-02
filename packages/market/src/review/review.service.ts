@@ -10,6 +10,7 @@ import {
   jsonValueSchema,
   deterministicId,
   newId,
+  NotFoundError,
 } from '@aptamind/contracts';
 import {
   getCollection,
@@ -23,6 +24,12 @@ import { candidateFromPayload } from '../companies/company-pipeline';
 import type { CompanyDoc } from '../companies/company.schema';
 import type { CompanyService } from '../companies/company.service';
 import type { MarketContext, RunLauncher } from '../context';
+import { assertImportSource } from '../imports/import.service';
+import {
+  importProposalContext,
+  sourceProposalInput,
+  type ProposalEffectPort,
+} from '../proposals/proposal.service';
 import { companyObservationPayloadSchema } from '../contracts/observations';
 import type { JobEvidenceService } from '../jobs/evidence.service';
 import type { JobService } from '../jobs/job.service';
@@ -35,7 +42,7 @@ import {
   sponsorshipCorrectionProblem,
 } from '../reconciliation/job-reconciler';
 import { COMPANY_RESOLVER_VERSION } from '../resolution/company-resolver';
-import type { SourceService } from '../sources/source.service';
+import { normalizeCreateSource, type SourceService } from '../sources/source.service';
 import type { AuditLog } from './audit';
 import type { ReviewRepository } from './review.repository';
 import { ReviewRetryIntents } from './retry-intents';
@@ -123,6 +130,9 @@ export const EFFECT_ACTIONS: Record<ReviewType, ReviewAction[]> = {
   careers_discovery: ['retry'],
   // Informational (re-verify #12): the sweep keeps retrying the job; dismiss once looked at.
   lifecycle_failure: [],
+  // create_new approves. reject writes nothing canonical. dismiss is allowed but has no effect.
+  source_proposal: ['create_new', 'reject'],
+  import_proposal: ['create_new', 'reject'],
 };
 const TARGETED: ReviewAction[] = ['merge', 'keep_separate'];
 
@@ -153,6 +163,12 @@ export class ReviewService {
   readonly lease = { staleMs: REVIEW_CLAIM_STALE_MS, heartbeatMs: REVIEW_HEARTBEAT_MS };
   /** Durable intents of `retry` decisions and their dispatcher (the only path to a source run). */
   readonly retryIntents: ReviewRetryIntents;
+  /**
+   * Post-commit effects of approved `source_proposal` / `import_proposal` items. Set by
+   * `MarketDomain` (proposals need the domain, so they cannot be a constructor argument).
+   * Approving a proposal without it fails `unavailable` and the claim stays recoverable.
+   */
+  proposalEffects?: ProposalEffectPort;
 
   constructor(
     private readonly ctx: MarketContext,
@@ -769,6 +785,7 @@ export class ReviewService {
               audit: false,
               resume: false,
               ...(op.result?.retryIntentId ? { retry: false } : {}),
+              ...(op.result?.proposalEffect === true ? { proposal: false } : {}),
             },
             'owner.at': now,
             updatedAt: now,
@@ -814,6 +831,7 @@ export class ReviewService {
   private async deliverOutbox(start: ReviewOperationDoc): Promise<ReviewOperationDoc> {
     let op = start;
     if (op.outbox?.retry === false) op = await this.deliverRetry(op);
+    if (op.outbox?.proposal === false) op = await this.deliverProposal(op);
     const item = await this.repo.get(op._id);
     const actor = op.decisionActor as Actor;
     if (!op.outbox?.audit) {
@@ -867,6 +885,79 @@ export class ReviewService {
       { $set: { ...set('result'), 'outbox.retry': true } },
     );
     return (await this.operations.findOne({ _id: op._id }))!;
+  }
+
+  /**
+   * Run an approved proposal's register / createImport and record it on the operation.
+   * Idempotent. A failure leaves `outbox.proposal` false: `resolve` with the same operation
+   * id, or `proposals.resumeApproved`, runs it again. The decision is already committed, so
+   * this does not release the item.
+   */
+  private async deliverProposal(op: ReviewOperationDoc): Promise<ReviewOperationDoc> {
+    const effects = this.proposalEffects;
+    if (!effects) throw new AppError('unavailable', 'Proposal effects are not configured');
+    const settled = {
+      _id: op._id,
+      operationId: op.operationId,
+      state: { $in: ['finalized', 'completed'] as const },
+    };
+    if (op.result?.effectApplied === true) {
+      await this.operations.updateOne(settled, { $set: { 'outbox.proposal': true } });
+      return (await this.operations.findOne({ _id: op._id }))!;
+    }
+    const item = await this.repo.get(op._id);
+    let fields: JsonObject;
+    try {
+      fields = await effects.executeApproved(item, op);
+    } catch (err) {
+      // Phase 2 failed after the decision committed. The effect is idempotent, so a later
+      // delivery (resumeApproved, the same resolve operation id, or the recovery sweep) retries
+      // it without a second source or a second import.
+      const now = this.ctx.clock.now();
+      await this.operations.updateOne(
+        { _id: op._id, state: 'finalized' },
+        { $set: { lastError: { message: errorMessage(err), at: now, generation: op.generation } } },
+      );
+      this.ctx.logger.warn(
+        { reviewItemId: op._id, err: errorMessage(err) },
+        'proposal effect failed after the decision committed; resume with proposals.resumeApproved or resolve with the same operation id',
+      );
+      throw err;
+    }
+    const set = (prefix: string) =>
+      Object.fromEntries(
+        Object.entries({ ...fields, effectApplied: true }).map(([k, v]) => [`${prefix}.${k}`, v]),
+      );
+    await this.repo.col.updateOne(
+      { _id: op._id, 'resolution.operationId': op.operationId },
+      { $set: set('resolution.result') },
+    );
+    await this.operations.updateOne(settled, { $set: { ...set('result'), 'outbox.proposal': true } });
+    return (await this.operations.findOne({ _id: op._id }))!;
+  }
+
+  /**
+   * Finish a committed decision's outbox (proposal or retry effect, audit, workflow resume).
+   * Safe to call repeatedly. `proposals.resumeApproved` uses this when the approval committed
+   * but register / createImport did not finish.
+   */
+  async deliverDecided(itemId: string): Promise<ReviewItemDoc> {
+    const op = await this.operations.findOne({ _id: itemId });
+    if (!op) throw new NotFoundError('ReviewOperation', itemId);
+    if (
+      op.state === 'completed' &&
+      op.outbox?.proposal !== false &&
+      op.outbox?.retry !== false &&
+      op.outbox?.audit &&
+      op.outbox?.resume
+    )
+      return this.repo.get(itemId);
+    if (op.state !== 'finalized' && op.state !== 'completed')
+      throw new InvalidStateError(
+        `Review item ${itemId} decision is ${op.state}; resume it with resolve and the same operation id`,
+      );
+    await this.deliverOutbox(op);
+    return this.repo.get(itemId);
   }
 
   /**
@@ -983,7 +1074,38 @@ export class ReviewService {
         return this.validateRetrySource(item);
       case 'lifecycle_failure':
         return;
+      case 'source_proposal':
+        return this.validateSourceProposal(item, d);
+      case 'import_proposal':
+        return this.validateImportProposal(item, d);
+      default: {
+        const exhaustive: never = item.type;
+        throw invalid(`Unsupported review type ${String(exhaustive)}`);
+      }
     }
+  }
+
+  private validateSourceProposal(item: ReviewItemDoc, d: Decision): void {
+    if (d.action === 'reject') return;
+    if (d.action !== 'create_new') throw invalid(`Unsupported action ${d.action}`);
+    try {
+      normalizeCreateSource(sourceProposalInput(item.context));
+    } catch (err) {
+      if (err instanceof z.ZodError) throw invalid(err.issues[0]?.message ?? 'Invalid source proposal');
+      throw err;
+    }
+  }
+
+  private async validateImportProposal(item: ReviewItemDoc, d: Decision): Promise<void> {
+    if (d.action === 'reject') return;
+    if (d.action !== 'create_new') throw invalid(`Unsupported action ${d.action}`);
+    const ctx = importProposalContext(item.context);
+    const source = await this.sources.get(ctx.sourceId);
+    assertImportSource(source, ctx.type);
+    const artifact = await this.ctx.artifacts.get(ctx.artifactId);
+    if (artifact.deletedAt) throw new InvalidStateError(`Staged artifact ${ctx.artifactId} was deleted`);
+    if (artifact.sha256 !== ctx.sha256)
+      throw invalid('Staged artifact does not match the proposal', { artifactId: ctx.artifactId });
   }
 
   private async validateCompanyResolution(item: ReviewItemDoc, d: Decision): Promise<void> {
@@ -1142,7 +1264,37 @@ export class ReviewService {
         return this.applyRetry(item, op, generation);
       case 'lifecycle_failure':
         return commit(async () => ({ applied: false })); // no effect actions
+      case 'source_proposal':
+      case 'import_proposal':
+        // reject (and dismiss, handled above) writes nothing canonical. create_new records the
+        // authority to register or import; the effect itself runs after commit.
+        if (d.action === 'reject') return commit(async () => ({ applied: false }));
+        return this.applyProposal(item, op, generation);
+      default: {
+        const exhaustive: never = item.type;
+        throw invalid(`Unsupported review type ${String(exhaustive)}`);
+      }
     }
+  }
+
+  /**
+   * Approve a proposal. The fenced transaction persists `{ approved: true, ...plan }` and
+   * does not register or import. `deliverOutbox` runs that effect afterwards (idempotent).
+   * A deterministic failure here (disabled or wrong-type source, bad input, missing artifact)
+   * releases the decision: the item stays open.
+   */
+  private async applyProposal(
+    item: ReviewItemDoc,
+    op: ReviewOperationDoc,
+    generation: number,
+  ): Promise<ReviewOperationDoc> {
+    const effects = this.proposalEffects;
+    if (!effects) throw new AppError('unavailable', 'Proposal effects are not configured');
+    if (op.decision.action !== 'create_new') throw invalid(`Unsupported action ${op.decision.action}`);
+    return this.commitEffects(op, generation, async (session) => {
+      const plan = await effects.assertApprovable(item, op, session);
+      return { approved: true, proposalEffect: true, ...plan };
+    });
   }
 
   /**
@@ -1604,6 +1756,9 @@ export class ReviewService {
         await this.jobReconciler.reconcile(merged, await this.companies.resolveActive(merged.companyId));
         return;
       }
+      case 'source_proposal':
+      case 'import_proposal':
+        return;
       case 'field_conflict':
       case 'employment_conflict':
       case 'salary_suspicious':
