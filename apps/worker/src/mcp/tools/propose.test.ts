@@ -15,11 +15,11 @@ function fake() {
       proposals: {
         proposeSource: async (input: unknown, actor: unknown, opts: { idempotencyKey: string }) => {
           proposals.push({ tool: 'propose_source', args: { input, actor, opts } });
-          return { item: { id: 'rev_src_1', type: 'source_proposal', status: 'open' }, created: true };
+          return { item: { _id: 'rev_src_1', type: 'source_proposal', status: 'open' }, created: true };
         },
         proposeImport: async (input: unknown, actor: unknown, opts: { idempotencyKey: string }) => {
           proposals.push({ tool: 'import_leads', args: { input, actor, opts } });
-          return { item: { id: 'rev_imp_1', type: 'import_proposal', status: 'open' }, created: true };
+          return { item: { _id: 'rev_imp_1', type: 'import_proposal', status: 'open' }, created: true };
         },
       },
     },

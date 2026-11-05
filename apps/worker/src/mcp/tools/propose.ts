@@ -76,7 +76,7 @@ async function proposeSourceCall(deps: ProposeToolDeps, args: ProposeSourceInput
       { idempotencyKey: args.idempotencyKey },
     );
     return {
-      reviewId: result.item.id,
+      reviewId: result.item._id,
       type: result.item.type,
       created: result.created,
       status: result.item.status,
@@ -98,7 +98,7 @@ async function importLeadsCall(deps: ProposeToolDeps, args: ImportLeadsInput): P
       { idempotencyKey: args.idempotencyKey },
     );
     return {
-      reviewId: result.item.id,
+      reviewId: result.item._id,
       type: result.item.type,
       created: result.created,
       status: result.item.status,
