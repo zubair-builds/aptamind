@@ -26,6 +26,7 @@ import type { CompanyService } from '../companies/company.service';
 import type { MarketContext, RunLauncher } from '../context';
 import { assertImportSource } from '../imports/import.service';
 import {
+  assertImportFileAccepted,
   importProposalContext,
   sourceProposalInput,
   type ProposalEffectPort,
@@ -1102,10 +1103,8 @@ export class ReviewService {
     const ctx = importProposalContext(item.context);
     const source = await this.sources.get(ctx.sourceId);
     assertImportSource(source, ctx.type);
-    const artifact = await this.ctx.artifacts.get(ctx.artifactId);
-    if (artifact.deletedAt) throw new InvalidStateError(`Staged artifact ${ctx.artifactId} was deleted`);
-    if (artifact.sha256 !== ctx.sha256)
-      throw invalid('Staged artifact does not match the proposal', { artifactId: ctx.artifactId });
+    // The file checks `createImport` would run, before anything about the decision is saved.
+    await assertImportFileAccepted(this.ctx.artifacts, source, ctx);
   }
 
   private async validateCompanyResolution(item: ReviewItemDoc, d: Decision): Promise<void> {

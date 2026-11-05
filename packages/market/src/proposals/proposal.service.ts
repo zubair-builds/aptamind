@@ -18,6 +18,8 @@ import {
   createImport,
 } from '../imports/import.service';
 import { IMPORT_TYPES, type ImportType } from '../imports/import.schema';
+import type { SourceDoc } from '../sources/source.schema';
+import { checkBeforeStorage } from '../sources/snapshot-upload';
 import type { AuditLog } from '../review/audit';
 import type { ReviewRepository } from '../review/review.repository';
 import type { ReviewItemDoc, ReviewOperationDoc } from '../review/schemas';
@@ -118,6 +120,33 @@ export function importProposalContext(context: unknown): ImportProposalContext {
       `Import proposal context is invalid: ${parsed.error.issues[0]?.message ?? 'invalid'}`,
     );
   return parsed.data;
+}
+
+/**
+ * The checks `createImport` runs on the file (`uploadSnapshot`'s provider checks), run on the
+ * staged bytes BEFORE an approval is saved, so a file the import would refuse rejects the
+ * approval and leaves the review open instead of resolving it with the import stuck pending.
+ * @throws AppError validation_failed / limit_exceeded (the upload refusal), invalid_state, not_found
+ */
+export async function assertImportFileAccepted(
+  artifacts: MarketDomain['ctx']['artifacts'],
+  source: SourceDoc,
+  ctx: ImportProposalContext,
+): Promise<void> {
+  const artifact = await artifacts.get(ctx.artifactId);
+  if (artifact.deletedAt) throw new InvalidStateError(`Staged artifact ${ctx.artifactId} was deleted`);
+  if (artifact.sha256 !== ctx.sha256)
+    throw new AppError('validation_failed', 'Staged artifact does not match the proposal', {
+      artifactId: ctx.artifactId,
+    });
+  const body = await artifacts.readBytes({ artifactId: ctx.artifactId, sha256: ctx.sha256 });
+  try {
+    checkBeforeStorage(source, body, ctx.contentType);
+  } catch (err) {
+    if (err instanceof AppError)
+      throw new AppError(err.code, `Import proposal cannot be approved: ${err.message}`, err.details);
+    throw err;
+  }
 }
 
 /**
@@ -323,12 +352,7 @@ export class ProposalService implements ProposalEffectPort {
       const source = await this.market.sources.col.findOne({ _id: ctx.sourceId }, { session });
       if (!source) throw new NotFoundError('Source', ctx.sourceId);
       assertImportSource(source, ctx.type);
-      const artifact = await this.market.ctx.artifacts.get(ctx.artifactId);
-      if (artifact.deletedAt) throw new InvalidStateError(`Staged artifact ${ctx.artifactId} was deleted`);
-      if (artifact.sha256 !== ctx.sha256)
-        throw new AppError('validation_failed', 'Staged artifact does not match the proposal', {
-          artifactId: ctx.artifactId,
-        });
+      await assertImportFileAccepted(this.market.ctx.artifacts, source, ctx);
       return {
         kind: 'import',
         plannedImportId: deterministicId('imp', 'proposal', item._id, op.operationId),

@@ -438,6 +438,30 @@ describe('import proposals', () => {
     expect(await canonical(directory._id)).toMatchObject({ snapshots: 0, imports: 0 });
   });
 
+  it('runs the import file checks before saving the approval: a refused file leaves the item open', async () => {
+    const directory = await registerDirectory();
+    const proposed = await t.market.proposals.proposeImport(
+      {
+        type: 'companies' satisfies ImportType,
+        sourceId: directory._id,
+        body: 'Company,Domain\nRefused,refused.example\n',
+        contentType: 'application/json',
+      },
+      t.actor,
+      { idempotencyKey: `idem-file-refused-${directory._id}` },
+    );
+    const runsBefore = runNowCalls;
+    await expect(
+      resolve(proposed.item._id, 'create_new', `rop-file-refused-${directory._id}`),
+    ).rejects.toMatchObject({ code: 'validation_failed', message: expect.stringContaining('not CSV') });
+    expect((await t.market.reviews.get(proposed.item._id)).status).toBe('open');
+    expect(await t.market.reviewService.operations.findOne({ _id: proposed.item._id })).toBeNull();
+    expect(await canonical(directory._id)).toMatchObject({ snapshots: 0, imports: 0, runs: runsBefore });
+    // Still decidable: a reviewer can reject it.
+    await resolve(proposed.item._id, 'reject', `rop-file-refused-reject-${directory._id}`);
+    expect((await t.market.reviews.get(proposed.item._id)).status).toBe('resolved');
+  });
+
   it('refuses an import body over 5 MB before storing an artifact or a review', async () => {
     const source = await registerFixture();
     const body = new Uint8Array(IMPORT_PROPOSAL_MAX_BYTES + 1);
