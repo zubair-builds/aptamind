@@ -93,12 +93,10 @@ describe('lifecycle signals (OPS-4)', () => {
     expect(second.written).toBe(2);
     expect(await w.cursor()).toEqual(at(4));
     expect(
-      await infra.db
-        .collection('market_signals')
-        .countDocuments({
-          type: 'job_discovered',
-          'facts.jobId': { $in: ['job_w1', 'job_w2', 'job_w3', 'job_w4'] },
-        }),
+      await infra.db.collection('market_signals').countDocuments({
+        type: 'job_discovered',
+        'facts.jobId': { $in: ['job_w1', 'job_w2', 'job_w3', 'job_w4'] },
+      }),
     ).toBe(4);
 
     // A job already passed in the keyset, then updated, is scanned on the next pass.

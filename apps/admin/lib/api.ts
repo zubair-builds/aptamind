@@ -92,7 +92,11 @@ export async function apiRequest<T>(path: string, opts: RequestOptions = {}): Pr
   }
   let res: Response;
   try {
-    res = await dispatchInternal(new Request(`${INTERNAL_ORIGIN}${full}`, { method, headers, body }), full, opts.timeoutMs ?? TIMEOUT_MS);
+    res = await dispatchInternal(
+      new Request(`${INTERNAL_ORIGIN}${full}`, { method, headers, body }),
+      full,
+      opts.timeoutMs ?? TIMEOUT_MS,
+    );
   } catch (err) {
     const cause =
       err instanceof Error ? ((err.cause as { code?: string } | undefined)?.code ?? err.name) : 'error';

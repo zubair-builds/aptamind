@@ -52,8 +52,8 @@ export default async function SystemPage() {
           Internal operations tool. When <code>ADMIN_PASSWORD</code> is set, every page and every{' '}
           <code>/api</code> route require HTTP basic auth (any username, the shared password); only{' '}
           <code>/health</code> stays public. There are no per-user accounts: every signed-in visitor acts as
-          the internal operator. Without <code>ADMIN_PASSWORD</code> the admin is open, so keep it on a private
-          interface.
+          the internal operator. Without <code>ADMIN_PASSWORD</code> the admin is open, so keep it on a
+          private interface.
         </p>
       </Section>
     </>

@@ -70,11 +70,9 @@ export function registerProposeTools(
 
 async function proposeSourceCall(deps: ProposeToolDeps, args: ProposeSourceInput): Promise<CallToolResult> {
   return writeCall(deps, 'propose_source', args, async () => {
-    const result = await deps.platform.market.proposals.proposeSource(
-      args.source as any,
-      MCP_ACTOR,
-      { idempotencyKey: args.idempotencyKey },
-    );
+    const result = await deps.platform.market.proposals.proposeSource(args.source as any, MCP_ACTOR, {
+      idempotencyKey: args.idempotencyKey,
+    });
     return {
       reviewId: result.item._id,
       type: result.item.type,

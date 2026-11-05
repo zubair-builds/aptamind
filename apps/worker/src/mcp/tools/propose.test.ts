@@ -29,11 +29,7 @@ function fake() {
 
 async function client(platform: Platform, limiters: McpLimiters = createMcpLimiters()) {
   const server = new McpServer({ name: 't', version: '0' });
-  registerProposeTools(
-    server,
-    { platform, limiters, logger: { error() {} }, clientIp: 'x' },
-    new Map(),
-  );
+  registerProposeTools(server, { platform, limiters, logger: { error() {} }, clientIp: 'x' }, new Map());
   const [t1, t2] = InMemoryTransport.createLinkedPair();
   await server.connect(t1);
   const c = new Client({ name: 'c', version: '0' });
