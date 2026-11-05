@@ -381,6 +381,14 @@ export const MARKET_ENUMS: Record<string, EnumEntry> = {
       source_anomaly: 'Source anomaly',
       careers_discovery: 'Careers discovery',
       lifecycle_failure: 'Lifecycle failure',
+      source_proposal: {
+        label: 'Source proposal',
+        description: 'An agent proposed a source. create_new registers it; reject and dismiss do not.',
+      },
+      import_proposal: {
+        label: 'Import proposal',
+        description: 'An agent staged a file. create_new imports it once; reject and dismiss do not.',
+      },
     },
     ['review.type', 'GET /api/review?type'],
   ),

@@ -18,7 +18,7 @@ import type { SourceDoc } from './source.schema';
  * Provider checks that run BEFORE anything is stored: a refused upload leaves no artifact, no
  * snapshot and no audit of stored content (only the refusal is audited, without the content).
  */
-function checkBeforeStorage(source: SourceDoc, body: Uint8Array | string, mimeType: string): void {
+export function checkBeforeStorage(source: SourceDoc, body: Uint8Array | string, mimeType: string): void {
   const problems =
     source.provider === COMPANY_DIRECTORY_PROVIDER
       ? checkDirectoryUpload(directoryConfigOf(source), body, mimeType)

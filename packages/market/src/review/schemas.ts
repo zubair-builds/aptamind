@@ -16,6 +16,8 @@ export const REVIEW_TYPES = [
   'source_anomaly', // e.g. dataset shrank drastically; destructive updates held back
   'careers_discovery', // careers/ATS discovery ambiguous or failed
   'lifecycle_failure', // a job's lifecycle repeatedly could not be re-derived from its evidence
+  'source_proposal', // a source an agent proposed; registered only when a human approves
+  'import_proposal', // a file an agent staged; imported only when a human approves
 ] as const;
 export type ReviewType = (typeof REVIEW_TYPES)[number];
 
@@ -243,9 +245,19 @@ export const reviewOperationDocSchema = z.object({
   result: jsonObjectSchema.optional(),
   /**
    * Post-decision effects still owed. `retry` is present only for a `retry` decision: the
-   * dispatch of its durable retry intent (see `reviewRetryIntentDocSchema`).
+   * dispatch of its durable retry intent (see `reviewRetryIntentDocSchema`). `proposal` is
+   * present only for an approved `source_proposal` / `import_proposal`: `register` or
+   * `createImport` runs after this transaction commits and is idempotent (see `ProposalService`).
+   * `false` means still owed.
    */
-  outbox: z.object({ audit: z.boolean(), resume: z.boolean(), retry: z.boolean().optional() }).optional(),
+  outbox: z
+    .object({
+      audit: z.boolean(),
+      resume: z.boolean(),
+      retry: z.boolean().optional(),
+      proposal: z.boolean().optional(),
+    })
+    .optional(),
   /** Owners whose claims were recovered (most recent last; bounded). */
   recoveredFrom: z.array(z.string()).optional(),
   /** Set with state `failed`: why the decision was released (the item was re-opened for it). */
