@@ -66,7 +66,7 @@ describe('MCP propose tools', () => {
     const res = await c.callTool({
       name: 'import_leads',
       arguments: {
-        type: 'csv',
+        type: 'companies',
         sourceId: 'test-src',
         contentType: 'text/csv',
         body: 'name,domain\nAcme,acme.com',

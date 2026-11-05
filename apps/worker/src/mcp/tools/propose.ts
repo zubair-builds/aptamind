@@ -15,7 +15,7 @@ const idempotencyKey = z
   .string()
   .min(8)
   .max(128)
-  .regex(/^[A-Za-z0-9._-]+$/, 'letters, digits and . _ - only');
+  .regex(/^[A-Za-z0-9._:-]+$/, 'letters, digits and . _ - : only');
 
 export const proposeSourceInput = z.object({
   source: z.record(z.unknown()), // full CreateSourceInput; Market validates
@@ -24,7 +24,7 @@ export const proposeSourceInput = z.object({
 type ProposeSourceInput = z.infer<typeof proposeSourceInput>;
 
 export const importLeadsInput = z.object({
-  type: z.string().min(1).max(50),
+  type: z.enum(['companies', 'ats_boards', 'snapshot', 'jobs']),
   sourceId: z.string().min(1).max(200),
   contentType: z.string().min(1).max(200),
   body: z.string().min(1), // raw text or base64; Market accepts string

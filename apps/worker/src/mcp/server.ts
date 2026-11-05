@@ -162,6 +162,11 @@ async function handleMcpRequest(
       { ...deps, platform: opts.platform, limiters: opts.limiters, runAllowlist: opts.config.runAllowlist },
       schemas,
     );
+    registerProposeTools(
+      mcp,
+      { ...deps, platform: opts.platform, limiters: opts.limiters },
+      schemas,
+    );
     // The SDK rejects bad arguments before the tool runs; audit those calls here.
     for (const call of toolCalls) {
       const schema = schemas.get(call.params.name);
