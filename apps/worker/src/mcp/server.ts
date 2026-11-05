@@ -84,7 +84,11 @@ async function handleMcpRequest(
   // Streamable HTTP safeguard against DNS rebinding.
   const origin = req.headers.origin;
   const host = req.headers.host;
-  if (origin && origin !== 'http://127.0.0.1:' + opts.config.port && origin !== 'https://127.0.0.1:' + opts.config.port) {
+  if (
+    origin &&
+    origin !== 'http://127.0.0.1:' + opts.config.port &&
+    origin !== 'https://127.0.0.1:' + opts.config.port
+  ) {
     reject(req, res, 403, 'invalid_origin');
     return;
   }
@@ -162,11 +166,7 @@ async function handleMcpRequest(
       { ...deps, platform: opts.platform, limiters: opts.limiters, runAllowlist: opts.config.runAllowlist },
       schemas,
     );
-    registerProposeTools(
-      mcp,
-      { ...deps, platform: opts.platform, limiters: opts.limiters },
-      schemas,
-    );
+    registerProposeTools(mcp, { ...deps, platform: opts.platform, limiters: opts.limiters }, schemas);
     // The SDK rejects bad arguments before the tool runs; audit those calls here.
     for (const call of toolCalls) {
       const schema = schemas.get(call.params.name);
@@ -176,7 +176,10 @@ async function handleMcpRequest(
           await auditOutcome(deps, call.params.name.slice(0, 64), new McpCallError('denied', 'unknown_tool'));
         }
       } else if (!schema.safeParse(call.params.arguments ?? {}).success) {
-        const isWrite = call.params.name === 'start_workflow_run' || call.params.name === 'propose_source' || call.params.name === 'import_leads';
+        const isWrite =
+          call.params.name === 'start_workflow_run' ||
+          call.params.name === 'propose_source' ||
+          call.params.name === 'import_leads';
         const bucket = isWrite ? opts.limiters.write : opts.limiters.read;
         const decision = bucket.take();
         if (!decision.ok) {
