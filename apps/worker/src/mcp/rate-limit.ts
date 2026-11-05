@@ -54,6 +54,7 @@ export class TokenBucketLimiter {
 export interface McpLimiters {
   read: TokenBucketLimiter;
   write: TokenBucketLimiter;
+  unauth: TokenBucketLimiter;
 }
 
 const MINUTE_MS = 60_000;
@@ -63,5 +64,6 @@ export function createMcpLimiters(now?: () => number): McpLimiters {
   return {
     read: new TokenBucketLimiter({ capacity: 60, refillPerMs: 60 / MINUTE_MS, now }),
     write: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / MINUTE_MS, now }),
+    unauth: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / MINUTE_MS, now }),
   };
 }

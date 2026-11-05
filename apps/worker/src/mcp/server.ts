@@ -79,10 +79,25 @@ async function handleMcpRequest(
     return;
   }
 
+  // Streamable HTTP safeguard against DNS rebinding.
+  const origin = req.headers.origin;
+  const host = req.headers.host;
+  if (origin && origin !== 'http://127.0.0.1:' + opts.config.port && origin !== 'https://127.0.0.1:' + opts.config.port) {
+    reject(req, res, 403, 'invalid_origin');
+    return;
+  }
+  if (host && !host.startsWith('127.0.0.1')) {
+    reject(req, res, 403, 'invalid_host');
+    return;
+  }
+
   const ip = clientIp(req);
   const deps = auditDeps(opts, ip);
   if (!checkBearer(authorizationHeader(req), opts.config.token)) {
-    await auditOutcome(deps, 'http', new McpCallError('unauthorized', 'unauthorized'));
+    const decision = opts.limiters.unauth.take();
+    if (decision.ok) {
+      await auditOutcome(deps, 'http', new McpCallError('unauthorized', 'unauthorized'));
+    }
     reject(req, res, 401, 'unauthorized');
     return;
   }
@@ -144,15 +159,20 @@ async function handleMcpRequest(
     for (const call of toolCalls) {
       const schema = schemas.get(call.params.name);
       if (!schema) {
-        await auditOutcome(deps, call.params.name.slice(0, 64), new McpCallError('denied', 'unknown_tool'));
+        const decision = opts.limiters.read.take();
+        if (decision.ok) {
+          await auditOutcome(deps, call.params.name.slice(0, 64), new McpCallError('denied', 'unknown_tool'));
+        }
       } else if (!schema.safeParse(call.params.arguments ?? {}).success) {
-        opts.limiters.read.take();
-        await auditOutcome(
-          deps,
-          call.params.name,
-          new McpCallError('error', 'validation_failed'),
-          call.params.arguments,
-        );
+        const decision = opts.limiters.read.take();
+        if (decision.ok) {
+          await auditOutcome(
+            deps,
+            call.params.name,
+            new McpCallError('error', 'validation_failed'),
+            call.params.arguments,
+          );
+        }
       }
     }
     await mcp.connect(transport);

@@ -483,6 +483,7 @@ describe('mcp server', () => {
     const limiters: McpLimiters = {
       read: new TokenBucketLimiter({ capacity: 0, refillPerMs: 1 / 60_000, now: () => 0 }),
       write: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / 60_000, now: () => 0 }),
+      unauth: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / 60_000, now: () => 0 }),
     };
     const port = portOf(await listen(platform, limiters));
     const res = await post(port, TOKEN, call(6, 'get_dashboard', { hours: 1 }));
@@ -589,6 +590,7 @@ describe('mcp server hardening', () => {
     const limiters: McpLimiters = {
       read: new TokenBucketLimiter({ capacity: 0, refillPerMs: 1 / 60_000, now: () => 0 }),
       write: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / 60_000, now: () => 0 }),
+      unauth: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / 60_000, now: () => 0 }),
     };
     const port = portOf(await listen(platform, limiters));
     const res = await post(port, TOKEN, { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
