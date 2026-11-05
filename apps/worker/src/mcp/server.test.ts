@@ -368,7 +368,7 @@ describe('mcp server', () => {
     expect(other.status).toBe(404);
   });
 
-  it('lists read tools over HTTP when the token matches', async () => {
+  it('lists the tools over HTTP when the token matches', async () => {
     const { platform } = fakePlatform([]);
     const port = portOf(await listen(platform));
     const res = await post(port, TOKEN, { jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
@@ -386,6 +386,7 @@ describe('mcp server', () => {
         'list_runs',
         'list_sources',
         'list_workflows',
+        'start_workflow_run',
       ].sort(),
     );
   });

@@ -110,6 +110,12 @@ export async function withAudit<T>(
   if (outcome === 'ok') {
     const resultCount = resultCountOf(result);
     if (resultCount !== undefined) details.resultCount = resultCount;
+    if (result && typeof result === 'object' && 'runId' in result) {
+      const r = result as { runId?: unknown; replayed?: unknown; idempotencyKey?: unknown };
+      if (typeof r.runId === 'string') details.runId = r.runId;
+      if (typeof r.replayed === 'boolean') details.replayed = r.replayed;
+      if (typeof r.idempotencyKey === 'string') details.idempotencyKey = r.idempotencyKey;
+    }
   }
   if (errorCode !== undefined) details.errorCode = errorCode;
   try {
