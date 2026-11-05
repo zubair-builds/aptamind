@@ -9,6 +9,7 @@ import type { McpConfig } from './config';
 import type { McpLimiters } from './rate-limit';
 import { registerReadTools } from './tools/read';
 import { registerRunTools } from './tools/run';
+import { registerProposeTools } from './tools/propose';
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -170,7 +171,8 @@ async function handleMcpRequest(
           await auditOutcome(deps, call.params.name.slice(0, 64), new McpCallError('denied', 'unknown_tool'));
         }
       } else if (!schema.safeParse(call.params.arguments ?? {}).success) {
-        const bucket = call.params.name === 'start_workflow_run' ? opts.limiters.write : opts.limiters.read;
+        const isWrite = call.params.name === 'start_workflow_run' || call.params.name === 'propose_source' || call.params.name === 'import_leads';
+        const bucket = isWrite ? opts.limiters.write : opts.limiters.read;
         const decision = bucket.take();
         if (!decision.ok) {
           await auditOutcome(deps, call.params.name, new McpCallError('rate_limited', 'rate_limited'));
