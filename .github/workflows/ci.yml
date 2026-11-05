@@ -1,11 +1,11 @@
 name: CI
 
-# Full certification suite, manual-only during development (DECISION_LOG 2026-10-01 O
-# "Full GitHub CI = manual milestone certification"). The supervisor dispatches it once per
-# milestone, release/deployment candidate, Foundation Exception, major shared-runtime/security/
-# concurrency change or owner request: `gh workflow run ci.yml --ref main`. Normal PRs and pushes
-# use the local gate and do not run this workflow.
+# Full certification suite. Runs on every pull request and on pushes to main so branch
+# protection can require it before merge. Also still available via workflow_dispatch.
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:
