@@ -5,12 +5,18 @@ A Cloudflare Tunnel on the same machine is the only way remote AI clients reach 
 
 ## 1. Enable MCP in the worker
 
-Add to the worker's `.env` (never commit it):
+Generate a token in a terminal (a `.env` file does not expand `$(...)`):
+
+```bash
+openssl rand -hex 32
+```
+
+Add to the worker's `.env` (never commit it), pasting the 64 hex characters printed above:
 
 ```bash
 MCP_ENABLED=true
 MCP_PORT=4102
-MCP_TOKEN=$(openssl rand -hex 32)        # paste the generated value, 64 hex chars
+MCP_TOKEN=<paste the generated value>
 MCP_RUN_WORKFLOW_ALLOWLIST=market.job.propose_requirements
 ```
 
@@ -39,12 +45,14 @@ ingress:
 
 Run it: `cloudflared tunnel run aptamind-mcp` (or `cloudflared service install` to keep it running).
 
-## 3. Recommended: Cloudflare Access
+## 3. Required: Cloudflare Access
 
 In Zero Trust → Access → Applications, add a self-hosted app for `mcp.<your-domain>` with a
 **Service Auth** policy and create a service token. Clients then send
-`CF-Access-Client-Id` / `CF-Access-Client-Secret` as well as the bearer. The worker does not
-enforce this; it is a second layer in front of `MCP_TOKEN`.
+`CF-Access-Client-Id` / `CF-Access-Client-Secret` as well as the bearer. This step is
+**required** before the tunnel is used by any remote client. The worker cannot enforce it, so do
+not run the tunnel without it. It is the second layer in front of `MCP_TOKEN` (which alone grants
+every tool) and stops unauthenticated traffic from reaching the worker or its audit log.
 
 ## 4. Connect a client
 

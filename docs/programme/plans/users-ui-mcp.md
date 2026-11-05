@@ -127,7 +127,7 @@ So all three asks need explicit owner decisions to lift current rules.
 
 **Decision D4 — APPROVED by owner 2026-10-31.** MCP server inside the single app at `/api/mcp` (Streamable HTTP), per-user scoped API tokens (token scopes never exceed the user's effective permissions), every call audited, size caps/paging, rate limits. The "no MCP agents" rule is narrowed to allow this server only; no in-app agents. Read tools for permitted users; admin-only proposal write tools (`import_leads`, `propose_source`); no edit/delete tools.
 
-**D4 revised 2026-11-02 (owner):** the first MCP server runs inside the local worker, not `/api/mcp`, with a single `MCP_TOKEN`, bound to `127.0.0.1` and exposed through a Cloudflare Tunnel. See [ADR-0023](../../decisions/0023-mcp-server-worker.md). `import_leads` and `propose_source` are deferred pending an owner decision. The design below remains the target once per-user tokens (M-U6) exist.
+**D4 revised 2026-11-02 (owner):** the first MCP server runs inside the local worker, not `/api/mcp`, with a single `MCP_TOKEN`, bound to `127.0.0.1` and exposed through a Cloudflare Tunnel. See [ADR-0023](../../decisions/0023-mcp-server-worker.md). `import_leads` and `propose_source` go through the Market review flow (ADR-0023 amendment, 2026-11-05). The design below remains the target once per-user tokens (M-U6) exist.
 
 ### Proposed design
 
@@ -157,6 +157,16 @@ So all three asks need explicit owner decisions to lift current rules.
 | M-M2b | Admin write tools: `import_leads`, `propose_source`                  | Admin-only (user tokens 403); import goes through existing pipeline and shows under Imports; source lands as pending proposal; per-call caps; audited. |
 | M-M3  | Professional tools behind scope                                      | Tokens without scope get 403; masking honoured; tests with synthetic subjects.                                                                         |
 | M-M4  | Docs: connect from Claude Desktop / Cursor; rate limits              | A design partner can connect end to end on preview.                                                                                                    |
+
+Worker MCP milestones (ADR-0023, current path; the table above is the later `/api/mcp` target):
+
+| ID    | PR                                                         | Status                |
+| ----- | ---------------------------------------------------------- | --------------------- |
+| W-M0  | #14 `docs/mcp-worker-adr`: ADR-0023, tunnel runbook        | in review             |
+| W-M1  | #15 `feat/worker-mcp-read`: worker MCP server + read tools | in review             |
+| W-M2  | #16 `feat/worker-mcp-propose`: `start_workflow_run`        | in review             |
+| W-M3a | #17 `feat/market-mcp-proposals`: proposal review types     | in review             |
+| W-M3b | worker tools `import_leads`, `propose_source`              | pending (not started) |
 
 ### Risks
 
