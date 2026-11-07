@@ -11,7 +11,7 @@ export default async function ReviewQueuePage({ searchParams }: { searchParams: 
     <>
       <PageHeader
         title="Review queue"
-        subtitle="Questions a person has to decide. Open items first by priority (then oldest); decided items by last update."
+        subtitle="Items that need a human decision. Open first, then recently decided."
       />
       <RecordList def={reviewObject} params={await searchParams} />
     </>
