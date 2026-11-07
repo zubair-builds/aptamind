@@ -9,10 +9,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 export default async function CompaniesPage({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
-      <PageHeader
-        title="Companies"
-        subtitle="Canonical companies (active). Every material field is a fact with provenance."
-      />
+      <PageHeader title="Companies" subtitle="Manage and monitor partner companies and their activity." />
       <RecordList def={companiesObject} params={await searchParams} />
     </>
   );

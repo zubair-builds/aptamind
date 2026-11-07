@@ -11,7 +11,7 @@ export default async function JobsPage({ searchParams }: { searchParams: SearchP
     <>
       <PageHeader
         title="Jobs"
-        subtitle="Canonical jobs (active). Filters, sort and columns live in the URL, so a view is a link."
+        subtitle="Track and manage open roles across partner companies."
       />
       <RecordList def={jobsObject} params={await searchParams} />
     </>

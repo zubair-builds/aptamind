@@ -11,7 +11,7 @@ export default async function SourcesPage({ searchParams }: { searchParams: Sear
     <>
       <PageHeader
         title="Sources"
-        subtitle="Information origins: acquisition workflow, schedule, authority, governance and health."
+        subtitle="Sources feeding the platform. Health, schedule and authority at a glance."
       />
       <RecordList def={sourcesObject} params={await searchParams} />
     </>
