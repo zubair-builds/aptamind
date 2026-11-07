@@ -68,8 +68,9 @@
   }
 
   .viewTab[aria-current='page'] {
-    background: var(--bg-selected);
+    background: var(--accent);
     border-color: var(--accent);
+    color: var(--accent-fg);
     color: var(--text);
   }
 
