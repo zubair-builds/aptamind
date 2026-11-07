@@ -97,9 +97,10 @@ function Licence({ r }: { r: CompanySummary }) {
 
 function Quality({ r }: { r: CompanySummary }) {
   const score = Math.min(100, r.quality.observationCount * 10 + r.quality.sourceCount * 5);
+  const tone = score >= 70 ? 'ok' : score >= 40 ? 'warn' : 'muted';
   return (
     <span className="small" title={`${r.quality.observationCount} obs · ${r.quality.sourceCount} src`}>
-      {score}
+      <span className={`badge badge-${tone}`}>{score}</span>
       <ConflictFields record={r} fields={r.quality.conflictFields} variant="count" />
     </span>
   );
