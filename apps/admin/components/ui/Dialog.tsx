@@ -19,6 +19,7 @@ export function Dialog({
   description,
   children,
   footer,
+  className,
 }: {
   open: boolean;
   onClose: () => void;
@@ -26,6 +27,7 @@ export function Dialog({
   description?: ReactNode;
   children?: ReactNode;
   footer?: ReactNode;
+  className?: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const downOnBackdrop = useRef(false);
@@ -42,7 +44,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
-      className={s.dialog}
+      className={`${s.dialog} ${className ?? ''}`.trim()}
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}
       onCancel={(e) => {
