@@ -1,19 +1,19 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { type ReactNode, useState } from 'react';
 import { IconButton } from '@/components/ui/Button';
-import { Popover } from '@/components/ui/Popover';
+import { Dialog } from '@/components/ui/Dialog';
+import s from './table.module.css';
 
-/** Row preview: an icon button next to the record name opening its key properties. */
+/** Row preview: opens a side sheet with the record's key properties. */
 export function RowPeek({ name, children }: { name: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Popover
-      label={`Preview: ${name}`}
-      trigger={<IconButton icon="eye" label={`Preview ${name}`} />}
-      // Back to the row's link (the one Tab stop of the row), not the out-of-order preview button.
-      returnFocusTo={(anchor) => anchor.closest('tr')?.querySelector<HTMLElement>('[data-row-link]')}
-    >
-      {children}
-    </Popover>
+    <>
+      <IconButton icon="eye" label={`Preview ${name}`} onClick={() => setOpen(true)} />
+      <Dialog open={open} onClose={() => setOpen(false)} title={name}>
+        <div className={s.peekSheet}>{children}</div>
+      </Dialog>
+    </>
   );
 }

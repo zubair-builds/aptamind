@@ -2,11 +2,12 @@
 
 @layer components {
   .dialog {
-    width: var(--dialog-width);
-    max-height: calc(100dvh - 2 * var(--space-32));
+    width: min(420px, 100vw - 32px);
+    max-height: calc(100dvh - 48px);
+    margin: auto 16px auto auto;
     padding: 0;
     border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
+    border-radius: 16px;
     background: var(--bg-surface);
     color: var(--text);
     box-shadow: var(--shadow-overlay);
