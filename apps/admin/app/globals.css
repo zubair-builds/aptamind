@@ -52,6 +52,7 @@ pre,
 
 code {
   background: var(--bg-subtle);
+  font-weight: 650;
   padding: 0 3px;
   border-radius: 3px;
 }
@@ -304,6 +305,7 @@ h3 {
 .label-chip {
   display: inline-block;
   background: var(--bg-subtle);
+  font-weight: 650;
   border-radius: 3px;
   padding: 0 4px;
   margin: 0 4px 2px 0;
@@ -347,6 +349,7 @@ h3 {
   position: sticky;
   top: 0;
   background: var(--bg-subtle);
+  font-weight: 650;
 }
 
 .table tbody tr:hover {
@@ -481,6 +484,7 @@ h3 {
   height: 36px;
   border-radius: 8px;
   background: var(--bg-subtle);
+  font-weight: 650;
   color: var(--text-secondary);
   flex-shrink: 0;
 }
@@ -540,6 +544,7 @@ details.json > summary {
 
 pre {
   background: var(--bg-subtle);
+  font-weight: 650;
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 6px 8px;
@@ -612,6 +617,7 @@ button {
   border-radius: 4px;
   border: 1px solid var(--border-strong);
   background: var(--bg-subtle);
+  font-weight: 650;
   color: var(--text);
   padding: 3px 10px;
   line-height: 20px;
@@ -793,6 +799,7 @@ a.btn-primary {
   max-height: 360px;
   overflow: auto;
   background: var(--bg-subtle);
+  font-weight: 650;
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 4px 6px;
