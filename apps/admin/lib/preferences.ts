@@ -6,7 +6,9 @@ export const SIDEBAR_COOKIE = 'aptamind-sidebar';
 export type ThemePreference = 'system' | 'light' | 'dark';
 
 export function parseTheme(value: string | undefined): ThemePreference {
-  return value === 'light' || value === 'dark' ? value : 'system';
+  // Default to light to match the mockup look when no preference is stored.
+  if (value === 'light' || value === 'dark' || value === 'system') return value;
+  return 'light';
 }
 
 /** Client-side cookie write (one year, whole admin). */

@@ -63,7 +63,8 @@
 }
 
 .sheet {
-  width: min(440px, calc(100vw - 32px));
+  width: min(460px, calc(100vw - 32px));
+  min-height: 60vh;
   margin-left: auto;
   margin-right: 16px;
   border-radius: 16px;

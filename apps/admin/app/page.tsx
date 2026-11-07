@@ -29,7 +29,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   return (
     <>
       <PageHeader
-        title="Home"
+        title="Overview"
         subtitle={<>Welcome back. Here's what's happening with your platform.</>}
         actions={
           <nav className="tabs" aria-label="Time window">
