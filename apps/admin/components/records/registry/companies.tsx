@@ -99,8 +99,17 @@ function Quality({ r }: { r: CompanySummary }) {
   const score = Math.min(100, r.quality.observationCount * 10 + r.quality.sourceCount * 5);
   const tone = score >= 70 ? 'ok' : score >= 40 ? 'warn' : 'muted';
   return (
-    <span className="small" title={`${r.quality.observationCount} obs · ${r.quality.sourceCount} src`}>
+    <span
+      className="small"
+      title={`${r.quality.observationCount} obs · ${r.quality.sourceCount} src`}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+    >
       <span className={`badge badge-${tone}`}>{score}</span>
+      <span
+        style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--bg-subtle)', overflow: 'hidden' }}
+      >
+        <span style={{ display: 'block', width: `${score}%`, height: '100%', background: 'var(--accent)' }} />
+      </span>
       <ConflictFields record={r} fields={r.quality.conflictFields} variant="count" />
     </span>
   );
