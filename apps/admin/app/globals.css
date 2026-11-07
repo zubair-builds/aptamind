@@ -912,3 +912,8 @@ hr.section-divider {
   border-top: 1px solid var(--border-subtle);
   margin: 24px 0;
 }
+
+/* mockup content */
+main {
+  background: var(--bg-app);
+}
