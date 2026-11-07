@@ -100,8 +100,8 @@ code {
 }
 
 h1 {
-  font-size: 24px;
-  margin: 0;
+  font-size: 26px;
+  margin: 0 0 4px;
   letter-spacing: -0.02em;
   font-weight: 650;
 }
@@ -438,7 +438,7 @@ h3 {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
