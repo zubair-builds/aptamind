@@ -898,3 +898,10 @@ section {
 section:hover {
   box-shadow: 0 2px 6px rgb(0 0 0 / 0.06);
 }
+
+/* mockup separator */
+hr.section-divider {
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  margin: 24px 0;
+}
