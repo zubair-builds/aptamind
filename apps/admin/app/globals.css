@@ -463,7 +463,6 @@ h3 {
   border-left-color: var(--tone-danger-dot);
 }
 
-
 .stat-top {
   display: flex;
   align-items: center;
@@ -477,9 +476,15 @@ h3 {
   flex-shrink: 0;
 }
 
-.stat-ok .stat-icon { color: var(--tone-success-fg); }
-.stat-warn .stat-icon { color: var(--tone-warning-fg); }
-.stat-bad .stat-icon { color: var(--tone-danger-fg); }
+.stat-ok .stat-icon {
+  color: var(--tone-success-fg);
+}
+.stat-warn .stat-icon {
+  color: var(--tone-warning-fg);
+}
+.stat-bad .stat-icon {
+  color: var(--tone-danger-fg);
+}
 
 .stat-label {
   color: var(--text-tertiary);

@@ -77,7 +77,11 @@ export function Stat({
   return (
     <div className={`stat${tone ? ` stat-${tone}` : ''}`}>
       <div className="stat-top">
-        {icon ? <span className="stat-icon" aria-hidden="true">{icon}</span> : null}
+        {icon ? (
+          <span className="stat-icon" aria-hidden="true">
+            {icon}
+          </span>
+        ) : null}
         <div className="stat-label">{label}</div>
       </div>
       <div className="stat-value">{value}</div>
