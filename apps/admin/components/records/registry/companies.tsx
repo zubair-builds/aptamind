@@ -96,16 +96,11 @@ function Licence({ r }: { r: CompanySummary }) {
 }
 
 function Quality({ r }: { r: CompanySummary }) {
+  const score = Math.min(100, r.quality.observationCount * 10 + r.quality.sourceCount * 5);
   return (
-    <span className="small">
-      {r.quality.observationCount} obs · {r.quality.sourceCount} src
+    <span className="small" title={`${r.quality.observationCount} obs · ${r.quality.sourceCount} src`}>
+      {score}
       <ConflictFields record={r} fields={r.quality.conflictFields} variant="count" />
-      {r.openReviewCount ? (
-        <span className="text-warn">
-          {' '}
-          · {r.openReviewCount} open review{r.openReviewCount === 1 ? '' : 's'}
-        </span>
-      ) : null}
     </span>
   );
 }
@@ -150,7 +145,7 @@ export const companiesObject: ObjectDef<CompanySummary> = {
     {
       key: 'hq',
       label: 'Headquarters',
-      defaultVisible: true,
+      defaultVisible: false,
       cell: (r) => <FactSummary fact={r.geography.headquarters} render={(v) => fmtLocation(v)} />,
     },
     {
@@ -175,7 +170,7 @@ export const companiesObject: ObjectDef<CompanySummary> = {
     {
       key: 'careers',
       label: 'Careers',
-      defaultVisible: true,
+      defaultVisible: false,
       cell: (r) => <StatusBadge value={r.freshness.careersDiscoveryStatus} />,
     },
     {
