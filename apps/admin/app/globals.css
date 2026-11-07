@@ -330,9 +330,9 @@ h3 {
 .table th,
 .table td {
   text-align: left;
-  padding: 4px 8px 4px 0;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
+  padding: 8px 12px 8px 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
 }
 
 .table th {
@@ -342,11 +342,12 @@ h3 {
   border-bottom-color: var(--border-strong);
   position: sticky;
   top: 0;
-  background: var(--bg-surface);
+  background: var(--bg-subtle);
 }
 
 .table tbody tr:hover {
-  background: var(--bg-subtle);
+  background: var(--bg-hover);
+  transition: background 0.12s ease;
 }
 
 .table .num {
