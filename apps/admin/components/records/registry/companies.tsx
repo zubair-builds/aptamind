@@ -102,7 +102,7 @@ function Quality({ r }: { r: CompanySummary }) {
     <span
       className="small"
       title={`${r.quality.observationCount} obs · ${r.quality.sourceCount} src`}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
     >
       <span className={`badge badge-${tone}`}>{score}</span>
       <span
