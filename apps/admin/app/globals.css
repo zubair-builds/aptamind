@@ -336,7 +336,7 @@ h3 {
 .table th,
 .table td {
   text-align: left;
-  padding: 12px 16px 12px 8px;
+  padding: 14px 18px 14px 10px;
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
 }
