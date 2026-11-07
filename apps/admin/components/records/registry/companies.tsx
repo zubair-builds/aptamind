@@ -106,7 +106,7 @@ function Quality({ r }: { r: CompanySummary }) {
     >
       <span className={`badge badge-${tone}`}>{score}</span>
       <span
-        style={{ width: 48, height: 5, borderRadius: 2, background: 'var(--bg-subtle)', overflow: 'hidden' }}
+        style={{ width: 56, height: 6, borderRadius: 2, background: 'var(--bg-subtle)', overflow: 'hidden' }}
       >
         <span style={{ display: 'block', width: `${score}%`, height: '100%', background: 'var(--accent)' }} />
       </span>
