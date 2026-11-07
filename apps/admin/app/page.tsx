@@ -29,7 +29,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     <>
       <PageHeader
         title="Home"
-        subtitle={<>Source health, failures, changes, staleness, review backlog and queue pressure.</>}
+        subtitle={<>Platform health, source freshness, review backlog and key activity at a glance.</>}
         actions={
           <nav className="tabs" aria-label="Time window">
             {WINDOWS.map((h) => (

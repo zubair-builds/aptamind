@@ -133,9 +133,9 @@ h3 {
 .section {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
 }
 
 .section-head {
@@ -162,13 +162,13 @@ h3 {
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 @media (max-width: 1100px) {
@@ -183,9 +183,9 @@ h3 {
 .panel {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
 }
 
 .panel-title {
@@ -226,12 +226,12 @@ h3 {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-  border-radius: 10px;
-  font-size: 11px;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 18px;
+  line-height: 20px;
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -433,17 +433,17 @@ h3 {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .stat {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-left-width: 4px;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 .stat-ok {
@@ -460,13 +460,13 @@ h3 {
 
 .stat-label {
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .stat-value {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -798,13 +798,13 @@ a.btn-primary {
 .two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .callout {
   border: 1px dashed var(--border-strong);
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 .callout h3 {
