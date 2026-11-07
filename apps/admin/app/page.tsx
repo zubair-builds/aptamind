@@ -5,6 +5,7 @@ import { DataTable } from '@/components/DataTable';
 import { Distribution } from '@/components/Distribution';
 import { SourceLink } from '@/components/links';
 import { PageHeader, Section, Stat } from '@/components/Section';
+import { Icon } from '@/components/ui/Icon';
 import { RelTime } from '@/components/Time';
 import { apiGet } from '@/lib/api';
 import { fmtAge, fmtDuration, fmtNum, fmtPct, humanize, intParam } from '@/lib/format';
@@ -68,6 +69,7 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
             value={fmtNum(h.healthy ?? 0)}
             hint={failingCount ? `${h.failing ?? 0} failing · ${h.degraded ?? 0} degraded` : 'none failing'}
             tone={h.failing ? 'bad' : h.degraded ? 'warn' : 'ok'}
+            icon={<Icon name="database" />}
           />
         </div>
         <div role="listitem">
@@ -76,6 +78,7 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
             value={fmtNum(overdue.length)}
             hint="past freshness policy"
             tone={overdue.length ? 'warn' : 'ok'}
+            icon={<Icon name="activity" />}
           />
         </div>
         <div role="listitem">
@@ -108,6 +111,7 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
                 : 'backlog empty'
             }
             tone={d.review.open ? 'warn' : 'ok'}
+            icon={<Icon name="inbox" />}
           />
         </div>
         <div role="listitem">
@@ -116,6 +120,7 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
             value={fmtNum(d.freshness.jobsDueForVerification)}
             hint="next check overdue"
             tone={d.freshness.jobsDueForVerification ? 'warn' : 'ok'}
+            icon={<Icon name="briefcase" />}
           />
         </div>
         <div role="listitem">

@@ -123,7 +123,9 @@
     padding: 0 var(--space-4) 0 var(--space-8);
     border: 1px solid var(--border);
     border-radius: var(--radius-full);
-    background: var(--bg-subtle);
+    background: var(--bg-surface);
+    color: var(--text);
+    font-weight: var(--weight-medium);
     overflow-wrap: anywhere;
   }
 
