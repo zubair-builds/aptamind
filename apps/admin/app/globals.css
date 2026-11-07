@@ -100,8 +100,9 @@ code {
 }
 
 h1 {
-  font-size: 19px;
+  font-size: 22px;
   margin: 0;
+  letter-spacing: -0.01em;
 }
 
 h2 {
@@ -133,9 +134,10 @@ h3 {
 .section {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 }
 
 .section-head {
@@ -162,13 +164,13 @@ h3 {
 .grid-2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .grid-3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 @media (max-width: 1100px) {
@@ -183,9 +185,10 @@ h3 {
 .panel {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 }
 
 .panel-title {
@@ -226,12 +229,12 @@ h3 {
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-  border-radius: 10px;
-  font-size: 11px;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
   font-weight: 600;
-  line-height: 18px;
+  line-height: 20px;
   white-space: nowrap;
   vertical-align: middle;
 }
@@ -330,9 +333,9 @@ h3 {
 .table th,
 .table td {
   text-align: left;
-  padding: 4px 8px 4px 0;
-  border-bottom: 1px solid var(--border);
-  vertical-align: top;
+  padding: 8px 12px 8px 4px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
 }
 
 .table th {
@@ -342,11 +345,12 @@ h3 {
   border-bottom-color: var(--border-strong);
   position: sticky;
   top: 0;
-  background: var(--bg-surface);
+  background: var(--bg-subtle);
 }
 
 .table tbody tr:hover {
-  background: var(--bg-subtle);
+  background: var(--bg-hover);
+  transition: background 0.12s ease;
 }
 
 .table .num {
@@ -433,17 +437,18 @@ h3 {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .stat {
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-left-width: 4px;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
 }
 
 .stat-ok {
@@ -458,15 +463,38 @@ h3 {
   border-left-color: var(--tone-danger-dot);
 }
 
+.stat-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.stat-icon {
+  display: inline-flex;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.stat-ok .stat-icon {
+  color: var(--tone-success-fg);
+}
+.stat-warn .stat-icon {
+  color: var(--tone-warning-fg);
+}
+.stat-bad .stat-icon {
+  color: var(--tone-danger-fg);
+}
+
 .stat-label {
   color: var(--text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .stat-value {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -798,13 +826,13 @@ a.btn-primary {
 .two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .callout {
   border: 1px dashed var(--border-strong);
-  border-radius: 6px;
-  padding: 6px 10px;
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 .callout h3 {

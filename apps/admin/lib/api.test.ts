@@ -30,7 +30,9 @@ describe('apiRequest (in-process, regression for the false "API unavailable")', 
     expect((await getApiHealth()).state).toBe('ready');
   });
   it('maps a 503 to not_ready and a thrown/timeout handler to unavailable', async () => {
-    handle.mockResolvedValueOnce(json(503, { error: { code: 'not_ready', message: 'x', details: { checks: { mongo: false } } } }));
+    handle.mockResolvedValueOnce(
+      json(503, { error: { code: 'not_ready', message: 'x', details: { checks: { mongo: false } } } }),
+    );
     const r = await apiRequest('/ready');
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error.kind).toBe('http');
