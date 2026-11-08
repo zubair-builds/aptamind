@@ -147,14 +147,17 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
                 <strong>{fmtNum(d.review.open)}</strong> open review{d.review.open === 1 ? '' : 's'}
               </Link>
               <span className="small muted">
-                {d.review.oldestOpenAgeMs !== null ? `oldest ${fmtAge(d.review.oldestOpenAgeMs)}` : 'needs a decision'}
+                {d.review.oldestOpenAgeMs !== null
+                  ? `oldest ${fmtAge(d.review.oldestOpenAgeMs)}`
+                  : 'needs a decision'}
               </span>
             </li>
           ) : null}
           {overdue.length > 0 ? (
             <li>
               <Link href="/sources">
-                <strong>{fmtNum(overdue.length)}</strong> source{overdue.length === 1 ? '' : 's'} past freshness
+                <strong>{fmtNum(overdue.length)}</strong> source{overdue.length === 1 ? '' : 's'} past
+                freshness
               </Link>
               <span className="small muted">check or reschedule</span>
             </li>
@@ -162,7 +165,8 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
           {failingCount > 0 ? (
             <li>
               <Link href="/sources">
-                <strong>{fmtNum(failingCount)}</strong> source{failingCount === 1 ? '' : 's'} failing or degraded
+                <strong>{fmtNum(failingCount)}</strong> source{failingCount === 1 ? '' : 's'} failing or
+                degraded
               </Link>
               <span className="small muted">investigate last error</span>
             </li>
@@ -170,7 +174,8 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
           {d.freshness.jobsDueForVerification > 0 ? (
             <li>
               <Link href="/jobs">
-                <strong>{fmtNum(d.freshness.jobsDueForVerification)}</strong> job{d.freshness.jobsDueForVerification === 1 ? '' : 's'} due verification
+                <strong>{fmtNum(d.freshness.jobsDueForVerification)}</strong> job
+                {d.freshness.jobsDueForVerification === 1 ? '' : 's'} due verification
               </Link>
               <span className="small muted">next check overdue</span>
             </li>
@@ -186,12 +191,18 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
           {laggingQueues.length > 0 ? (
             <li>
               <span>
-                <strong>{fmtNum(laggingQueues.length)}</strong> queue{laggingQueues.length === 1 ? '' : 's'} lagging
+                <strong>{fmtNum(laggingQueues.length)}</strong> queue{laggingQueues.length === 1 ? '' : 's'}{' '}
+                lagging
               </span>
-              <span className="small muted">oldest waiting > 5m</span>
+              <span className="small muted">oldest waiting over 5m</span>
             </li>
           ) : null}
-          {d.review.open === 0 && overdue.length === 0 && failingCount === 0 && d.freshness.jobsDueForVerification === 0 && runsFailed === 0 && laggingQueues.length === 0 ? (
+          {d.review.open === 0 &&
+          overdue.length === 0 &&
+          failingCount === 0 &&
+          d.freshness.jobsDueForVerification === 0 &&
+          runsFailed === 0 &&
+          laggingQueues.length === 0 ? (
             <li className="muted">Nothing needs attention right now.</li>
           ) : null}
         </ul>
