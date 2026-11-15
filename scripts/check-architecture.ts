@@ -117,6 +117,7 @@ const ALLOWED: Record<string, string[]> = {
     'professional',
     'provenance',
     'workflows',
+    'workflow-sdk',
     'dev:testing',
   ],
 };
