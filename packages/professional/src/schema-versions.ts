@@ -10,7 +10,7 @@ import { professionalCollections } from './collections';
  * process running older code unable to downgrade what a newer one applied.
  */
 export const PROFESSIONAL_COLLECTION_VERSIONS: Readonly<Record<string, number>> = Object.freeze({
-  professional_subjects: 4, // P1.2: acquisitionCount; P1.3: extractionCount; P5.1: targetsRev (all optional, widened)
+  professional_subjects: 5, // P1.2: acquisitionCount; P1.3: extractionCount; P5.1: targetsRev; v5: spec fingerprint update
   professional_sources: 1,
   professional_snapshots: 4, // P1.2: chronology, previousSourceAsOf, by_source_created; v3: random ids; v4 (P1.3): ingest
   professional_acquisitions: 1, // P1.2: new

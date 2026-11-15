@@ -347,6 +347,7 @@ describe('collection-definition versions (never downgrade, §15)', () => {
       2: '314bc04981f8ea843bcab0b80a494f9a52bd4ad57ce30928aed0d3b90326425d',
       3: '79d6eb910e79c3e1cffc5c717170f29b23d3d731ef5bc83e1aff21dbf7d335ca',
       4: '09afa129a277d269a95c2cf6ce0bebe2be962d01e7c197eee9817c1a0522a7ea', // P5.1: targetsRev
+      5: 'd43c37fae291840ac7c3a2c4172ac8d95f0c8da8632f7b3ab6b29d29a9fed29f', // current spec
     },
     professional_sources: { 1: 'f2f8f16e0f207661d5dbf13b298e0201911681402c2421f8a8919a0c061d126b' },
     professional_snapshots: {

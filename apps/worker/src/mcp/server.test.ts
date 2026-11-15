@@ -387,6 +387,8 @@ describe('mcp server', () => {
         'list_sources',
         'list_workflows',
         'start_workflow_run',
+        'propose_source',
+        'import_leads',
       ].sort(),
     );
   });
