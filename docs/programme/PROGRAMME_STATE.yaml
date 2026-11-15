@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-11-05T13:50Z
+updated: 2026-11-15T11:30Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -358,3 +358,56 @@ open_tasks: # nothing is running at handoff; no agent, review or milestone in fl
   - 'Professional next milestone per roadmap.private_professional.next (P2.4, or P2.1/P2.2)'
   - 'Admin next per roadmap.admin_ux.next (domain asks first, incl. the Sponsorship history relabel)'
   - 'Supervisor: FE-P7/FE-P8 before real personal data; FE-T1 flaky shared-infra tests; supervisor_follow_ups; optionally delete merged topic branches and remove their worktrees'
+
+# ---------------------------------------------------------------------------
+# Recent live state (2026-11-15) — MCP + visual canvas
+# ---------------------------------------------------------------------------
+recent_milestones:
+  - id: MCP-SERVER
+    title: MCP server in local worker with 12 tools
+    status: live
+    note: 'Read tools + start_workflow_run + propose_source + import_leads'
+  - id: PR-18
+    title: Market proposal review types (3a)
+    status: merged
+    pr: 18
+    note: 'source_proposal / import_proposal review flow'
+  - id: PR-31
+    title: MCP lint + reviewId cleanup
+    status: merged
+    pr: 31
+    note: 'no-explicit-any fixes; reviewId uses _id; CI blockers cleared'
+  - id: PR-30
+    title: Visual canvas + Register Workflow
+    status: merged
+    pr: 30
+    note: 'Admin /workflows/canvas (React Flow). Flexible sources (MCP, HTTP, CSV, etc.). POST /api/workflows registers WorkflowSpec via catalog.register. Existing Sources picker.'
+  - id: PR-32
+    title: Fix 5 pre-existing failing tests (CI green)
+    status: parked
+    pr: 32
+    note: 'Lower priority. professional_sources fingerprint drift remains; no version bumps (serializer drift, spec unchanged).'
+
+# ---------------------------------------------------------------------------
+# Remaining for MVP (ranked highest impact first)
+# ---------------------------------------------------------------------------
+remaining_for_mvp:
+  - item: 'Canvas title-collision guard'
+    impact: 'Prevents a canvas workflow title that matches an existing key from silently creating a new version of that workflow'
+    priority: high
+  - item: 'PROGRAMME_STATE stays current'
+    impact: 'New sessions resume from accurate state instead of stale 2026-11-05 snapshot'
+    priority: high
+  - item: 'MCP propose tools end-to-end smoke (local)'
+    impact: 'Confirms propose_source / import_leads still raise review items and return reviewId after #31'
+    priority: medium
+  - item: 'Canvas register + run path smoke'
+    impact: 'Confirms a canvas-exported spec can be registered and started via the existing runtime'
+    priority: medium
+
+post_mvp:
+  - 'Canvas title-collision note (already listed above as high if we want it in MVP; otherwise post)'
+  - 'Auth backlog items (FE-P7/FE-P8 before real personal data)'
+  - 'Run-status overlay on the canvas'
+  - 'Full CI green (PR #32 parked; serializer-drift fingerprints)'
+  - 'Worker hosting conflict (Render vs local heavy jobs)'
