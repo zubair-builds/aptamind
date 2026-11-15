@@ -153,7 +153,7 @@ describe('RecordTable', () => {
     expect(first.textContent).not.toMatch(/Role offers sponsorship|sponsors: yes/i);
 
     fireEvent.click(within(name).getByRole('button', { name: 'Preview Engineer job_1' }));
-    const peek = screen.getByRole('dialog', { name: 'Preview: Engineer job_1' });
+    const peek = screen.getByRole('dialog', { name: 'Engineer job_1' });
     expect(within(peek).getByRole('link', { name: 'Open job record →' }).getAttribute('href')).toBe(
       '/jobs/job_1',
     );
@@ -349,7 +349,7 @@ describe('UX3 review follow-ups', () => {
     expect(tabbable[0]!.hasAttribute('data-row-link')).toBe(true);
     act(() => tabbable[0]!.focus());
     fireEvent.keyDown(tabbable[0]!, { key: ' ' });
-    const peek = screen.getByRole('dialog', { name: 'Preview: Engineer job_1' });
+    const peek = screen.getByRole('dialog', { name: 'Engineer job_1' });
     // Inside the preview, j is the preview's key, not the table's.
     const focusedBefore = document.activeElement;
     fireEvent.keyDown(document.activeElement!, { key: 'j' });
