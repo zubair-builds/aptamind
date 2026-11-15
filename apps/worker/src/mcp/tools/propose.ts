@@ -1,6 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { Platform } from '@aptamind/platform';
+import type { CreateSourceInput } from '@aptamind/market';
+import type { ImportType } from '@aptamind/market';
 import { z } from 'zod';
 import { McpCallError, withAudit, type McpAuditDeps } from '../audit';
 import type { McpLimiters } from '../rate-limit';
@@ -18,7 +20,7 @@ const idempotencyKey = z
   .regex(/^[A-Za-z0-9._:-]+$/, 'letters, digits and . _ - : only');
 
 export const proposeSourceInput = z.object({
-  source: z.record(z.unknown()), // full CreateSourceInput; Market validates
+  source: z.record(z.string(), z.unknown()), // full CreateSourceInput; Market validates
   idempotencyKey,
 });
 type ProposeSourceInput = z.infer<typeof proposeSourceInput>;
@@ -70,9 +72,13 @@ export function registerProposeTools(
 
 async function proposeSourceCall(deps: ProposeToolDeps, args: ProposeSourceInput): Promise<CallToolResult> {
   return writeCall(deps, 'propose_source', args, async () => {
-    const result = await deps.platform.market.proposals.proposeSource(args.source as any, MCP_ACTOR, {
-      idempotencyKey: args.idempotencyKey,
-    });
+    const result = await deps.platform.market.proposals.proposeSource(
+      args.source as CreateSourceInput,
+      MCP_ACTOR,
+      {
+        idempotencyKey: args.idempotencyKey,
+      },
+    );
     return {
       reviewId: result.item._id,
       type: result.item.type,
@@ -86,7 +92,7 @@ async function importLeadsCall(deps: ProposeToolDeps, args: ImportLeadsInput): P
   return writeCall(deps, 'import_leads', args, async () => {
     const result = await deps.platform.market.proposals.proposeImport(
       {
-        type: args.type as any,
+        type: args.type as ImportType,
         sourceId: args.sourceId,
         contentType: args.contentType,
         body: args.body,

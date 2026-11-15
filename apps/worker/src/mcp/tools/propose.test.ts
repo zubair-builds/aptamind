@@ -50,8 +50,8 @@ describe('MCP propose tools', () => {
     });
     expect(res.isError).toBeFalsy();
     expect(proposals).toHaveLength(1);
-    expect(proposals[0].tool).toBe('propose_source');
-    const content = JSON.parse((res.content as any)[0].text);
+    expect(proposals[0]!.tool).toBe('propose_source');
+    const content = JSON.parse((res.content as { type: string; text: string }[])[0]!.text);
     expect(content.reviewId).toBe('rev_src_1');
     expect(content.created).toBe(true);
   });
@@ -72,8 +72,8 @@ describe('MCP propose tools', () => {
     });
     expect(res.isError).toBeFalsy();
     expect(proposals).toHaveLength(1);
-    expect(proposals[0].tool).toBe('import_leads');
-    const content = JSON.parse((res.content as any)[0].text);
+    expect(proposals[0]!.tool).toBe('import_leads');
+    const content = JSON.parse((res.content as { type: string; text: string }[])[0]!.text);
     expect(content.reviewId).toBe('rev_imp_1');
     expect(content.type).toBe('import_proposal');
   });
