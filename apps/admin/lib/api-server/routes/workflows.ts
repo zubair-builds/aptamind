@@ -117,6 +117,19 @@ export async function workflowRoutes(app: FastifyInstance, { platform }: { platf
   app.post('/api/workflows', async (req, reply) => {
     const spec = workflowSpecSchema.parse(req.body);
 
+    // Reject any node whose capability is not registered (same registry as /api/capabilities).
+    const unknown = spec.nodes
+      .filter((n) => !runtime.registry.has(n.capability))
+      .map((n) => `${n.capability.type}@${n.capability.version}`);
+    if (unknown.length > 0) {
+      return reply.status(400).send({
+        error: {
+          code: 'validation_error',
+          message: `Unknown step types: ${[...new Set(unknown)].join(', ')}`,
+        },
+      });
+    }
+
     // Canvas must never create or version private-domain workflows.
     if (spec.key.startsWith('professional.') || !workflowAccess.startableGenerically(spec.key)) {
       return reply.status(403).send({
@@ -128,7 +141,6 @@ export async function workflowRoutes(app: FastifyInstance, { platform }: { platf
     }
 
     // Title-collision guard: refuse to create a new version of an existing key.
-    // Exact re-register of an unchanged spec still goes through catalog (created: false).
     const versions = await runtime.catalog.listVersions(spec.key);
     if (versions.length > 0) {
       return reply.status(409).send({
