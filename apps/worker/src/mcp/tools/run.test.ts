@@ -158,6 +158,7 @@ describe('start_workflow_run', () => {
     const limiters = {
       read: new TokenBucketLimiter({ capacity: 60, refillPerMs: 1, now: () => 0 }),
       write: new TokenBucketLimiter({ capacity: 0, refillPerMs: 1 / 60_000, now: () => 0 }),
+      unauth: new TokenBucketLimiter({ capacity: 10, refillPerMs: 10 / 60_000, now: () => 0 }),
     };
     const call = await client(f.platform, [KEY], limiters);
     const r = await call({ workflowKey: KEY, input: { jobId: 'job_1' }, idempotencyKey: 'abc12345' });

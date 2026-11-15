@@ -20,7 +20,7 @@ const idempotencyKey = z
   .regex(/^[A-Za-z0-9._:-]+$/, 'letters, digits and . _ - : only');
 
 export const proposeSourceInput = z.object({
-  source: z.record(z.unknown()), // full CreateSourceInput; Market validates
+  source: z.record(z.string(), z.unknown()), // full CreateSourceInput; Market validates
   idempotencyKey,
 });
 type ProposeSourceInput = z.infer<typeof proposeSourceInput>;
