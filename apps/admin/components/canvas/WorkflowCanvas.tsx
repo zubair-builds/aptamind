@@ -80,21 +80,69 @@ function CustomNode({ data }: { data: CanvasNodeData }) {
 const nodeTypes: NodeTypes = { custom: CustomNode };
 
 const PALETTE = [
-  { stage: 'connect' as const, label: 'MCP Source', capabilityType: 'core.mcp_call', capabilityVersion: 1, defaultSource: { type: 'mcp' as const, name: '' } },
-  { stage: 'connect' as const, label: 'HTTP Source', capabilityType: 'core.http_request', capabilityVersion: 1, defaultSource: { type: 'http' as const, name: '' } },
-  { stage: 'connect' as const, label: 'CSV Source', capabilityType: 'core.csv_parse', capabilityVersion: 1, defaultSource: { type: 'csv' as const, name: '' } },
-  { stage: 'connect' as const, label: 'Browser Source', capabilityType: 'core.browser_fetch', capabilityVersion: 1, defaultSource: { type: 'browser' as const, name: '' } },
-  { stage: 'understand' as const, label: 'Resolve Entities', capabilityType: 'market.resolve_entities', capabilityVersion: 1 },
-  { stage: 'understand' as const, label: 'Ingest Observation', capabilityType: 'market.ingest_observation', capabilityVersion: 1 },
-  { stage: 'enrich' as const, label: 'Map Fields', capabilityType: 'market.map_fields', capabilityVersion: 1 },
-  { stage: 'act' as const, label: 'Detect Signal', capabilityType: 'market.detect_signal', capabilityVersion: 1 },
+  {
+    stage: 'connect' as const,
+    label: 'MCP Source',
+    capabilityType: 'core.mcp_call',
+    capabilityVersion: 1,
+    defaultSource: { type: 'mcp' as const, name: '' },
+  },
+  {
+    stage: 'connect' as const,
+    label: 'HTTP Source',
+    capabilityType: 'core.http_request',
+    capabilityVersion: 1,
+    defaultSource: { type: 'http' as const, name: '' },
+  },
+  {
+    stage: 'connect' as const,
+    label: 'CSV Source',
+    capabilityType: 'core.csv_parse',
+    capabilityVersion: 1,
+    defaultSource: { type: 'csv' as const, name: '' },
+  },
+  {
+    stage: 'connect' as const,
+    label: 'Browser Source',
+    capabilityType: 'core.browser_fetch',
+    capabilityVersion: 1,
+    defaultSource: { type: 'browser' as const, name: '' },
+  },
+  {
+    stage: 'understand' as const,
+    label: 'Resolve Entities',
+    capabilityType: 'market.resolve_entities',
+    capabilityVersion: 1,
+  },
+  {
+    stage: 'understand' as const,
+    label: 'Ingest Observation',
+    capabilityType: 'market.ingest_observation',
+    capabilityVersion: 1,
+  },
+  {
+    stage: 'enrich' as const,
+    label: 'Map Fields',
+    capabilityType: 'market.map_fields',
+    capabilityVersion: 1,
+  },
+  {
+    stage: 'act' as const,
+    label: 'Detect Signal',
+    capabilityType: 'market.detect_signal',
+    capabilityVersion: 1,
+  },
   { stage: 'control' as const, label: 'For Each', capabilityType: 'core.for_each', capabilityVersion: 1 },
 ];
 
 let idCounter = 1;
 
 function makeNodeId(base: string): string {
-  const safe = base.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'node';
+  const safe =
+    base
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '') || 'node';
   return `${safe}_${idCounter++}`;
 }
 
@@ -107,7 +155,9 @@ export default function WorkflowCanvas() {
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
   const [registerMsg, setRegisterMsg] = useState<string | null>(null);
   const [registering, setRegistering] = useState(false);
-  const [sources, setSources] = useState<Array<{ _id: string; key?: string; name?: string; provider?: string }>>([]);
+  const [sources, setSources] = useState<
+    Array<{ _id: string; key?: string; name?: string; provider?: string }>
+  >([]);
 
   useEffect(() => {
     fetch('/api/sources?limit=100')
@@ -116,10 +166,7 @@ export default function WorkflowCanvas() {
       .catch(() => setSources([]));
   }, []);
 
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
-  );
+  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   const addNode = (item: (typeof PALETTE)[number]) => {
     const id = makeNodeId(item.label);
@@ -141,9 +188,7 @@ export default function WorkflowCanvas() {
 
   const updateSelected = (patch: Partial<CanvasNodeData>) => {
     if (!selected) return;
-    setNodes((nds) =>
-      nds.map((n) => (n.id === selected.id ? { ...n, data: { ...n.data, ...patch } } : n)),
-    );
+    setNodes((nds) => nds.map((n) => (n.id === selected.id ? { ...n, data: { ...n.data, ...patch } } : n)));
     setSelected((s) => (s ? { ...s, data: { ...s.data, ...patch } } : s));
   };
 
@@ -154,15 +199,17 @@ export default function WorkflowCanvas() {
   };
 
   const generatedSpec = useMemo(() => {
-    const key = workflowName
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '.')
-      .replace(/^\.+|\.+$/g, '')
-      .replace(/\.{2,}/g, '.') || 'canvas.workflow';
+    const key =
+      workflowName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '.')
+        .replace(/^\.+|\.+$/g, '')
+        .replace(/\.{2,}/g, '.') || 'canvas.workflow';
     return {
       key: key.length >= 3 ? key : `canvas.${key}`,
       title: workflowName,
-      description: 'Created via visual canvas. Sources may be MCP, HTTP, CSV, browser, file, registry, or other.',
+      description:
+        'Created via visual canvas. Sources may be MCP, HTTP, CSV, browser, file, registry, or other.',
       nodes: nodes.map((n) => ({
         id: n.id,
         title: n.data.label,
@@ -264,13 +311,23 @@ export default function WorkflowCanvas() {
         id: makeNodeId('resolve'),
         type: 'custom',
         position: { x: 360, y: 120 },
-        data: { label: 'Resolve Entities', stage: 'understand', capabilityType: 'market.resolve_entities', capabilityVersion: 1 },
+        data: {
+          label: 'Resolve Entities',
+          stage: 'understand',
+          capabilityType: 'market.resolve_entities',
+          capabilityVersion: 1,
+        },
       };
       const n3: Node<CanvasNodeData> = {
         id: makeNodeId('signal'),
         type: 'custom',
         position: { x: 640, y: 120 },
-        data: { label: 'Detect Signal', stage: 'act', capabilityType: 'market.detect_signal', capabilityVersion: 1 },
+        data: {
+          label: 'Detect Signal',
+          stage: 'act',
+          capabilityType: 'market.detect_signal',
+          capabilityVersion: 1,
+        },
       };
       setNodes([n1, n2, n3]);
       setEdges([
@@ -307,7 +364,12 @@ export default function WorkflowCanvas() {
         id: makeNodeId('resolve'),
         type: 'custom',
         position: { x: 380, y: 150 },
-        data: { label: 'Resolve Entities', stage: 'understand', capabilityType: 'market.resolve_entities', capabilityVersion: 1 },
+        data: {
+          label: 'Resolve Entities',
+          stage: 'understand',
+          capabilityType: 'market.resolve_entities',
+          capabilityVersion: 1,
+        },
       };
       setNodes([n1, n2, n3]);
       setEdges([
@@ -326,46 +388,144 @@ export default function WorkflowCanvas() {
         <input
           value={workflowName}
           onChange={(e) => setWorkflowName(e.target.value)}
-          style={{ padding: '6px 10px', border: '1px solid #d1d5db', borderRadius: 6, fontSize: 14, minWidth: 240 }}
+          style={{
+            padding: '6px 10px',
+            border: '1px solid #d1d5db',
+            borderRadius: 6,
+            fontSize: 14,
+            minWidth: 240,
+          }}
           placeholder="Workflow name"
         />
-        <button onClick={() => loadTemplate('mcp-resolve')} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: 6, background: '#fff', cursor: 'pointer' }}>
+        <button
+          onClick={() => loadTemplate('mcp-resolve')}
+          style={{
+            padding: '6px 12px',
+            border: '1px solid #d1d5db',
+            borderRadius: 6,
+            background: '#fff',
+            cursor: 'pointer',
+          }}
+        >
           Template: MCP → Resolve → Signal
         </button>
-        <button onClick={() => loadTemplate('http-csv')} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: 6, background: '#fff', cursor: 'pointer' }}>
+        <button
+          onClick={() => loadTemplate('http-csv')}
+          style={{
+            padding: '6px 12px',
+            border: '1px solid #d1d5db',
+            borderRadius: 6,
+            background: '#fff',
+            cursor: 'pointer',
+          }}
+        >
           Template: HTTP + CSV → Resolve
         </button>
-        <button onClick={exportSpec} style={{ padding: '6px 14px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
+        <button
+          onClick={exportSpec}
+          style={{
+            padding: '6px 14px',
+            background: '#2563eb',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+          }}
+        >
           Export Spec
         </button>
         <button
           onClick={registerSpec}
           disabled={registering}
-          style={{ padding: '6px 14px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', opacity: registering ? 0.6 : 1 }}
+          style={{
+            padding: '6px 14px',
+            background: '#16a34a',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+            opacity: registering ? 0.6 : 1,
+          }}
         >
           {registering ? 'Registering…' : 'Register Workflow'}
         </button>
-        <button onClick={() => setShowPreview((v) => !v)} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: 6, background: '#fff', cursor: 'pointer' }}>
+        <button
+          onClick={() => setShowPreview((v) => !v)}
+          style={{
+            padding: '6px 12px',
+            border: '1px solid #d1d5db',
+            borderRadius: 6,
+            background: '#fff',
+            cursor: 'pointer',
+          }}
+        >
           {showPreview ? 'Hide' : 'Show'} Spec Preview
         </button>
       </div>
       {validationMsg && (
-        <div style={{ padding: '8px 12px', background: '#fef2f2', color: '#991b1b', borderRadius: 6, fontSize: 13 }}>
+        <div
+          style={{
+            padding: '8px 12px',
+            background: '#fef2f2',
+            color: '#991b1b',
+            borderRadius: 6,
+            fontSize: 13,
+          }}
+        >
           {validationMsg}
         </div>
       )}
       {registerMsg && (
-        <div style={{ padding: '8px 12px', background: registerMsg.startsWith('Registered') || registerMsg.startsWith('Already') ? '#f0fdf4' : '#fef2f2', color: registerMsg.startsWith('Registered') || registerMsg.startsWith('Already') ? '#166534' : '#991b1b', borderRadius: 6, fontSize: 13 }}>
+        <div
+          style={{
+            padding: '8px 12px',
+            background:
+              registerMsg.startsWith('Registered') || registerMsg.startsWith('Already')
+                ? '#f0fdf4'
+                : '#fef2f2',
+            color:
+              registerMsg.startsWith('Registered') || registerMsg.startsWith('Already')
+                ? '#166534'
+                : '#991b1b',
+            borderRadius: 6,
+            fontSize: 13,
+          }}
+        >
           {registerMsg}
         </div>
       )}
-      <div style={{ display: 'flex', flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden', minHeight: 480 }}>
+      <div
+        style={{
+          display: 'flex',
+          flex: 1,
+          border: '1px solid #e5e7eb',
+          borderRadius: 8,
+          overflow: 'hidden',
+          minHeight: 480,
+        }}
+      >
         {/* Palette */}
-        <div style={{ width: 220, background: '#f9fafb', borderRight: '1px solid #e5e7eb', padding: 12, overflowY: 'auto' }}>
+        <div
+          style={{
+            width: 220,
+            background: '#f9fafb',
+            borderRight: '1px solid #e5e7eb',
+            padding: 12,
+            overflowY: 'auto',
+          }}
+        >
           <div style={{ fontWeight: 600, marginBottom: 12 }}>Node Palette</div>
           {(['connect', 'understand', 'enrich', 'act', 'control'] as const).map((stage) => (
             <div key={stage} style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', color: STAGE_COLORS[stage], marginBottom: 4 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  color: STAGE_COLORS[stage],
+                  marginBottom: 4,
+                }}
+              >
                 {stage}
               </div>
               {PALETTE.filter((p) => p.stage === stage).map((item) => (
@@ -411,10 +571,20 @@ export default function WorkflowCanvas() {
         </div>
 
         {/* Inspector */}
-        <div style={{ width: 300, background: '#f9fafb', borderLeft: '1px solid #e5e7eb', padding: 12, overflowY: 'auto' }}>
+        <div
+          style={{
+            width: 300,
+            background: '#f9fafb',
+            borderLeft: '1px solid #e5e7eb',
+            padding: 12,
+            overflowY: 'auto',
+          }}
+        >
           <div style={{ fontWeight: 600, marginBottom: 12 }}>Inspector</div>
           {!selected ? (
-            <div style={{ color: '#6b7280', fontSize: 13 }}>Select a node to configure it. Sources can be MCP, HTTP, CSV, or any other type.</div>
+            <div style={{ color: '#6b7280', fontSize: 13 }}>
+              Select a node to configure it. Sources can be MCP, HTTP, CSV, or any other type.
+            </div>
           ) : (
             <div>
               <div style={{ marginBottom: 8 }}>
@@ -427,13 +597,21 @@ export default function WorkflowCanvas() {
               <input
                 value={selected.data.label}
                 onChange={(e) => updateSelected({ label: e.target.value })}
-                style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                style={{
+                  width: '100%',
+                  padding: 6,
+                  marginBottom: 8,
+                  borderRadius: 4,
+                  border: '1px solid #d1d5db',
+                }}
               />
               {selected.data.source && (
                 <div>
                   {sources.length > 0 && (
                     <>
-                      <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Use existing source</label>
+                      <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
+                        Use existing source
+                      </label>
                       <select
                         value=""
                         onChange={(e) => {
@@ -446,7 +624,13 @@ export default function WorkflowCanvas() {
                             });
                           }
                         }}
-                        style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                        style={{
+                          width: '100%',
+                          padding: 6,
+                          marginBottom: 8,
+                          borderRadius: 4,
+                          border: '1px solid #d1d5db',
+                        }}
                       >
                         <option value="">— select to prefill —</option>
                         {sources.map((s) => (
@@ -461,7 +645,13 @@ export default function WorkflowCanvas() {
                   <select
                     value={selected.data.source.type}
                     onChange={(e) => updateSelectedSource({ type: e.target.value as SourceType })}
-                    style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    style={{
+                      width: '100%',
+                      padding: 6,
+                      marginBottom: 8,
+                      borderRadius: 4,
+                      border: '1px solid #d1d5db',
+                    }}
                   >
                     <option value="mcp">MCP</option>
                     <option value="http">HTTP</option>
@@ -475,7 +665,13 @@ export default function WorkflowCanvas() {
                   <input
                     value={selected.data.source.name}
                     onChange={(e) => updateSelectedSource({ name: e.target.value })}
-                    style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                    style={{
+                      width: '100%',
+                      padding: 6,
+                      marginBottom: 8,
+                      borderRadius: 4,
+                      border: '1px solid #d1d5db',
+                    }}
                   />
                   {selected.data.source.type === 'mcp' && (
                     <>
@@ -484,25 +680,45 @@ export default function WorkflowCanvas() {
                         value={selected.data.source.mcpServer || ''}
                         onChange={(e) => updateSelectedSource({ mcpServer: e.target.value })}
                         placeholder="e.g. company-data"
-                        style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                        style={{
+                          width: '100%',
+                          padding: 6,
+                          marginBottom: 8,
+                          borderRadius: 4,
+                          border: '1px solid #d1d5db',
+                        }}
                       />
                       <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Tool</label>
                       <input
                         value={selected.data.source.tool || ''}
                         onChange={(e) => updateSelectedSource({ tool: e.target.value })}
                         placeholder="e.g. fetch_company"
-                        style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                        style={{
+                          width: '100%',
+                          padding: 6,
+                          marginBottom: 8,
+                          borderRadius: 4,
+                          border: '1px solid #d1d5db',
+                        }}
                       />
                     </>
                   )}
                   {(selected.data.source.type === 'http' || selected.data.source.type === 'browser') && (
                     <>
-                      <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Endpoint / URL</label>
+                      <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
+                        Endpoint / URL
+                      </label>
                       <input
                         value={selected.data.source.endpoint || ''}
                         onChange={(e) => updateSelectedSource({ endpoint: e.target.value })}
                         placeholder="https://..."
-                        style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                        style={{
+                          width: '100%',
+                          padding: 6,
+                          marginBottom: 8,
+                          borderRadius: 4,
+                          border: '1px solid #d1d5db',
+                        }}
                       />
                     </>
                   )}
@@ -520,7 +736,18 @@ export default function WorkflowCanvas() {
         </div>
       </div>
       {showPreview && (
-        <pre style={{ margin: 0, padding: 12, background: '#111827', color: '#e5e7eb', borderRadius: 8, fontSize: 12, maxHeight: 220, overflow: 'auto' }}>
+        <pre
+          style={{
+            margin: 0,
+            padding: 12,
+            background: '#111827',
+            color: '#e5e7eb',
+            borderRadius: 8,
+            fontSize: 12,
+            maxHeight: 220,
+            overflow: 'auto',
+          }}
+        >
           {JSON.stringify(generatedSpec, null, 2)}
         </pre>
       )}
