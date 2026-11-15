@@ -21,6 +21,11 @@ export default async function WorkflowsPage() {
         title="Workflows"
         subtitle="Registered workflow definitions (immutable versions) and schedule triggers."
       />
+      <div style={{ marginBottom: 16 }}>
+        <Link href="/workflows/canvas" className="button-like">
+          Open Visual Canvas
+        </Link>
+      </div>
       <Section title="Definitions" id="definitions">
         {!defs.ok ? (
           <ApiErrorPanel error={defs.error} />
