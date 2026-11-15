@@ -48,12 +48,18 @@ describe('POST /api/workflows (canvas registration)', () => {
     expect((res.body as { version: number }).version).toBeGreaterThan(0);
   });
 
-  it('returns the same result when the same spec is registered twice', async () => {
-    const first = await h.post('/api/workflows', validSpec);
+  it('rejects a second registration of an existing key (title-collision guard)', async () => {
     const second = await h.post('/api/workflows', validSpec);
-    expect(first.status).toBe(200);
-    expect(second.status).toBe(200);
-    expect(second.body).toEqual(first.body);
-    expect((second.body as { created: boolean }).created).toBe(false);
+    expect(second.status).toBe(409);
+    expect((second.body as { error?: { message?: string } }).error?.message).toContain('already exists');
+  });
+
+  it('rejects a professional.* key', async () => {
+    const res = await h.post('/api/workflows', {
+      ...validSpec,
+      key: 'professional.secret.workflow',
+    });
+    expect(res.status).toBe(403);
+    expect((res.body as { error?: { message?: string } }).error?.message).toContain('reserved');
   });
 });
