@@ -116,7 +116,29 @@ export async function workflowRoutes(app: FastifyInstance, { platform }: { platf
 
   app.post('/api/workflows', async (req, reply) => {
     const spec = workflowSpecSchema.parse(req.body);
-    // Register is idempotent: unchanged spec returns existing version; changed spec creates N+1.
+
+    // Canvas must never create or version private-domain workflows.
+    if (spec.key.startsWith('professional.') || !workflowAccess.startableGenerically(spec.key)) {
+      return reply.status(403).send({
+        error: {
+          code: 'forbidden',
+          message: `Workflow key ${spec.key} is reserved. Choose a different key.`,
+        },
+      });
+    }
+
+    // Title-collision guard: refuse to create a new version of an existing key.
+    // Exact re-register of an unchanged spec still goes through catalog (created: false).
+    const versions = await runtime.catalog.listVersions(spec.key);
+    if (versions.length > 0) {
+      return reply.status(409).send({
+        error: {
+          code: 'conflict',
+          message: `A workflow with key ${spec.key} already exists. Rename it.`,
+        },
+      });
+    }
+
     const result = await runtime.catalog.register(spec);
     return reply.status(result.created ? 201 : 200).send({
       key: spec.key,
