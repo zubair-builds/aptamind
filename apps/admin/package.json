@@ -39,7 +39,8 @@
     "react-dom": "19.3.0",
     "tldts": "^7.0.17",
     "undici": "^7.16.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.5",
+    "@aptamind/workflow-sdk": "workspace:*"
   },
   "devDependencies": {
     "@aptamind/testing": "workspace:*",

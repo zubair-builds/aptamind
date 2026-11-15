@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { jsonObjectSchema, NotFoundError, pageQuerySchema } from '@aptamind/contracts';
 import type { Platform } from '@aptamind/platform';
+import { workflowSpecSchema } from '@aptamind/workflow-sdk';
 
 export async function workflowRoutes(app: FastifyInstance, { platform }: { platform: Platform }) {
   const { runtime, artifactAccess, workflowAccess } = platform;
@@ -111,6 +112,17 @@ export async function workflowRoutes(app: FastifyInstance, { platform }: { platf
     const detail = await runtime.queries.getRunDetail(id);
     // FE-P6: a private domain's artifact refs (size, sha256) are not listed here.
     return { ...detail, artifacts: await artifactAccess.listableRunArtifacts(detail.run, detail.artifacts) };
+  });
+
+  app.post('/api/workflows', async (req, reply) => {
+    const spec = workflowSpecSchema.parse(req.body);
+    // Register is idempotent: unchanged spec returns existing version; changed spec creates N+1.
+    const result = await runtime.catalog.register(spec);
+    return reply.status(result.created ? 201 : 200).send({
+      key: spec.key,
+      version: result.version.version,
+      created: result.created,
+    });
   });
 
   app.post('/api/runs/:id/cancel', async (req) => {

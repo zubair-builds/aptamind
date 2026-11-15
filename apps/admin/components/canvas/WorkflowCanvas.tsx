@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -105,6 +105,16 @@ export default function WorkflowCanvas() {
   const [workflowName, setWorkflowName] = useState('New Canvas Workflow');
   const [showPreview, setShowPreview] = useState(false);
   const [validationMsg, setValidationMsg] = useState<string | null>(null);
+  const [registerMsg, setRegisterMsg] = useState<string | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [sources, setSources] = useState<Array<{ _id: string; key?: string; name?: string; provider?: string }>>([]);
+
+  useEffect(() => {
+    fetch('/api/sources?limit=100')
+      .then((r) => (r.ok ? r.json() : Promise.reject(r)))
+      .then((data) => setSources(data.items || []))
+      .catch(() => setSources([]));
+  }, []);
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -202,6 +212,39 @@ export default function WorkflowCanvas() {
     URL.revokeObjectURL(url);
   };
 
+  const registerSpec = async () => {
+    const err = validate();
+    if (err) {
+      setValidationMsg(err);
+      setRegisterMsg(null);
+      return;
+    }
+    setValidationMsg(null);
+    setRegistering(true);
+    setRegisterMsg(null);
+    try {
+      const res = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(generatedSpec),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setRegisterMsg(data.error?.message || data.message || `Registration failed (${res.status})`);
+      } else {
+        setRegisterMsg(
+          data.created
+            ? `Registered as ${data.key} (version ${data.version})`
+            : `Already registered as ${data.key} (version ${data.version})`,
+        );
+      }
+    } catch (e) {
+      setRegisterMsg(e instanceof Error ? e.message : 'Network error');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const loadTemplate = (kind: 'mcp-resolve' | 'http-csv') => {
     idCounter = 1;
     if (kind === 'mcp-resolve') {
@@ -295,6 +338,13 @@ export default function WorkflowCanvas() {
         <button onClick={exportSpec} style={{ padding: '6px 14px', background: '#2563eb', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer' }}>
           Export Spec
         </button>
+        <button
+          onClick={registerSpec}
+          disabled={registering}
+          style={{ padding: '6px 14px', background: '#16a34a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', opacity: registering ? 0.6 : 1 }}
+        >
+          {registering ? 'Registering…' : 'Register Workflow'}
+        </button>
         <button onClick={() => setShowPreview((v) => !v)} style={{ padding: '6px 12px', border: '1px solid #d1d5db', borderRadius: 6, background: '#fff', cursor: 'pointer' }}>
           {showPreview ? 'Hide' : 'Show'} Spec Preview
         </button>
@@ -302,6 +352,11 @@ export default function WorkflowCanvas() {
       {validationMsg && (
         <div style={{ padding: '8px 12px', background: '#fef2f2', color: '#991b1b', borderRadius: 6, fontSize: 13 }}>
           {validationMsg}
+        </div>
+      )}
+      {registerMsg && (
+        <div style={{ padding: '8px 12px', background: registerMsg.startsWith('Registered') || registerMsg.startsWith('Already') ? '#f0fdf4' : '#fef2f2', color: registerMsg.startsWith('Registered') || registerMsg.startsWith('Already') ? '#166534' : '#991b1b', borderRadius: 6, fontSize: 13 }}>
+          {registerMsg}
         </div>
       )}
       <div style={{ display: 'flex', flex: 1, border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden', minHeight: 480 }}>
@@ -376,6 +431,32 @@ export default function WorkflowCanvas() {
               />
               {selected.data.source && (
                 <div>
+                  {sources.length > 0 && (
+                    <>
+                      <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Use existing source</label>
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          const id = e.target.value;
+                          const s = sources.find((x) => x._id === id);
+                          if (s) {
+                            updateSelectedSource({
+                              name: s.key || s.name || s._id,
+                              notes: `Linked to existing source ${s.name || s.key || s._id}`,
+                            });
+                          }
+                        }}
+                        style={{ width: '100%', padding: 6, marginBottom: 8, borderRadius: 4, border: '1px solid #d1d5db' }}
+                      >
+                        <option value="">— select to prefill —</option>
+                        {sources.map((s) => (
+                          <option key={s._id} value={s._id}>
+                            {s.name || s.key || s._id} {s.provider ? `(${s.provider})` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
                   <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>Source type</label>
                   <select
                     value={selected.data.source.type}

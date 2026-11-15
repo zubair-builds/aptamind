@@ -86,6 +86,9 @@ importers:
       '@aptamind/provenance':
         specifier: workspace:*
         version: link:../../packages/provenance
+      '@aptamind/workflow-sdk':
+        specifier: workspace:*
+        version: link:../../packages/workflow-sdk
       '@aptamind/workflows':
         specifier: workspace:*
         version: link:../../packages/workflows
