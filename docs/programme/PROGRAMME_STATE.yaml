@@ -221,9 +221,11 @@ streams:
   admin_ux:
     branch: admin/attio-redesign
     status: 'idle — UX0-UX3f merged; next per roadmap.admin_ux'
+    merged:
+      - 'Overview PR 1/3 (PR 36, squash 1c7fccc): Overview cut to 4 insights + What needs attention; Data quality and BullMQ queues moved to /settings/system; sidebar Home -> Overview.'
+      - 'Overview PR 2/3 (PR 37, squash 1c113f9): visual calm via app/overview.module.css (existing tokens only, content max width, tinted cards, two-number Runs/Source health, soft attention rows); breadcrumb Home -> Overview; Source health links failing+degraded; lagging queues link /settings/system#queues.'
     in_progress:
-      - 'Overview PR 1/3 (feat/admin-overview-insights, PR pending review): Overview cut to 4 insights + What needs attention; Data quality and BullMQ queues moved to /settings/system; sidebar Home -> Overview. PR 2 = styling.'
-      - 'Overview PR 2/3 (feat/admin-overview-visual-calm, stacked on PR 1): visual calm via app/overview.module.css (existing tokens only, content max width, tinted cards, two-number Runs/Source health, soft attention rows); breadcrumb Home -> Overview; Source health links failing+degraded; lagging queues link /settings/system#queues. PR 3 next.'
+      - 'Overview PR 3/3 (feat/admin-overview-named-attention, this PR): What needs attention names the top 5 open reviews (GET /api/review?status=open&limit=5) and top 5 failed runs in the window (GET /api/runs?state=FAILED&limit=5, window filtered client-side: the runs API has no hours param), each linking to its review/run with a short label and age; empty states No open reviews / No failed runs; per-list error rows; count rows, cards and PR 2 styles unchanged; no new endpoints.'
     asks_from_domains:
       - 'Market (PR 21): previously_licensed label "Previously licensed"; authorization.regions as region codes; posting-stated sponsorship as "Posting states: Yes/No" + quote + unverified marker; operator override alternates as neutral "System reading"'
       - 'Market (PR 22): use GET /api/meta/enums labels; triage claim body field holder; no assign in v0.1'
