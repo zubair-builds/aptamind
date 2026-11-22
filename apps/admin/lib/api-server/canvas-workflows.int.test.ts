@@ -62,4 +62,22 @@ describe('POST /api/workflows (canvas registration)', () => {
     expect(res.status).toBe(403);
     expect((res.body as { error?: { message?: string } }).error?.message).toContain('reserved');
   });
+
+  it('rejects an unknown step type', async () => {
+    const res = await h.post('/api/workflows', {
+      ...validSpec,
+      key: 'canvas.unknown.step',
+      nodes: [
+        {
+          id: 'bad',
+          title: 'Unknown',
+          capability: { type: 'core.does_not_exist', version: 1 },
+          config: {},
+          input: {},
+        },
+      ],
+    });
+    expect(res.status).toBe(400);
+    expect((res.body as { error?: { message?: string } }).error?.message).toContain('core.does_not_exist@1');
+  });
 });
