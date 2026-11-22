@@ -36,7 +36,7 @@ export function Sidebar({ theme }: { theme: ThemePreference }) {
       </div>
       <nav aria-label="Main" className={s.nav}>
         <ul className={s.navList}>
-          <NavItem href="/" label="Home" icon={<Icon name="house" />} />
+          <NavItem href="/" label="Overview" icon={<Icon name="house" />} />
           <NavItem
             href="/review"
             label="Review"

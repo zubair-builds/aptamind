@@ -221,6 +221,8 @@ streams:
   admin_ux:
     branch: admin/attio-redesign
     status: 'idle — UX0-UX3f merged; next per roadmap.admin_ux'
+    in_progress:
+      - 'Overview PR 1/3 (feat/admin-overview-insights, PR pending review): Overview cut to 4 insights + What needs attention; Data quality and BullMQ queues moved to /settings/system; sidebar Home -> Overview. PR 2 = styling.'
     asks_from_domains:
       - 'Market (PR 21): previously_licensed label "Previously licensed"; authorization.regions as region codes; posting-stated sponsorship as "Posting states: Yes/No" + quote + unverified marker; operator override alternates as neutral "System reading"'
       - 'Market (PR 22): use GET /api/meta/enums labels; triage claim body field holder; no assign in v0.1'
