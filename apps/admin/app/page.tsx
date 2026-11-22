@@ -48,7 +48,7 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
   const runsFailed = d.runs.runsByState.FAILED ?? 0;
   const overdue = d.freshness.overdueSources;
   const due = d.freshness.jobsDueForVerification;
-  const dueLabel = due >= DUE_VERIFICATION_CAP ? `${fmtNum(DUE_VERIFICATION_CAP)}+` : fmtNum(due);
+  const dueLabel = due >= DUE_VERIFICATION_CAP ? `${DUE_VERIFICATION_CAP}+` : fmtNum(due);
   const laggingQueues = d.queues.filter((q) => (q.oldestWaitingAgeMs ?? 0) > QUEUE_LAG_WARN_MS);
   const windowLabel = hours === 168 ? '7d' : `${hours}h`;
 
