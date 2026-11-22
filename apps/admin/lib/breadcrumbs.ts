@@ -47,7 +47,7 @@ function decode(segment: string) {
 
 export function crumbsFor(pathname: string): Crumb[] {
   const segs = pathname.split(/[?#]/)[0]!.split('/').filter(Boolean);
-  if (!segs.length) return [{ label: 'Home' }];
+  if (!segs.length) return [{ label: 'Overview' }];
   const page = PAGES[segs.join('/')];
   if (segs[0] === 'settings') return page ? [SETTINGS, ...[page].flat()] : [SETTINGS];
   const object = OBJECTS[segs[0]!];

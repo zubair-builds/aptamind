@@ -223,6 +223,7 @@ streams:
     status: 'idle — UX0-UX3f merged; next per roadmap.admin_ux'
     in_progress:
       - 'Overview PR 1/3 (feat/admin-overview-insights, PR pending review): Overview cut to 4 insights + What needs attention; Data quality and BullMQ queues moved to /settings/system; sidebar Home -> Overview. PR 2 = styling.'
+      - 'Overview PR 2/3 (feat/admin-overview-visual-calm, stacked on PR 1): visual calm via app/overview.module.css (existing tokens only, content max width, tinted cards, two-number Runs/Source health, soft attention rows); breadcrumb Home -> Overview; Source health links failing+degraded; lagging queues link /settings/system#queues. PR 3 next.'
     asks_from_domains:
       - 'Market (PR 21): previously_licensed label "Previously licensed"; authorization.regions as region codes; posting-stated sponsorship as "Posting states: Yes/No" + quote + unverified marker; operator override alternates as neutral "System reading"'
       - 'Market (PR 22): use GET /api/meta/enums labels; triage claim body field holder; no assign in v0.1'
