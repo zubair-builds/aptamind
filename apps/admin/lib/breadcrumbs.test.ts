@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { crumbsFor } from './breadcrumbs';
 
 describe('crumbsFor', () => {
-  it('names the home page', () => {
-    expect(crumbsFor('/')).toEqual([{ label: 'Home' }]);
+  it('names the overview page', () => {
+    expect(crumbsFor('/')).toEqual([{ label: 'Overview' }]);
   });
 
   it('shows the object on list pages', () => {

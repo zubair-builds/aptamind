@@ -392,7 +392,7 @@ async function smoke(browser: Browser) {
     return [];
   };
 
-  await visit(page, { path: '/', heading: 'Home' });
+  await visit(page, { path: '/', heading: 'Overview' });
 
   const sources = await visit(page, { path: '/sources', heading: 'Sources' });
   await visit(page, { path: '/sources/new', heading: 'New source' });
