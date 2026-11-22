@@ -71,8 +71,8 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
         <div role="listitem">
           <Stat
             label={`Runs (${windowLabel})`}
-            value={<Link href="/runs?state=FAILED">{fmtNum(runsFailed)} failed</Link>}
-            hint={`${fmtNum(d.runs.activeRuns)} active now`}
+            value={<Link href="/runs?state=FAILED">{fmtNum(runsFailed)}</Link>}
+            hint={`failed · ${fmtNum(d.runs.activeRuns)} active now`}
             tone={runsFailed ? 'bad' : 'ok'}
             icon={<Icon name="play" />}
           />
@@ -80,8 +80,8 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
         <div role="listitem">
           <Stat
             label="Source health"
-            value={<Link href="/sources?health=failing">{fmtNum(failingCount)} failing or degraded</Link>}
-            hint={`${fmtNum(overdue.length)} overdue`}
+            value={<Link href="/sources?health=failing">{fmtNum(failingCount)}</Link>}
+            hint={`failing or degraded · ${fmtNum(overdue.length)} overdue`}
             tone={h.failing ? 'bad' : h.degraded || overdue.length ? 'warn' : 'ok'}
             icon={<Icon name="database" />}
           />
@@ -91,12 +91,12 @@ function DashboardBody({ d, hours }: { d: Dashboard; hours: number }) {
             label={`This window (${windowLabel})`}
             value={
               <>
-                <Link href="/companies">+{fmtNum(d.companies.created)} companies</Link>
+                <Link href="/companies">+{fmtNum(d.companies.created)}</Link>
                 {' · '}
-                <Link href="/jobs">+{fmtNum(d.jobs.created)} jobs</Link>
+                <Link href="/jobs">+{fmtNum(d.jobs.created)}</Link>
               </>
             }
-            hint="created in window"
+            hint="companies · jobs created"
             icon={<Icon name="activity" />}
           />
         </div>
