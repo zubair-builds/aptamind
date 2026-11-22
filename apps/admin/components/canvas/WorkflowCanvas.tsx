@@ -82,13 +82,6 @@ const nodeTypes: NodeTypes = { custom: CustomNode };
 const PALETTE = [
   {
     stage: 'connect' as const,
-    label: 'MCP Source',
-    capabilityType: 'core.mcp_call',
-    capabilityVersion: 1,
-    defaultSource: { type: 'mcp' as const, name: '' },
-  },
-  {
-    stage: 'connect' as const,
     label: 'HTTP Source',
     capabilityType: 'core.http_request',
     capabilityVersion: 1,
@@ -97,7 +90,7 @@ const PALETTE = [
   {
     stage: 'connect' as const,
     label: 'CSV Source',
-    capabilityType: 'core.csv_parse',
+    capabilityType: 'core.parse_csv',
     capabilityVersion: 1,
     defaultSource: { type: 'csv' as const, name: '' },
   },
@@ -109,30 +102,42 @@ const PALETTE = [
     defaultSource: { type: 'browser' as const, name: '' },
   },
   {
+    stage: 'enrich' as const,
+    label: 'Map Fields',
+    capabilityType: 'core.map_fields',
+    capabilityVersion: 1,
+  },
+  { stage: 'control' as const, label: 'For Each', capabilityType: 'core.for_each', capabilityVersion: 1 },
+  // Coming soon — not yet registered capabilities
+  {
+    stage: 'connect' as const,
+    label: 'MCP Source',
+    capabilityType: 'core.mcp_call',
+    capabilityVersion: 1,
+    comingSoon: true,
+    defaultSource: { type: 'mcp' as const, name: '' },
+  },
+  {
     stage: 'understand' as const,
     label: 'Resolve Entities',
     capabilityType: 'market.resolve_entities',
     capabilityVersion: 1,
+    comingSoon: true,
   },
   {
     stage: 'understand' as const,
     label: 'Ingest Observation',
     capabilityType: 'market.ingest_observation',
     capabilityVersion: 1,
-  },
-  {
-    stage: 'enrich' as const,
-    label: 'Map Fields',
-    capabilityType: 'market.map_fields',
-    capabilityVersion: 1,
+    comingSoon: true,
   },
   {
     stage: 'act' as const,
     label: 'Detect Signal',
     capabilityType: 'market.detect_signal',
     capabilityVersion: 1,
+    comingSoon: true,
   },
-  { stage: 'control' as const, label: 'For Each', capabilityType: 'core.for_each', capabilityVersion: 1 },
 ];
 
 let idCounter = 1;
@@ -169,6 +174,7 @@ export default function WorkflowCanvas() {
   const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
   const addNode = (item: (typeof PALETTE)[number]) => {
+    if (item.comingSoon) return;
     const id = makeNodeId(item.label);
     const newNode: Node<CanvasNodeData> = {
       id,
@@ -295,46 +301,33 @@ export default function WorkflowCanvas() {
   const loadTemplate = (kind: 'mcp-resolve' | 'http-csv') => {
     idCounter = 1;
     if (kind === 'mcp-resolve') {
+      // MCP / resolve / detect are coming soon; use available capabilities only.
       const n1: Node<CanvasNodeData> = {
-        id: makeNodeId('mcp'),
+        id: makeNodeId('http'),
         type: 'custom',
         position: { x: 80, y: 120 },
         data: {
-          label: 'MCP Source',
+          label: 'HTTP Source',
           stage: 'connect',
-          capabilityType: 'core.mcp_call',
+          capabilityType: 'core.http_request',
           capabilityVersion: 1,
-          source: { type: 'mcp', name: 'Company MCP', mcpServer: 'company-data', tool: 'fetch_records' },
+          source: { type: 'http', name: 'Company feed', endpoint: 'https://example.com/companies' },
         },
       };
       const n2: Node<CanvasNodeData> = {
-        id: makeNodeId('resolve'),
+        id: makeNodeId('map'),
         type: 'custom',
         position: { x: 360, y: 120 },
         data: {
-          label: 'Resolve Entities',
-          stage: 'understand',
-          capabilityType: 'market.resolve_entities',
+          label: 'Map Fields',
+          stage: 'enrich',
+          capabilityType: 'core.map_fields',
           capabilityVersion: 1,
         },
       };
-      const n3: Node<CanvasNodeData> = {
-        id: makeNodeId('signal'),
-        type: 'custom',
-        position: { x: 640, y: 120 },
-        data: {
-          label: 'Detect Signal',
-          stage: 'act',
-          capabilityType: 'market.detect_signal',
-          capabilityVersion: 1,
-        },
-      };
-      setNodes([n1, n2, n3]);
-      setEdges([
-        { id: 'e1', source: n1.id, target: n2.id },
-        { id: 'e2', source: n2.id, target: n3.id },
-      ]);
-      setWorkflowName('MCP Company Resolve');
+      setNodes([n1, n2]);
+      setEdges([{ id: 'e1', source: n1.id, target: n2.id }]);
+      setWorkflowName('HTTP Map Fields');
     } else {
       const n1: Node<CanvasNodeData> = {
         id: makeNodeId('http'),
@@ -355,19 +348,19 @@ export default function WorkflowCanvas() {
         data: {
           label: 'CSV Source',
           stage: 'connect',
-          capabilityType: 'core.csv_parse',
+          capabilityType: 'core.parse_csv',
           capabilityVersion: 1,
           source: { type: 'csv', name: 'Directory CSV' },
         },
       };
       const n3: Node<CanvasNodeData> = {
-        id: makeNodeId('resolve'),
+        id: makeNodeId('map'),
         type: 'custom',
         position: { x: 380, y: 150 },
         data: {
-          label: 'Resolve Entities',
-          stage: 'understand',
-          capabilityType: 'market.resolve_entities',
+          label: 'Map Fields',
+          stage: 'enrich',
+          capabilityType: 'core.map_fields',
           capabilityVersion: 1,
         },
       };
@@ -376,7 +369,7 @@ export default function WorkflowCanvas() {
         { id: 'e1', source: n1.id, target: n3.id },
         { id: 'e2', source: n2.id, target: n3.id },
       ]);
-      setWorkflowName('HTTP + CSV Resolve');
+      setWorkflowName('HTTP + CSV Map');
     }
     setSelected(null);
     setValidationMsg(null);
@@ -532,6 +525,7 @@ export default function WorkflowCanvas() {
                 <button
                   key={item.label}
                   onClick={() => addNode(item)}
+                  disabled={item.comingSoon}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -540,12 +534,15 @@ export default function WorkflowCanvas() {
                     marginBottom: 4,
                     border: '1px solid #e5e7eb',
                     borderRadius: 6,
-                    background: '#fff',
-                    cursor: 'pointer',
+                    background: item.comingSoon ? '#f3f4f6' : '#fff',
+                    cursor: item.comingSoon ? 'not-allowed' : 'pointer',
                     fontSize: 12,
+                    color: item.comingSoon ? '#9ca3af' : undefined,
+                    opacity: item.comingSoon ? 0.7 : 1,
                   }}
                 >
                   {item.label}
+                  {item.comingSoon && <span style={{ marginLeft: 6, fontSize: 10 }}>coming soon</span>}
                 </button>
               ))}
             </div>
