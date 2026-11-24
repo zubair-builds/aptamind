@@ -60,17 +60,71 @@ docs/             architecture, decisions (ADRs), runbooks, guides, execution st
 
 ## Quick start
 
-Prerequisites: Node.js ≥ 22.12, pnpm 10 and Docker (Compose plugin). Native binaries are an optional fallback (see the local-development runbook).
+Prerequisites: Node.js ≥ 22.12 and pnpm 10.
 
 ```bash
 pnpm install
 cp .env.example .env            # optional; defaults work for local development
-pnpm infra:up                   # MongoDB (replica set) + Redis + S3 (SeaweedFS) via Docker Compose
-#   or: pnpm infra:local        # same services from native binaries (see runbook)
+set -a; . ./.env; set +a        # scripts do not load .env automatically
 pnpm db:migrate                 # collections, validators, indexes, workflows, system sources
-pnpm dev:worker                 # terminal 1 — worker (health on http://127.0.0.1:4101/health)
-pnpm dev:admin                  # terminal 2 — UI/API on http://127.0.0.1:3000
-pnpm seed:dev -- --demo         # register the UK sponsor source and load committed fixtures offline
+```
+
+Start MongoDB, Redis and S3 with one of these infrastructure options.
+
+### With Docker
+
+Requires Docker Engine with the Compose plugin.
+
+```bash
+pnpm infra:up
+```
+
+Stop the infrastructure with:
+
+```bash
+pnpm infra:down
+```
+
+### Without Docker
+
+Requires native `mongod` ≥ 7.0, `redis-server` ≥ 7, and SeaweedFS `weed` or MinIO `minio` on `PATH`.
+You can set `MONGOD_BIN`, `REDIS_BIN`, and `S3_BIN` if the binaries are outside `PATH`.
+
+```bash
+pnpm infra:local
+```
+
+Native infrastructure data is stored in `.local-infra/`. Check or stop it with:
+
+```bash
+bash scripts/local-infra.sh status
+bash scripts/local-infra.sh stop
+```
+
+### Run the frontend and worker
+
+After infrastructure is running, run these in separate terminals. Export `.env` in each terminal
+because the scripts do not load it automatically.
+
+```bash
+# Terminal 1 — worker
+set -a; . ./.env; set +a
+pnpm dev:worker
+```
+
+```bash
+# Terminal 2 — frontend and API
+set -a; . ./.env; set +a
+pnpm dev:admin
+```
+
+- Admin UI/API: http://127.0.0.1:3000
+- Worker health: http://127.0.0.1:4101/health
+
+Load demo fixtures after the database and services are running:
+
+```bash
+pnpm seed:dev -- --demo
 ```
 
 `seed:dev` without `--demo` only registers the live UK sponsor register source (scheduled daily;
