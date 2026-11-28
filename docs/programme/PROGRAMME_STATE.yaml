@@ -1,7 +1,7 @@
 # Aptamind programme durable state. Machine-readable; update after every milestone and before a
 # session ends. A fresh session resumes from CLAUDE.md + this file.
 schema_version: 1
-updated: 2026-11-15T11:30Z
+updated: 2026-11-28T11:00Z
 handoff:
   reason: 'owner brief 2026-10-01: Market Intelligence operationally complete v1 is P0 (MKT-OPS). Supervisor session runs on the owner Mac.'
   resume_rules:
@@ -224,13 +224,14 @@ streams:
 
   admin_ux:
     branch: admin/attio-redesign
-    status: 'in progress — calm API health notice (feat/admin-calm-api-notice); next per roadmap.admin_ux'
+    status: 'in progress — canvas e2e authoring PR-0 (docs/canvas-authoring-adr, ADR-0024); next PR-1 after PR-0 merges'
     merged:
       - 'Overview PR 1/3 (PR 36, squash 1c7fccc): Overview cut to 4 insights + What needs attention; Data quality and BullMQ queues moved to /settings/system; sidebar Home -> Overview.'
       - 'Overview PR 2/3 (PR 37, squash 1c113f9): visual calm via app/overview.module.css (existing tokens only, content max width, tinted cards, two-number Runs/Source health, soft attention rows); breadcrumb Home -> Overview; Source health links failing+degraded; lagging queues link /settings/system#queues.'
       - 'Overview PR 3/3 (PR 38, squash 581266f): What needs attention names the top 5 open reviews (GET /api/review?status=open&limit=5) and top 5 failed runs in the window (GET /api/runs?state=FAILED&limit=5, window filtered client-side: the runs API has no hours param), each linking to its review/run with a short label and age; empty states No open reviews / No failed runs; per-list error rows; count rows, cards and PR 2 styles unchanged; no new endpoints.'
+      - 'Calm API health notice (PR 39, squash d0b5410): replace the red "API not ready" shell banner with a dismissible warning-tone strip (existing tokens only, shown for any dependency outage); impact-based copy; retry once before showing; auto re-check with backoff; sessionStorage dismissal keyed by failure signature; dev-only local-setup hints; ApiErrorPanel copy tidy-up; no /ready contract or handler.ts changes.'
     in_progress:
-      - 'Calm API health notice (feat/admin-calm-api-notice, this PR): replace the red "API not ready" shell banner with a dismissible warning-tone strip (existing tokens only, shown for any dependency outage); impact-based copy; retry once before showing; auto re-check with backoff; sessionStorage dismissal keyed by failure signature; dev-only local-setup hints; ApiErrorPanel copy tidy-up; no /ready contract or handler.ts changes.'
+      - 'Canvas e2e authoring PR-0 (docs/canvas-authoring-adr): ADR-0024 canvas authoring policy plus docs. Owner approved the plan 2026-11-28 for PR-0 through PR-9 (PR-10 MCP Source deferred). One review per PR. See workstreams.canvas_e2e.'
     asks_from_domains:
       - 'Market (PR 21): previously_licensed label "Previously licensed"; authorization.regions as region codes; posting-stated sponsorship as "Posting states: Yes/No" + quote + unverified marker; operator override alternates as neutral "System reading"'
       - 'Market (PR 22): use GET /api/meta/enums labels; triage claim body field holder; no assign in v0.1'
@@ -246,8 +247,8 @@ streams:
     blockers: []
 
 integration:
-  main_sha: 1f588923f3852dce662953d40803793438885b28
-  ci_status: 'CERTIFIED: full CI green on main b58104a (MKT-OPS-1 candidate), run 36973623814 (workflow_dispatch, 2026-10-02T06:27-06:49Z). Later docs-only commits are covered by the local gate.'
+  main_sha: d15dbd7a85876df3f228ea9cdda1476abaaa152a
+  ci_status: 'Latest main is d15dbd7 (PR 40, FE-8 API startup retry, 2026-11-28). Full CI certification is still the earlier run on b58104a (MKT-OPS-1 candidate), run 36973623814 (workflow_dispatch, 2026-10-02T06:27-06:49Z). Later commits are covered by the local gate.'
   certification:
     { sha: 87c70b526d997be6db1601e7a23c1e3f8ab9656e, run_id: 36827931909, date: 2026-10-01, result: success }
   merged_prs:
@@ -285,6 +286,11 @@ integration:
       33,
       34,
       35,
+      36,
+      37,
+      38,
+      39,
+      40,
     ]
   open_prs: []
   merge_status:
@@ -397,27 +403,108 @@ recent_milestones:
     status: parked
     pr: 32
     note: 'Lower priority. professional_sources fingerprint drift remains; no version bumps (serializer drift, spec unchanged).'
+  - id: PR-34
+    title: Canvas title-collision guard
+    status: merged
+    pr: 34
+    note: 'POST /api/workflows returns 409 when a key already has versions. PR-6 relaxes this only for resaves of canvas.* keys labelled origin=canvas; all other keys stay 409.'
+  - id: PR-36
+    title: 'Overview PR 1/3: 4 insights + attention list'
+    status: merged
+    pr: 36
+    sha: 1c7fccc
+  - id: PR-37
+    title: 'Overview PR 2/3: visual calm'
+    status: merged
+    pr: 37
+    sha: 1c113f9
+  - id: PR-38
+    title: 'Overview PR 3/3: named attention items'
+    status: merged
+    pr: 38
+    sha: 581266f
+  - id: PR-39
+    title: Calm API-not-ready notice
+    status: merged
+    pr: 39
+    sha: d0b5410
+    note: 'Replaced the red API-not-ready shell banner with a dismissible warning-tone strip. Merged to main as d0b5410.'
+  - id: PR-40
+    title: 'FE-8: retry API startup after a rejected cold start'
+    status: merged
+    pr: 40
+    sha: d15dbd7
+    note: 'Foundation Exception FE-8. Squash-merged to main as d15dbd7. handler.ts no longer caches a rejected createPlatform/init/buildApp for the process lifetime.'
+
+# ---------------------------------------------------------------------------
+# Canvas end-to-end authoring (owner approved 2026-11-28)
+# ---------------------------------------------------------------------------
+workstreams:
+  canvas_e2e:
+    title: Canvas authoring end-to-end (Connect → Understand → Enrich → Act)
+    status: in_progress
+    approved: 2026-11-28
+    adr: docs/decisions/0024-canvas-authoring-policy.md
+    stream: admin_ux
+    reviews: one independent review per PR (MVP mode)
+    sequence: each PR branches off the latest main after the previous one merges
+    scope: PR-0 through PR-9; PR-10 MCP Source deferred
+    foundation_exceptions: none for PR-0 through PR-9 (additive admin/composition and Market capabilities only)
+    notes:
+      - 'Detect Signal is dropped from the palette (existing signal writers are Tier B).'
+      - 'Resolve Entities is a read-only preview plus a review item; no canonical create or merge.'
+    prs:
+      - {
+          id: PR-0,
+          title: 'ADR-0024 canvas authoring policy + docs',
+          status: in_progress,
+          branch: docs/canvas-authoring-adr,
+        }
+      - {
+          id: PR-1,
+          title: 'Server gate, dry-run validation, MCP canvas.* deny, CANVAS_AUTHORING_ENABLED',
+          status: planned,
+        }
+      - { id: PR-2, title: 'Schema-driven inspectors; remove MCP Source from the palette', status: planned }
+      - { id: PR-3, title: 'Input bindings, visible Start node, run input', status: planned }
+      - { id: PR-4, title: 'Save & Run, Runs link, live node status', status: planned }
+      - { id: PR-5, title: 'UX fixes (delete, layout, key/title, tokens)', status: planned }
+      - {
+          id: PR-6,
+          title: 'Open existing canvas workflow; 409 relaxation for origin=canvas',
+          status: planned,
+        }
+      - {
+          id: PR-7,
+          title: 'Understand wiring (read-only resolve preview plus a review item)',
+          status: planned,
+        }
+      - { id: PR-8, title: 'Act wiring (propose_source / propose_import only)', status: planned }
+      - {
+          id: PR-9,
+          title: 'Optional Tier B evidence-writing nodes',
+          status: optional,
+          note: 'Starts only if the owner later approves Tier B',
+        }
+      - { id: PR-10, title: 'MCP Source (core.mcp_call)', status: deferred }
 
 # ---------------------------------------------------------------------------
 # Remaining for MVP (ranked highest impact first)
 # ---------------------------------------------------------------------------
 remaining_for_mvp:
-  - item: 'Canvas title-collision guard'
-    impact: 'Prevents a canvas workflow title that matches an existing key from silently creating a new version of that workflow'
+  - item: 'Canvas e2e authoring (ADR-0024, PR-0 through PR-9)'
+    impact: 'A canvas-built workflow can be saved, run, and shown in Runs, with a server-side allowlist and proposal-only Act steps'
     priority: high
+    note: 'PR-0 in progress (docs/canvas-authoring-adr). PR-1 through PR-9 are planned and strictly sequential. PR-10 MCP Source is deferred. Title-collision guard landed in PR 34.'
   - item: 'PROGRAMME_STATE stays current'
-    impact: 'New sessions resume from accurate state instead of stale 2026-11-05 snapshot'
+    impact: 'New sessions resume from accurate state instead of a stale snapshot'
     priority: high
   - item: 'MCP propose tools end-to-end smoke (local)'
     impact: 'Confirms propose_source / import_leads still raise review items and return reviewId after #31'
     priority: medium
-  - item: 'Canvas register + run path smoke'
-    impact: 'Confirms a canvas-exported spec can be registered and started via the existing runtime'
-    priority: medium
 
 post_mvp:
-  - 'Canvas title-collision note (already listed above as high if we want it in MVP; otherwise post)'
   - 'Auth backlog items (FE-P7/FE-P8 before real personal data)'
-  - 'Run-status overlay on the canvas'
+  - 'MCP Source / core.mcp_call on the canvas (PR-10 deferred; needs a Foundation Exception and ADR-0025)'
   - 'Full CI green (PR #32 parked; serializer-drift fingerprints)'
   - 'Worker hosting conflict (Render vs local heavy jobs)'

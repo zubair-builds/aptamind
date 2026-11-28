@@ -94,9 +94,10 @@ semantic tokens. `globals.css` shrinks milestone by milestone and is deleted in 
 
 **Interactivity without a UI kit.** Native `<dialog>`, the Popover API, `inert`, roving
 tabindex and a small `useHotkeys` hook cover command menu, menus, panel and tooltips. Icons: a
-vendored set of ~30 ISC-licensed Lucide SVGs in `components/ui/icons` (attributed). The only
-candidate dependency is a graph layout/canvas for UX8 — decided there by ADR (default: custom
-SVG layered layout; DAGs are < 40 nodes).
+vendored set of ~30 ISC-licensed Lucide SVGs in `components/ui/icons` (attributed). The graph
+library for the workflow canvas is `@xyflow/react`, added in PR #30 and accepted retroactively
+by [ADR-0024](../../decisions/0024-canvas-authoring-policy.md) (the earlier default of a custom
+SVG layered layout is not required for this workstream).
 
 **Tests (no pixel snapshots).** UX0 adds a vitest `admin` project (`apps/admin/**/*.test.{ts,tsx}`;
 `node` env for codecs/formatters, `happy-dom` + `@testing-library/react` dev deps for client
@@ -182,3 +183,25 @@ saved-view persistence — URL views + code-defined system views are sufficient 
 - UI never derives domain facts; all interpretation stays in Market (reviewed in PR template).
 - Parallel streams: admin changes stay inside `apps/admin` (+ root vitest/eslint config in UX0);
   API asks go to Market as contracts above, never as admin-side workarounds.
+
+## 7. Canvas end-to-end authoring (approved 2026-11-28)
+
+Owner-approved workstream to make `/workflows/canvas` save, run and show up in Runs. Policy:
+[ADR-0024](../../decisions/0024-canvas-authoring-policy.md). Scope is PR-0 through PR-9; PR-10
+(MCP Source) is deferred. PRs run strictly in order, each off the latest `main` after the
+previous one merges. One independent review per PR (MVP mode).
+
+- PR-0 (this record): ADR-0024 and docs.
+- PR-1: server-side allowlist, dry-run validation, `CANVAS_AUTHORING_ENABLED`, and a hard-deny
+  of `canvas.*` in MCP `start_workflow_run`.
+- PR-2: schema-driven inspectors for existing nodes; remove MCP Source from the palette.
+- PR-3: input bindings, visible Start node (`core.manual_trigger`), run input.
+- PR-4: Save & Run, link to `/runs/{id}`, live node status. End-to-end milestone.
+- PR-5: delete, layout, key/title separation, tokens and dark mode.
+- PR-6: open an existing canvas workflow; 409 relaxation for `origin=canvas` resaves only.
+- PR-7: Understand wiring, including a read-only company-resolution preview.
+- PR-8: Act steps that raise review proposals only (`propose_source`, `propose_import`).
+- PR-9 (optional): Tier B evidence-writing nodes, only if the owner later approves them.
+
+Scheduling canvas workflows is out of scope. Canonical writes stay off the canvas; Resolve
+Entities is a preview plus a review item; Detect Signal is dropped.
