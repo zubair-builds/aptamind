@@ -25,3 +25,4 @@
 | [0021](0021-nextjs-api-boundary.md)              | Next.js API boundary with separate workers                                  |
 | [0022](0022-user-authentication.md)              | User authentication: Better Auth, Google sign-in, admin approval            |
 | [0023](0023-mcp-server-worker.md)                | MCP server in the local worker, bearer token, Cloudflare Tunnel             |
+| [0024](0024-canvas-authoring-policy.md)          | Canvas authoring policy: allowlist, canvas.* keys, proposals only           |

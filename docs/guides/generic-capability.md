@@ -16,7 +16,7 @@ export const countRecords = defineCapability({
   inputSchema: z.object({ records: recordsInputSchema }),
   outputSchema: z.object({ count: z.number().int() }),
   configSchema: z.object({}), // validated when a workflow is registered
-  execution: { retryable: false, idempotency: 'optional', sideEffects: false },
+  execution: { retryable: false, idempotency: 'pure', sideEffects: false },
   async execute(ctx, input) {
     let count = 0;
     for await (const _ of ctx.records.read(input.records)) count += 1;
@@ -31,9 +31,13 @@ Checklist:
    (`ctx.records.write`) or an artifact (`ctx.artifacts.put`) and return the reference.
 2. **Errors**: throw `RetryableError` for transient failures and `TerminalError` for permanent
    ones; unclassified errors follow `execution.retryable`.
-3. **Idempotency**: if the capability has side effects, key them on `ctx.idempotencyKey`
-   (stable across retries and per fan-out item) and declare `idempotency: 'required'`.
-   Declare `'none'` only if re-running is unsafe (operator retry is then refused).
+3. **Idempotency**: every capability declares one of `pure`, `key`, `natural` or `no_retry`
+   (ADR-0015). A capability without side effects is `pure`. If it has side effects, key
+   them on `ctx.idempotencyKey` (stable across retries and per fan-out item) and declare
+   `key`, or declare `natural` when the effect is idempotent by construction (deterministic
+   ids, unique keys, replay markers); both need a written `idempotencyProof`. Declare
+   `no_retry` only if re-running is unsafe (the runtime then refuses automatic and operator
+   retry, and the node cannot be a `for_each` body).
 4. **Cancellation/timeouts**: pass `ctx.signal` to I/O; call `ctx.heartbeat()` in long loops.
 5. **Network**: use `ctx.services.get(NET_CLIENT)` — never raw `fetch` (SSRF protection,
    scoping, limits). Browser work goes to the `browser` queue.
