@@ -38,7 +38,12 @@ export async function fetchApiHealth(): Promise<ApiHealth> {
   const initial = toApiHealth(await apiRequest<Readiness>('/ready', { timeoutMs: first }));
   if (initial.state === 'ready') return initial;
   await sleep(HEALTH_RETRY_DELAY_MS);
-  return toApiHealth(await apiRequest<Readiness>('/ready', { timeoutMs: second }));
+  const retry = toApiHealth(await apiRequest<Readiness>('/ready', { timeoutMs: second }));
+  if (retry.state === 'ready') return retry;
+  // A hung dependency answers 503 in ~1.5s (FE-9). That fits the 2s first probe but not
+  // the 700ms retry, so keep the first not_ready (with checks) instead of an abort.
+  if (retry.state === 'unavailable' && initial.state === 'not_ready') return initial;
+  return retry;
 }
 
 /** API readiness, fetched at most once per request (sidebar dot, notice and System page). */
