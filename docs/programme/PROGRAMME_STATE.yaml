@@ -243,8 +243,8 @@ streams:
     blockers: []
 
 integration:
-  main_sha: d0b541019d3d36060160fe24ebe8ab1eb1abcf8c
-  ci_status: 'Latest main is d0b5410 (PR 39, 2026-11-28). Full CI certification is still the earlier run on b58104a (MKT-OPS-1 candidate), run 36973623814 (workflow_dispatch, 2026-10-02T06:27-06:49Z). Later commits are covered by the local gate.'
+  main_sha: d15dbd7a85876df3f228ea9cdda1476abaaa152a
+  ci_status: 'Latest main is d15dbd7 (PR 40, FE-8 API startup retry, 2026-11-28). Full CI certification is still the earlier run on b58104a (MKT-OPS-1 candidate), run 36973623814 (workflow_dispatch, 2026-10-02T06:27-06:49Z). Later commits are covered by the local gate.'
   certification:
     { sha: 87c70b526d997be6db1601e7a23c1e3f8ab9656e, run_id: 36827931909, date: 2026-10-01, result: success }
   merged_prs:
@@ -286,6 +286,7 @@ integration:
       37,
       38,
       39,
+      40,
     ]
   open_prs: []
   merge_status:
@@ -424,6 +425,12 @@ recent_milestones:
     pr: 39
     sha: d0b5410
     note: 'Replaced the red API-not-ready shell banner with a dismissible warning-tone strip. Merged to main as d0b5410.'
+  - id: PR-40
+    title: 'FE-8: retry API startup after a rejected cold start'
+    status: merged
+    pr: 40
+    sha: d15dbd7
+    note: 'Foundation Exception FE-8. Squash-merged to main as d15dbd7. handler.ts no longer caches a rejected createPlatform/init/buildApp for the process lifetime.'
 
 # ---------------------------------------------------------------------------
 # Canvas end-to-end authoring (owner approved 2026-11-28)
