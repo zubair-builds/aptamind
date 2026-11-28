@@ -47,6 +47,10 @@ foundation:
       title: additive user actor kind (userId, workspaceId) in packages/contracts actorSchema
       status: 'approved by owner 2026-10-31; implemented on a2/m-u1-fe5-user-actor (milestone M-U1)'
       record: foundation-exceptions/FE-5-user-actor-kind.md
+    - id: FE-9
+      title: bound /ready health checks so a hung Redis or Mongo ping returns 503 quickly
+      status: 'approved by owner 2026-11-28; implemented on fix/ready-check-timeout'
+      record: foundation-exceptions/FE-9-ready-check-timeout.md
 
 owner_decisions_pending: []
 owner_decisions_answered: # Zubair Haider, 2026-10-30 (explicit answer; DECISION_LOG)

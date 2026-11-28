@@ -45,6 +45,7 @@ import {
 } from '@aptamind/workflow-nodes';
 import { createWorkflowRuntime, ensureWorkflowCollections, type WorkflowRuntime } from '@aptamind/workflows';
 import { ensureRunLabelIndexes, type RunLabelIndexSpec } from './run-label-indexes';
+import { runReadyChecks } from './ready-checks';
 
 /**
  * Decides whether the generic artifact routes (`/api/artifacts/:id(/content)`) may serve an
@@ -108,6 +109,7 @@ export interface Platform {
 /** Apps build raw S3 clients (dev scripts) through the same fail-closed settings (FE-3). */
 export { s3ClientConfig } from '@aptamind/storage';
 export { ensureRunLabelIndexes, replacementIndexName, type RunLabelIndexSpec } from './run-label-indexes';
+export { READY_CHECK_TIMEOUT_MS, runReadyChecks } from './ready-checks';
 
 export const MIGRATIONS: Migration[] = [
   {
@@ -440,8 +442,11 @@ export async function createPlatform(
       await professional.ensureReady();
     },
     async checks() {
-      const [m, r, s] = await Promise.all([mongo.ping(), transport.ping(), storage.ping()]);
-      return { mongo: m, redis: r, objectStorage: s };
+      return runReadyChecks({
+        mongo: () => mongo.ping(),
+        redis: () => transport.ping(),
+        objectStorage: () => storage.ping(),
+      });
     },
     async close() {
       await browser.close().catch(() => {});

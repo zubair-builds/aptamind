@@ -82,6 +82,15 @@ describe('fetchApiHealth', () => {
     expect(apiRequest).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps the first not_ready when the 700ms retry aborts (FE-9 hang)', async () => {
+    const checks = { mongo: true, redis: false, objectStorage: true };
+    apiRequest.mockResolvedValueOnce(notReady(checks)).mockResolvedValueOnce(unavailable);
+    const health = await probe();
+    expect(health.state).toBe('not_ready');
+    expect(health.checks).toEqual(checks);
+    expect(apiRequest).toHaveBeenCalledTimes(2);
+  });
+
   it('stays within the readiness budget of 3 s', () => {
     expect(
       HEALTH_PROBE_TIMEOUTS_MS[0] + HEALTH_PROBE_TIMEOUTS_MS[1] + HEALTH_RETRY_DELAY_MS,
