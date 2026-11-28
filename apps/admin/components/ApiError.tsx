@@ -1,19 +1,13 @@
 import { ErrorState } from '@/components/ui/ErrorState';
 import type { ApiFailure } from '@/lib/api';
-import { API_BASE_URL } from '@/lib/api';
 
 /** Error panel for a failed API call — never crashes the page. */
 export function ApiErrorPanel({ error, title }: { error: ApiFailure; title?: string }) {
   if (error.kind === 'unavailable') {
     return (
       <ErrorState
-        title="API unavailable"
-        message={
-          <>
-            The admin could not reach the internal API at <code>{API_BASE_URL}</code>. Check that the Next.js
-            server is running.
-          </>
-        }
+        title="Couldn't load this right now"
+        message="The data service didn't answer. This is usually temporary; try again in a moment."
         meta={`${error.method} ${error.path} — ${error.message}`}
       />
     );

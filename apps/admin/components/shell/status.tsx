@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { apiRequest } from '@/lib/api';
 import { fmtNum } from '@/lib/format';
-import { getApiHealth, HEALTH_LABEL, HEALTH_SHORT } from '@/lib/health';
+import { describeHealth, getApiHealth, HEALTH_LABEL, HEALTH_SHORT } from '@/lib/health';
+import { HealthNoticeReset, HealthStrip } from './HealthStrip';
 import s from './Shell.module.css';
 
 /**
@@ -41,15 +42,21 @@ export async function HealthDot() {
   );
 }
 
-/** One shell-level callout while the API is unavailable or not ready. */
+/**
+ * One calm shell-level strip while a dependency is down: impact in plain words, a retry, a link to
+ * System status for the technical detail, and (outside production) a collapsed local-setup hint.
+ */
 export async function HealthNotice() {
-  const health = await getApiHealth();
-  if (health.state === 'ready') return null;
+  const description = describeHealth(await getApiHealth());
+  if (!description) return <HealthNoticeReset />;
+  const showDevHints = process.env.NODE_ENV !== 'production';
   return (
-    <div className={s.notice} role="status">
-      <strong>{HEALTH_LABEL[health.state]}</strong> at <code>{health.url}</code>: pages that need it will show
-      errors. <Link href="/settings/system">System status</Link>
-    </div>
+    <HealthStrip
+      signature={description.signature}
+      headline={description.headline}
+      detail={description.detail}
+      devHints={showDevHints ? description.devHints : []}
+    />
   );
 }
 

@@ -139,8 +139,15 @@ Weights: 400 / 500 / 600 only. No uppercase labels except `kbd`. Sentence case e
   record header (UX6) and stay in the page until then. After the actions comes the calm
   `Internal · no auth` chip (replaces the red banner; links to Settings › System status › Access,
   which explains ADR-0008). The chip lives in the top bar so it is visible at every width and
-  with the sidebar collapsed or closed. A shell-level callout appears under the top bar while the
-  API is unavailable or not ready.
+  with the sidebar collapsed or closed. A calm warning strip appears under the top bar while any
+  readiness check is down (Mongo, Redis or object storage) or the API is unreachable: plain-language
+  impact copy (never a raw URL or "API not ready"), existing `--tone-warning-*` tokens only, a
+  Retry now button, automatic re-checks with backoff that pause while the tab is hidden, a Details
+  link to Settings › System status (`/settings/system#api`), and a Dismiss control stored in
+  `sessionStorage` keyed by the failure signature (a different failure re-shows it; recovery
+  forgets the dismissal). The first `/ready` probe is retried once so brief startup blips never
+  show. Outside production, a collapsed "Local setup hint" names the missing service and its env
+  var (never a value). Pages keep rendering; section-level errors use the same calm wording.
 - **View bar** (lists only): system/saved view tabs, then `Filter`, `Sort`, `Display` (columns,
   density), result count. Ephemeral changes show `Unsaved · Reset · Save view · Copy link`.
 - **Command menu (⌘K / Ctrl K)**: native `<dialog>`, 640 px, top 20 vh. Input + groups:
@@ -342,16 +349,16 @@ _Run_ follows §10 run mode.
 
 ## 7. States
 
-| State                  | Rule                                                                                                                                                       |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Loading (route)        | `loading.tsx` per segment renders skeletons shaped like the target (header + rows); no page spinners; `aria-busy` on the region                            |
-| Loading (action)       | button shows spinner + "Working…", `aria-busy`, disabled; result inline (`role=status`) or toast with link                                                 |
-| Empty (never had data) | one sentence + primary next step ("No sources yet · New source"); no illustrations                                                                         |
-| Empty (filtered)       | "No jobs match these filters" + `Clear filters`                                                                                                            |
-| Error (API)            | keep `ApiErrorPanel` content (message, code, HTTP status, request id, path) in a calm danger callout with Retry; section-level errors never blank the page |
-| API unavailable        | health dot turns red + one shell-level callout; pages show cached-nothing error, not stack traces                                                          |
-| Not found / merged     | "This company was merged into X" callout linking the survivor (existing behaviour)                                                                         |
-| Stale data             | freshness overdue shown as warning pill with "Overdue by 2d"                                                                                               |
+| State                       | Rule                                                                                                                                                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Loading (route)             | `loading.tsx` per segment renders skeletons shaped like the target (header + rows); no page spinners; `aria-busy` on the region                                                                                      |
+| Loading (action)            | button shows spinner + "Working…", `aria-busy`, disabled; result inline (`role=status`) or toast with link                                                                                                           |
+| Empty (never had data)      | one sentence + primary next step ("No sources yet · New source"); no illustrations                                                                                                                                   |
+| Empty (filtered)            | "No jobs match these filters" + `Clear filters`                                                                                                                                                                      |
+| Error (API)                 | keep `ApiErrorPanel` content (message, code, HTTP status, request id, path) in a calm danger callout with Retry; section-level errors never blank the page                                                           |
+| API unavailable / not ready | health dot turns amber (not ready) or red (unreachable); a dismissible calm warning strip under the top bar (impact copy, retry, Details); pages show their own section errors (`ApiErrorPanel`), never stack traces |
+| Not found / merged          | "This company was merged into X" callout linking the survivor (existing behaviour)                                                                                                                                   |
+| Stale data                  | freshness overdue shown as warning pill with "Overdue by 2d"                                                                                                                                                         |
 
 ## 8. Keyboard map
 
